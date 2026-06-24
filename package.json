@@ -1,0 +1,27 @@
+{
+  "name": "teranga-align",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter=web",
+    "dev:mobile": "turbo run dev --filter=mobile",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:payroll": "turbo run test --filter=@teranga/payroll",
+    "test:scoring": "turbo run test --filter=@teranga/scoring",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "supabase:types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > packages/types/src/database.ts",
+    "supabase:migrate": "supabase db push"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.0",
+    "typescript": "^5.5.4"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@10.24.0"
+}
