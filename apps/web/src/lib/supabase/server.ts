@@ -93,9 +93,22 @@ interface Database {
         Relationships: [];
       };
       payslips: {
-        Row:    { id: string; organization_id: string; profile_id: string; month: number; year: number; base_salary: number; bonuses: number; overtime: number; gross_total: number; net_salary: number; payment_status: string; created_at: string };
-        Insert: { id?: string; organization_id: string; profile_id: string; month: number; year: number; base_salary: number; bonuses?: number; overtime?: number; gross_total: number; net_salary: number; payment_status?: string };
-        Update: { bonuses?: number; overtime?: number; gross_total?: number; net_salary?: number; payment_status?: string; payment_method?: string };
+        Row: {
+          id: string; organization_id: string; profile_id: string; month: number; year: number;
+          base_salary: number; bonuses: number; overtime: number; gross_total: number; net_salary: number;
+          retenues: number | null; irpp: number | null; charges_patronal: number | null;
+          cout_employeur: number | null; details: unknown | null; payment_status: string; created_at: string;
+        };
+        Insert: {
+          id?: string; organization_id: string; profile_id: string; month: number; year: number;
+          base_salary: number; bonuses?: number; overtime?: number; gross_total: number; net_salary: number;
+          retenues?: number | null; irpp?: number | null; charges_patronal?: number | null;
+          cout_employeur?: number | null; details?: unknown | null; payment_status?: string;
+        };
+        Update: {
+          bonuses?: number; overtime?: number; gross_total?: number; net_salary?: number;
+          retenues?: number | null; irpp?: number | null; payment_status?: string;
+        };
         Relationships: [];
       };
     };
