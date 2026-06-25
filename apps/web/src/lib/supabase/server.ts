@@ -37,7 +37,22 @@ interface Database {
       };
       talent_passports: {
         Row:    { id: string; profile_id: string; organization_id: string | null; score_global: number | null; score_hard: number | null; score_soft: number | null; score_exp: number | null; score_life: number | null; score_energy: number | null; score_risk: number | null; growth_potential: number | null; transfer_score: number | null; energy_pilotes: number | null; energy_initialiseurs: number | null; energy_accomplisseurs: number | null; energy_dynamiseurs: number | null; energy_regulateurs: number | null; dominant_family: string | null; dominant_profile: string | null; energy_level: string | null; passport_version: number; passport_id: string | null; verified: boolean; last_assessment: string | null; created_at: string; updated_at: string };
-        Insert: { id?: string; profile_id: string; organization_id?: string | null; score_global?: number | null; passport_version?: number; passport_id?: string | null; verified?: boolean };
+        Insert: {
+          id?: string; profile_id: string; organization_id?: string | null;
+          score_global?: number | null; score_hard?: number | null; score_soft?: number | null;
+          score_exp?: number | null; score_life?: number | null; score_energy?: number | null;
+          score_risk?: number | null; growth_potential?: number | null; transfer_score?: number | null;
+          energy_pilotes?: number | null; energy_initialiseurs?: number | null; energy_accomplisseurs?: number | null;
+          energy_dynamiseurs?: number | null; energy_regulateurs?: number | null;
+          dominant_family?: string | null; dominant_profile?: string | null; energy_level?: string | null;
+          soft_communication?: number | null; soft_leadership?: number | null; soft_adaptability?: number | null;
+          soft_problem_solving?: number | null; soft_critical_thinking?: number | null;
+          soft_collaboration?: number | null; soft_stress_mgmt?: number | null;
+          soft_organization?: number | null; soft_learning_speed?: number | null;
+          soft_emotional_intel?: number | null;
+          passport_version?: number; passport_id?: string | null; verified?: boolean;
+          last_assessment?: string | null;
+        };
         Update: { score_global?: number | null; score_hard?: number | null; score_soft?: number | null; organization_id?: string | null; verified?: boolean; passport_id?: string | null };
         Relationships: [];
       };
