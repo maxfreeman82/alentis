@@ -24,8 +24,10 @@ import {
   TableProperties,
   BarChart2,
   CreditCard,
+  LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { signOutAction } from '@/app/actions/auth';
 
 interface NavItem {
   href: string;
@@ -132,8 +134,17 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-white/[0.04]">
-        <p className="text-slate-600 text-[10px] text-center">
+      <div className="p-3 border-t border-white/[0.04] space-y-2">
+        <form action={signOutAction}>
+          <button
+            type="submit"
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-400/5 transition-all text-xs"
+          >
+            <LogOut size={13} />
+            Se déconnecter
+          </button>
+        </form>
+        <p className="text-slate-700 text-[10px] text-center">
           v1.0.0 · Teranga Align © 2026
         </p>
       </div>
