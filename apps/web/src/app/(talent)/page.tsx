@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { withAuth } from '@workos-inc/authkit-nextjs';
 import Link from 'next/link';
 import { ClipboardList, User, Lightbulb, ArrowRight, Star } from 'lucide-react';
