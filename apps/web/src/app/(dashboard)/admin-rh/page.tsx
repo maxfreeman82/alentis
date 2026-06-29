@@ -1,6 +1,6 @@
 import { withAuth } from '@workos-inc/authkit-nextjs';
 import Link from 'next/link';
-import { Users, FileText, Calendar, AlertTriangle, Plus, CheckCircle, Clock } from 'lucide-react';
+import { Users, FileText, Calendar, AlertTriangle, Plus, CheckCircle, Clock, Activity, UserPlus, Award, Heart } from 'lucide-react';
 import { SectionHeader, AlertCard } from '@/components/shared';
 import { getUserOrg } from '@/lib/supabase/auth';
 
@@ -28,8 +28,11 @@ export default async function AdminRHPage() {
 
   if (!ctx) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-slate-400">Profil en cours de configuration…</p>
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <p className="text-slate-400 text-sm">Profil en cours de configuration…</p>
+        <a href="/onboarding" className="text-xs text-emerald hover:underline">
+          → Accéder à l&apos;onboarding
+        </a>
       </div>
     );
   }
@@ -62,9 +65,104 @@ export default async function AdminRHPage() {
       .limit(20),
   ]);
 
-  const profiles = profilesRes.data ?? [];
-  const leaves   = leavesRes.data   ?? [];
-  const docs     = docsRes.data     ?? [];
+  // Requêtes logs RH — sans joins pour compatibilité types Supabase
+  const [appsRes, passportsRes, wellbeingRes] = await Promise.all([
+    supabase
+      .from('applications')
+      .select('id, stage, created_at, job_id')
+      .eq('organization_id', organizationId)
+      .order('created_at', { ascending: false })
+      .limit(10),
+    supabase
+      .from('talent_passports')
+      .select('id, dominant_profile, score_global, last_assessment, profile_id')
+      .eq('organization_id', organizationId)
+      .not('last_assessment', 'is', null)
+      .order('last_assessment', { ascending: false })
+      .limit(5),
+    supabase
+      .from('wellbeing_surveys')
+      .select('id, score_global, burnout_risk, created_at, profile_id')
+      .eq('organization_id', organizationId)
+      .eq('year', new Date().getFullYear())
+      .order('created_at', { ascending: false })
+      .limit(5),
+  ]);
+
+  const profiles   = profilesRes.data ?? [];
+  const leaves     = leavesRes.data   ?? [];
+  const docs       = docsRes.data     ?? [];
+  const apps       = appsRes.data     ?? [];
+  const passports  = passportsRes.data ?? [];
+  const wellbeing  = wellbeingRes.data ?? [];
+
+  // Index profils pour résolution nom dans les logs
+  const profileMap = new Map(profiles.map(p => [p.id, p]));
+
+  // Construction du fil d'activité RH
+  const STAGE_LABELS: Record<string, string> = {
+    new:        'Nouvelle candidature',
+    screening:  'En screening',
+    interview:  'Entretien planifié',
+    assessment: 'Assessment en cours',
+    offer:      'Offre envoyée',
+    hired:      'Embauché(e)',
+  };
+
+  type LogEntry = {
+    id:    string;
+    icon:  'application' | 'passport' | 'wellbeing' | 'profile';
+    title: string;
+    desc:  string;
+    date:  string;
+    color: string;
+  };
+
+  const activityLog: LogEntry[] = [
+    ...apps.map(a => ({
+      id:    `app-${a.id}`,
+      icon:  'application' as const,
+      title: STAGE_LABELS[a.stage ?? ''] ?? 'Candidature',
+      desc:  `Poste : ${a.job_id.slice(0, 8)}…`,
+      date:  a.created_at,
+      color: '#0EA5E9',
+    })),
+    ...passports.map(p => {
+      const prof = profileMap.get(p.profile_id ?? '');
+      const name = prof ? `${prof.first_name ?? ''} ${prof.last_name ?? ''}`.trim() : 'Inconnu';
+      return {
+        id:    `pass-${p.id}`,
+        icon:  'passport' as const,
+        title: 'Passport 6D complété',
+        desc:  `${name} · ${p.dominant_profile ?? '—'} · Score ${p.score_global ?? '—'}/100`,
+        date:  p.last_assessment ?? '',
+        color: '#8B5CF6',
+      };
+    }),
+    ...wellbeing.map(w => {
+      const prof = profileMap.get(w.profile_id ?? '');
+      const name = prof ? `${prof.first_name ?? ''} ${prof.last_name ?? ''}`.trim() : 'Inconnu';
+      return {
+        id:    `wb-${w.id}`,
+        icon:  'wellbeing' as const,
+        title: 'Enquête bien-être soumise',
+        desc:  `${name} · Bien-être ${w.score_global ?? '—'}/100${(w.burnout_risk ?? 0) >= 60 ? ' ⚠ Burnout risk' : ''}`,
+        date:  w.created_at,
+        color: '#10B981',
+      };
+    }),
+    ...profiles.slice(0, 3).map(p => ({
+      id:    `prof-${p.id}`,
+      icon:  'profile' as const,
+      title: 'Profil créé',
+      desc:  `${p.first_name ?? ''} ${p.last_name ?? ''} · ${p.role.replace('org_', '')}`,
+      date:  p.created_at,
+      color: '#F59E0B',
+    })),
+  ]
+    .filter(e => e.date)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 12);
 
   const pendingLeaves  = leaves.filter(l => l.status === 'pending');
   const approvedLeaves = leaves.filter(l => l.status === 'approved');
@@ -218,6 +316,47 @@ export default async function AdminRHPage() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Fil d'activité RH */}
+      <div className="card space-y-4">
+        <div className="flex items-center gap-2">
+          <Activity className="w-4 h-4 text-violet-400" />
+          <h3 className="font-display text-white text-sm">Activité RH récente</h3>
+          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-violet-500/10 text-violet-400">
+            {activityLog.length}
+          </span>
+        </div>
+
+        {activityLog.length === 0 ? (
+          <p className="text-slate-500 text-sm py-2">Aucune activité récente.</p>
+        ) : (
+          <div className="space-y-0 divide-y divide-white/[0.04]">
+            {activityLog.map(entry => {
+              const Icon = entry.icon === 'application' ? FileText
+                         : entry.icon === 'passport'    ? Award
+                         : entry.icon === 'wellbeing'   ? Heart
+                         : UserPlus;
+              return (
+                <div key={entry.id} className="flex items-start gap-3 py-2.5">
+                  <div
+                    className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                    style={{ backgroundColor: `${entry.color}18` }}
+                  >
+                    <Icon size={13} style={{ color: entry.color }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-xs font-medium">{entry.title}</p>
+                    <p className="text-slate-500 text-[11px] mt-0.5 truncate">{entry.desc}</p>
+                  </div>
+                  <span className="text-slate-600 text-[10px] flex-shrink-0 mt-1">
+                    {new Date(entry.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Annuaire collaborateurs */}

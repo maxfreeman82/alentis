@@ -8,5 +8,5 @@ export default authkitMiddleware({
 });
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon|api/webhooks|api/public).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon|api/webhooks|api/public|candidats).*)'],
 };
