@@ -67,11 +67,6 @@ export default async function JobsPage() {
                   <span className={`text-[10px] font-bold ${STATUS_COLORS[job.status as keyof typeof STATUS_COLORS] ?? 'text-slate-500'}`}>
                     {STATUS_LABELS[job.status as keyof typeof STATUS_LABELS] ?? job.status}
                   </span>
-                  {job.required_family && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-violet/10 text-violet">
-                      {job.required_family}
-                    </span>
-                  )}
                 </div>
                 {/* Mini Kanban */}
                 <div className="flex items-center gap-1">
