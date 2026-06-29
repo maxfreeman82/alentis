@@ -1,7 +1,8 @@
 import { withAuth } from '@workos-inc/authkit-nextjs';
 import Link from 'next/link';
 import { ClipboardList, Share2, Star, Zap, Shield, TrendingUp, Heart, Cpu } from 'lucide-react';
-import { getUserOrg } from '@/lib/supabase/auth';
+import { getTalentProfile } from '@/lib/supabase/auth';
+import { redirect } from 'next/navigation';
 import { ScoreCircle } from '@/components/shared';
 
 const ENERGY_COLORS = {
@@ -22,8 +23,8 @@ function scoreColor(v: number) {
 
 export default async function PassportPage() {
   const { user } = await withAuth({ ensureSignedIn: true });
-  const ctx = await getUserOrg(user.id);
-  if (!ctx) return <div className="flex items-center justify-center h-64"><p className="text-slate-400">Profil en cours de configuration…</p></div>;
+  const ctx = await getTalentProfile(user.id);
+  if (!ctx) { redirect('/talent/onboarding'); return null; }
 
   const { supabase, profileId } = ctx;
 

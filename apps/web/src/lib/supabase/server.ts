@@ -12,9 +12,15 @@ interface Database {
         Relationships: [];
       };
       profiles: {
-        Row:    { id: string; workos_user_id: string; organization_id: string | null; role: string; first_name: string | null; last_name: string | null; email: string; created_at: string };
-        Insert: { id?: string; workos_user_id: string; organization_id?: string | null; role: string; first_name?: string | null; last_name?: string | null; email: string };
-        Update: { organization_id?: string | null; role?: string; first_name?: string | null; last_name?: string | null; email?: string };
+        Row:    { id: string; workos_user_id: string; organization_id: string | null; role: string; first_name: string | null; last_name: string | null; email: string; personal_email: string | null; phone: string | null; city: string | null; country: string | null; current_status: string | null; sector: string | null; years_experience: number | null; job_title: string | null; employer_name: string | null; target_roles: unknown | null; target_sectors: unknown | null; salary_min: number | null; location_pref: string | null; mobility_ok: boolean; cv_url: string | null; onboarding_completed: boolean; created_at: string };
+        Insert: { id?: string; workos_user_id: string; organization_id?: string | null; role: string; first_name?: string | null; last_name?: string | null; email: string; personal_email?: string | null; phone?: string | null; city?: string | null; country?: string | null; current_status?: string | null; sector?: string | null; years_experience?: number | null; job_title?: string | null; employer_name?: string | null; target_roles?: unknown | null; target_sectors?: unknown | null; salary_min?: number | null; location_pref?: string | null; mobility_ok?: boolean; cv_url?: string | null; onboarding_completed?: boolean };
+        Update: { organization_id?: string | null; role?: string; first_name?: string | null; last_name?: string | null; email?: string; personal_email?: string | null; phone?: string | null; city?: string | null; country?: string | null; current_status?: string | null; sector?: string | null; years_experience?: number | null; job_title?: string | null; employer_name?: string | null; target_roles?: unknown | null; target_sectors?: unknown | null; salary_min?: number | null; location_pref?: string | null; mobility_ok?: boolean; onboarding_completed?: boolean };
+        Relationships: [];
+      };
+      onboarding_progress: {
+        Row:    { id: string; profile_id: string; step_identity: boolean; step_situation: boolean; step_objectives: boolean; step_energy_skills: boolean; passport_generated: boolean; completed_at: string | null; last_active_step: string | null; updated_at: string };
+        Insert: { id?: string; profile_id: string; step_identity?: boolean; step_situation?: boolean; step_objectives?: boolean; step_energy_skills?: boolean; passport_generated?: boolean; completed_at?: string | null; last_active_step?: string | null; updated_at?: string };
+        Update: { step_identity?: boolean; step_situation?: boolean; step_objectives?: boolean; step_energy_skills?: boolean; passport_generated?: boolean; completed_at?: string | null; last_active_step?: string | null; updated_at?: string };
         Relationships: [];
       };
       vision_assessments: {

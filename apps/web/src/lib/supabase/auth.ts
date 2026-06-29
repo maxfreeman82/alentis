@@ -19,6 +19,44 @@ export interface UserContext {
   supabase:       ReturnType<typeof createServerClient>;
 }
 
+export interface TalentContext {
+  profileId:          string;
+  role:               string;
+  firstName:          string | null;
+  lastName:           string | null;
+  email:              string;
+  onboardingDone:     boolean;
+  supabase:           ReturnType<typeof createServerClient>;
+}
+
+// Lookup profil talent sans exiger d'organisation — pour talent_free et l'espace talent
+export async function getTalentProfile(workosUserId: string): Promise<TalentContext | null> {
+  const admin = createAdminClient();
+
+  const { data: profile, error } = await admin
+    .from('profiles')
+    .select('id, role, first_name, last_name, email, onboarding_completed, organization_id')
+    .eq('workos_user_id', workosUserId)
+    .maybeSingle();
+
+  if (error || !profile) return null;
+
+  const supabase = createServerClient();
+  if (profile.organization_id) {
+    await setOrgContext(supabase, profile.organization_id);
+  }
+
+  return {
+    profileId:      profile.id,
+    role:           profile.role,
+    firstName:      profile.first_name,
+    lastName:       profile.last_name,
+    email:          profile.email,
+    onboardingDone: profile.onboarding_completed ?? false,
+    supabase,
+  };
+}
+
 export async function getUserOrg(workosUserId: string): Promise<UserContext | null> {
   const admin = createAdminClient();
 

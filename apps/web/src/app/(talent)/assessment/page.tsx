@@ -1,12 +1,15 @@
 import { withAuth } from '@workos-inc/authkit-nextjs';
-import { getUserOrg } from '@/lib/supabase/auth';
+import { getTalentProfile } from '@/lib/supabase/auth';
+import { redirect } from 'next/navigation';
 import { QUESTION_STEPS } from '@/lib/talent/assessment';
 import AssessmentForm from '@/components/talent/AssessmentForm';
 
 export default async function AssessmentPage() {
   const { user } = await withAuth({ ensureSignedIn: true });
-  const ctx = await getUserOrg(user.id);
-  if (!ctx) return <div className="flex items-center justify-center h-64"><p className="text-slate-400">Profil en cours de configuration…</p></div>;
+  const ctx = await getTalentProfile(user.id);
+
+  // Rediriger vers l'onboarding si le profil n'existe pas encore
+  if (!ctx) redirect('/talent/onboarding');
 
   const { supabase, profileId } = ctx;
 
