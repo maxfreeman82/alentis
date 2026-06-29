@@ -87,16 +87,17 @@ export async function PATCH(req: Request) {
   const parsed = patchSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
-  const { id, ...rest } = parsed.data;
+  const { id, title, status, description, requirements, soft_thresholds, ias_impact, weights_6d } = parsed.data;
 
-  const updates: Record<string, unknown> = {};
-  if (rest.title           !== undefined) updates['title']           = rest.title;
-  if (rest.status          !== undefined) updates['status']          = rest.status;
-  if (rest.description     !== undefined) updates['description']     = rest.description     ?? null;
-  if (rest.requirements    !== undefined) updates['requirements']    = rest.requirements    ?? null;
-  if (rest.soft_thresholds !== undefined) updates['soft_thresholds'] = rest.soft_thresholds ?? null;
-  if (rest.ias_impact      !== undefined) updates['ias_impact']      = rest.ias_impact      ?? null;
-  if (rest.weights_6d      !== undefined) updates['weights_6d']      = rest.weights_6d      ?? null;
+  const updates = {
+    ...(title           !== undefined && { title }),
+    ...(status          !== undefined && { status }),
+    ...(description     !== undefined && { description:     description     ?? null }),
+    ...(requirements    !== undefined && { requirements:    requirements    ?? null }),
+    ...(soft_thresholds !== undefined && { soft_thresholds: soft_thresholds ?? null }),
+    ...(ias_impact      !== undefined && { ias_impact:      ias_impact      ?? null }),
+    ...(weights_6d      !== undefined && { weights_6d:      weights_6d      ?? null }),
+  };
 
   const { data, error } = await supabase
     .from('jobs')

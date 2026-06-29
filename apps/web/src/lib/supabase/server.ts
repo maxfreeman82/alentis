@@ -71,7 +71,7 @@ interface Database {
       jobs: {
         Row:    { id: string; organization_id: string; okr_id: string | null; title: string; description: string | null; requirements: unknown | null; soft_thresholds: unknown | null; weights_6d: unknown | null; status: string; ias_impact: number | null; created_at: string };
         Insert: { id?: string; organization_id: string; okr_id?: string | null; title: string; description?: string | null; requirements?: unknown | null; soft_thresholds?: unknown | null; weights_6d?: unknown | null; status?: string; ias_impact?: number | null };
-        Update: { okr_id?: string | null; title?: string; description?: string | null; requirements?: unknown | null; status?: string; ias_impact?: number | null };
+        Update: { okr_id?: string | null; title?: string; description?: string | null; requirements?: unknown | null; soft_thresholds?: unknown | null; weights_6d?: unknown | null; status?: string; ias_impact?: number | null };
         Relationships: [];
       };
       applications: {
