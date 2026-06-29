@@ -47,17 +47,3 @@ export async function POST(req: Request) {
   return NextResponse.json({ ok: true }, { status: 201 });
 }
 
-export async function POST_register(req: Request) {
-  const { user } = await withAuth({ ensureSignedIn: true });
-  const ctx = await getUserOrg(user.id);
-  if (!ctx) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const { event_id } = await req.json() as { event_id: string };
-
-  const { error } = await ctx.supabase
-    .from('community_event_registrations')
-    .upsert({ event_id, profile_id: ctx.profileId }, { onConflict: 'event_id,profile_id' });
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ ok: true });
-}
