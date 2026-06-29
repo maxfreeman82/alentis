@@ -43,3 +43,5 @@ apps/mobile/.expo/
 apps/web/e2e/.auth/
 apps/web/e2e/test-results/
 apps/web/e2e/playwright-report/
+
+.vercel
