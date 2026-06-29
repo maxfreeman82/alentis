@@ -20,6 +20,10 @@ import {
   BookUser,
   BarChart3,
   Award,
+  Radio,
+  TableProperties,
+  BarChart2,
+  CreditCard,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -28,13 +32,18 @@ interface NavItem {
   label: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
   color?: string;
+  children?: { href: string; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[];
 }
 
 const NAV_ITEMS: NavItem[] = [
   { href: '/dashboard',       label: 'Dashboard',     icon: LayoutDashboard },
   { href: '/boussole',        label: 'Boussole',      icon: Compass,       color: 'text-violet' },
+  { href: '/vision-pulse',    label: 'Vision Pulse',  icon: Radio,         color: 'text-emerald' },
   { href: '/recrutement',     label: 'Recrutement',   icon: Users },
-  { href: '/performance',     label: 'Performance',   icon: TrendingUp,    color: 'text-orange' },
+  { href: '/performance',     label: 'Performance',   icon: TrendingUp,    color: 'text-orange', children: [
+    { href: '/performance/tour-de-table', label: 'Tour de Table',   icon: TableProperties },
+    { href: '/performance/tour-de-table/mes-resultats', label: 'Mes résultats', icon: BarChart2 },
+  ]},
   { href: '/remuneration',    label: 'Rémunération',  icon: DollarSign,    color: 'text-emerald' },
   { href: '/formation',       label: 'Formation',     icon: GraduationCap, color: 'text-sky' },
   { href: '/admin-rh',        label: 'Admin RH',      icon: FileText },
@@ -48,6 +57,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/directory',       label: 'Annuaire',      icon: BookUser },
   { href: '/analytics',       label: 'Analytics',     icon: BarChart3,     color: 'text-cyan' },
   { href: '/certification',   label: 'Certification', icon: Award,         color: 'text-amber' },
+  { href: '/abonnement',     label: 'Abonnement',    icon: CreditCard,    color: 'text-emerald' },
 ];
 
 export function Sidebar() {
@@ -69,28 +79,54 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-2">
         {NAV_ITEMS.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-          const Icon = item.icon;
+          const isActive    = pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const Icon        = item.icon;
+          const showChildren = isActive && item.children && item.children.length > 0;
 
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'flex items-center gap-3 px-3 py-2 mx-2 rounded-lg text-sm transition-all duration-150',
-                isActive
-                  ? 'bg-emerald/10 text-emerald font-semibold'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
-              )}
-            >
-              <Icon
-                size={16}
+            <div key={item.href}>
+              <Link
+                href={item.href}
                 className={cn(
-                  isActive ? 'text-emerald' : (item.color ?? 'text-slate-500')
+                  'flex items-center gap-3 px-3 py-2 mx-2 rounded-lg text-sm transition-all duration-150',
+                  isActive
+                    ? 'bg-emerald/10 text-emerald font-semibold'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
                 )}
-              />
-              {item.label}
-            </Link>
+              >
+                <Icon
+                  size={16}
+                  className={cn(
+                    isActive ? 'text-emerald' : (item.color ?? 'text-slate-500')
+                  )}
+                />
+                {item.label}
+              </Link>
+
+              {showChildren && (
+                <div className="ml-4 mt-0.5 mb-1 border-l border-white/[0.06] pl-3 space-y-0.5">
+                  {item.children!.map((child) => {
+                    const childActive = pathname === child.href || pathname.startsWith(`${child.href}/`);
+                    const ChildIcon   = child.icon;
+                    return (
+                      <Link
+                        key={child.href}
+                        href={child.href}
+                        className={cn(
+                          'flex items-center gap-2 px-2 py-1.5 mx-1 rounded-md text-xs transition-all duration-150',
+                          childActive
+                            ? 'text-orange font-semibold bg-orange/5'
+                            : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.03]'
+                        )}
+                      >
+                        <ChildIcon size={13} className={childActive ? 'text-orange' : 'text-slate-600'} />
+                        {child.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           );
         })}
       </nav>

@@ -47,8 +47,9 @@ interface PipelineBoardProps {
 }
 
 export function PipelineBoard({ candidates: initial }: PipelineBoardProps) {
-  const [candidates, setCandidates] = useState<Candidate[]>(initial);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [candidates, setCandidates]   = useState<Candidate[]>(initial);
+  const [activeId,   setActiveId]     = useState<string | null>(null);
+  const [dragOrigin, setDragOrigin]   = useState<PipelineStage | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -62,7 +63,10 @@ export function PipelineBoard({ candidates: initial }: PipelineBoardProps) {
   const activeCandidate = candidates.find((c) => c.id === activeId) ?? null;
 
   function handleDragStart({ active }: DragStartEvent) {
-    setActiveId(active.id as string);
+    const id  = active.id as string;
+    const org = candidates.find((c) => c.id === id);
+    setActiveId(id);
+    setDragOrigin(org?.stage ?? null);
   }
 
   function handleDragOver({ active, over }: DragOverEvent) {
@@ -82,22 +86,33 @@ export function PipelineBoard({ candidates: initial }: PipelineBoardProps) {
   }
 
   function handleDragEnd({ active, over }: DragEndEvent) {
+    const origin = dragOrigin;
     setActiveId(null);
+    setDragOrigin(null);
     if (!over) return;
 
-    const activeCandidate = candidates.find((c) => c.id === active.id);
-    const overCandidate  = candidates.find((c) => c.id === over.id);
+    const moved       = candidates.find((c) => c.id === active.id);
+    const overCard    = candidates.find((c) => c.id === over.id);
 
-    if (!activeCandidate) return;
+    if (!moved) return;
 
     // Réordonner dans la même colonne
-    if (overCandidate && activeCandidate.stage === overCandidate.stage && activeCandidate.id !== overCandidate.id) {
+    if (overCard && moved.stage === overCard.stage && moved.id !== overCard.id) {
       setCandidates((prev) => {
-        const stageItems = prev.filter((c) => c.stage === activeCandidate.stage);
-        const others     = prev.filter((c) => c.stage !== activeCandidate.stage);
+        const stageItems = prev.filter((c) => c.stage === moved.stage);
+        const others     = prev.filter((c) => c.stage !== moved.stage);
         const oldIdx = stageItems.findIndex((c) => c.id === active.id);
         const newIdx = stageItems.findIndex((c) => c.id === over.id);
         return [...others, ...arrayMove(stageItems, oldIdx, newIdx)];
+      });
+    }
+
+    // Persister le changement d'étape quand la carte a changé de colonne
+    if (origin && moved.stage !== origin) {
+      void fetch('/api/recrutement/stage', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ applicationId: active.id, stage: moved.stage }),
       });
     }
   }

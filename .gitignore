@@ -38,3 +38,8 @@ supabase/.temp/
 # Expo
 .expo/
 apps/mobile/.expo/
+
+# Playwright E2E — fichiers de session et rapports
+apps/web/e2e/.auth/
+apps/web/e2e/test-results/
+apps/web/e2e/playwright-report/

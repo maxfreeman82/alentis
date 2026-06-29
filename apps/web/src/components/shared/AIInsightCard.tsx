@@ -1,20 +1,31 @@
 import { Bot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface AIInsightCardProps {
-  content: string;
+export interface AIInsightCardProps {
+  content?: string;
+  insights?: string[];
   title?: string;
   className?: string;
 }
 
-export function AIInsightCard({ content, title = 'Analyse IA', className }: AIInsightCardProps) {
+export function AIInsightCard({ content, insights, title = 'Analyse IA', className }: AIInsightCardProps) {
   return (
     <div className={cn('ai-insight', className)}>
       <div className="flex items-center gap-2 mb-2">
         <Bot size={14} className="text-violet" />
         <span className="section-tag text-violet">{title}</span>
       </div>
-      <p className="text-slate-300 text-sm leading-relaxed">{content}</p>
+      {content && <p className="text-slate-300 text-sm leading-relaxed">{content}</p>}
+      {insights && (
+        <ul className="space-y-2">
+          {insights.map((ins, i) => (
+            <li key={i} className="text-slate-300 text-sm leading-relaxed flex gap-2">
+              <span className="text-violet shrink-0 mt-0.5">·</span>
+              <span>{ins}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

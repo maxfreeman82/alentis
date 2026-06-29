@@ -1,0 +1,31 @@
+import { NextResponse } from 'next/server';
+import { withAuth } from '@workos-inc/authkit-nextjs';
+import { z } from 'zod';
+import { getUserOrg } from '@/lib/supabase/auth';
+
+const schema = z.object({
+  title:    z.string().min(2).max(200),
+  content:  z.string().min(2).max(2000),
+  priority: z.enum(['low','normal','high','urgent']).default('normal'),
+  pinned:   z.boolean().default(false),
+});
+
+export async function POST(req: Request) {
+  const { user } = await withAuth({ ensureSignedIn: true });
+  const ctx = await getUserOrg(user.id);
+  if (!ctx) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!['org_admin', 'org_hr', 'org_manager'].includes(ctx.role)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
+  const body = await req.json() as unknown;
+  const parsed = schema.safeParse(body);
+  if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+
+  const { error } = await ctx.supabase.from('workspace_announcements').insert({
+    organization_id: ctx.organizationId,
+    author_id:       ctx.profileId,
+    ...parsed.data,
+  });
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ ok: true });
+}

@@ -1,95 +1,200 @@
 import { withAuth } from '@workos-inc/authkit-nextjs';
-import { SectionHeader, AIInsightCard, ScoreCircle } from '@/components/shared';
-import { ScoreBreakdown } from '@/components/shared';
+import Link from 'next/link';
+import { Briefcase } from 'lucide-react';
+import { SectionHeader, AIInsightCard, ScoreCircle, ScoreBreakdown } from '@/components/shared';
 import { compute6DScore, scoreColor } from '@teranga/scoring';
+import type { Score6DResult } from '@teranga/scoring';
+import { getUserOrg } from '@/lib/supabase/auth';
 import { cn } from '@/lib/utils';
 
-// Données mock — candidats avec leurs scores 6D pour un poste donné
-const JOB_TITLE = 'Lead Product Manager';
+function buildStrengths(r: Score6DResult): string[] {
+  const s: string[] = [];
+  if (r.breakdown.H >= 75) s.push('Compétences techniques solides');
+  if (r.breakdown.S >= 75) s.push('Excellent leadership interpersonnel');
+  if (r.breakdown.X >= 75) s.push('Expérience senior confirmée');
+  if (r.breakdown.E >= 75) s.push("Haut niveau d'énergie professionnelle");
+  if (r.breakdown.R <= 25) s.push('Résistance au stress exceptionnelle');
+  if (r.composite >= 80)      s.push('Profil exceptionnel — fort alignement au poste');
+  else if (r.composite >= 70) s.push('Bon alignement global avec le profil recherché');
+  return s.slice(0, 3).length > 0 ? s.slice(0, 3) : ['Profil à évaluer en entretien'];
+}
 
-const MOCK_MATCHES = [
-  {
-    id: 'c1', name: 'Fatou Ndiaye', avatar: 'F',
-    input: { hardSkills: 82, softSkills: 95, experience: 78, lifeScore: 70, energyFit: 90, stressRisk: 22 },
-    strengths: ['Leadership naturel', 'Vision produit forte', 'Excellente communication'],
-    risks:     ['Peu d\'expérience secteur fintech'],
-    recommendation: 'Candidature fortement recommandée. Profil rare — leadership + vision produit + résilience.',
-  },
-  {
-    id: 'c3', name: 'Aminata Diallo', avatar: 'A',
-    input: { hardSkills: 75, softSkills: 88, experience: 85, lifeScore: 65, energyFit: 78, stressRisk: 35 },
-    strengths: ['Expérience senior confirmée', 'Très bon historique livraison'],
-    risks:     ['Risque départ sous 18 mois si pas d\'évolution', 'Attentes salariales élevées'],
-    recommendation: 'Bon profil avec risque départ modéré. Proposer un plan de carrière dès l\'offre.',
-  },
-  {
-    id: 'c2', name: 'Oumar Ba', avatar: 'O',
-    input: { hardSkills: 68, softSkills: 72, experience: 60, lifeScore: 55, energyFit: 65, stressRisk: 55 },
-    strengths: ['Bonne culture produit', 'Agile et adaptable'],
-    risks:     ['Expérience insuffisante pour un rôle Lead', 'Stress élevé en période de crunch'],
-    recommendation: 'Profil Junior Lead. Envisager un rôle PM Senior avec montée en compétence sur 12 mois.',
-  },
-];
+function buildRisks(r: Score6DResult): string[] {
+  const risks: string[] = [];
+  if (r.breakdown.H < 60) risks.push('Compétences techniques à renforcer');
+  if (r.breakdown.S < 60) risks.push('Compétences soft à développer');
+  if (r.breakdown.X < 55) risks.push('Expérience insuffisante pour ce niveau');
+  if (r.breakdown.R > 60) risks.push('Risque de stress élevé en environnement exigeant');
+  if (r.breakdown.E < 55) risks.push("Niveau d'énergie à surveiller");
+  return risks.slice(0, 2).length > 0 ? risks.slice(0, 2) : ['Aucun risque majeur identifié'];
+}
 
-export default async function MatchingPage() {
-  await withAuth({ ensureSignedIn: true });
+export default async function MatchingPage({
+  searchParams,
+}: { searchParams: Promise<{ job?: string }> }) {
+  const [{ user }, params] = await Promise.all([
+    withAuth({ ensureSignedIn: true }),
+    searchParams,
+  ]);
 
-  const matchResults = MOCK_MATCHES.map((m) => ({
-    ...m,
-    result: compute6DScore(m.input),
-  })).sort((a, b) => b.result.composite - a.result.composite);
+  const ctx = await getUserOrg(user.id);
+  if (!ctx) return <div className="flex items-center justify-center h-64"><p className="text-slate-400">Profil en cours de configuration…</p></div>;
+
+  const { supabase, organizationId } = ctx;
+
+  const { data: jobs } = await supabase
+    .from('jobs')
+    .select('id, title, ias_impact')
+    .eq('organization_id', organizationId)
+    .neq('status', 'closed')
+    .order('created_at', { ascending: false });
+
+  const activeJobs    = jobs ?? [];
+  const selectedJobId = params.job ?? activeJobs[0]?.id;
+  const selectedJob   = activeJobs.find(j => j.id === selectedJobId);
+
+  const jobSelector = activeJobs.length > 1 ? (
+    <div className="flex gap-2 flex-wrap">
+      {activeJobs.map(j => (
+        <Link key={j.id} href={`/recrutement/matching?job=${j.id}`}
+          className={cn('px-3 py-1.5 rounded-lg text-xs border transition-colors',
+            j.id === selectedJobId
+              ? 'border-violet/40 bg-violet/10 text-violet font-semibold'
+              : 'border-white/[0.06] text-slate-400 hover:text-white hover:border-white/[0.12]')}>
+          {j.title}
+        </Link>
+      ))}
+    </div>
+  ) : null;
+
+  if (!selectedJob || selectedJobId === undefined) {
+    return (
+      <div className="animate-fade-in space-y-6">
+        <SectionHeader tag="RECRUTEMENT · MATCHING IA" tagColor="text-violet"
+          title="Matching IA" subtitle="Créez un poste actif pour démarrer le matching 6D." />
+        <div className="card text-center py-12">
+          <Briefcase className="w-10 h-10 text-slate-600 mx-auto mb-3" />
+          <p className="text-slate-400 text-sm mb-4">Aucun poste actif.</p>
+          <Link href="/recrutement/jobs" className="text-sm text-emerald hover:underline">Créer un poste →</Link>
+        </div>
+      </div>
+    );
+  }
+
+  const { data: applications } = await supabase
+    .from('applications')
+    .select('id, passport_id, stage, score_6d, score_breakdown, ai_insight')
+    .eq('organization_id', organizationId)
+    .eq('job_id', selectedJob.id)
+    .neq('stage', 'rejected')
+    .order('score_6d', { ascending: false });
+
+  const apps = applications ?? [];
+
+  if (apps.length === 0) {
+    return (
+      <div className="animate-fade-in space-y-6">
+        <SectionHeader tag="RECRUTEMENT · MATCHING IA" tagColor="text-violet"
+          title={`Matching — ${selectedJob.title}`}
+          subtitle="Aucun candidat dans le pipeline pour ce poste." />
+        {jobSelector}
+        <div className="card text-center py-12">
+          <p className="text-slate-400 text-sm">
+            Ajoutez des candidats depuis le{' '}
+            <Link href="/recrutement/pipeline" className="text-sky hover:underline">pipeline</Link>.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const passportIds = [...new Set(apps.map(a => a.passport_id).filter((id): id is string => id != null))];
+  const { data: passports } = passportIds.length > 0 ? await supabase
+    .from('talent_passports')
+    .select('id, profile_id, score_hard, score_soft, score_exp, score_life, score_energy, score_risk')
+    .in('id', passportIds) : { data: [] };
+
+  const passportMap = new Map((passports ?? []).map(p => [p.id, p]));
+
+  const profileIds = [...new Set((passports ?? []).map(p => p.profile_id).filter((id): id is string => id != null))];
+  const { data: profiles } = profileIds.length > 0 ? await supabase
+    .from('profiles')
+    .select('id, first_name, last_name, email')
+    .in('id', profileIds) : { data: [] };
+
+  const profileMap = new Map((profiles ?? []).map(p => [p.id, p]));
+
+  const candidates = apps.map(app => {
+    const passport = app.passport_id ? passportMap.get(app.passport_id) : undefined;
+    const profile  = passport ? profileMap.get(passport.profile_id) : undefined;
+
+    let result: Score6DResult;
+    if (app.score_6d != null && app.score_breakdown != null) {
+      const bd = app.score_breakdown as { H: number; S: number; X: number; L: number; E: number; R: number };
+      result   = { composite: app.score_6d, breakdown: bd, color: scoreColor(app.score_6d) };
+    } else {
+      result = compute6DScore({
+        hardSkills: passport?.score_hard   ?? 0,
+        softSkills: passport?.score_soft   ?? 0,
+        experience: passport?.score_exp    ?? 0,
+        lifeScore:  passport?.score_life   ?? 0,
+        energyFit:  passport?.score_energy ?? 0,
+        stressRisk: passport?.score_risk   ?? 0,
+      });
+    }
+
+    const firstName = profile?.first_name ?? '';
+    const lastName  = profile?.last_name  ?? '';
+    const name   = ([firstName, lastName].filter(Boolean).join(' ') || profile?.email?.split('@')[0]) ?? 'Candidat';
+    const avatar = (firstName[0] ?? lastName[0] ?? 'C').toUpperCase();
+
+    return {
+      id: app.id, name, avatar, stage: app.stage ?? '', aiInsight: app.ai_insight,
+      result, strengths: buildStrengths(result), risks: buildRisks(result),
+    };
+  }).sort((a, b) => b.result.composite - a.result.composite);
 
   return (
     <div className="animate-fade-in space-y-6">
       <SectionHeader
         tag="RECRUTEMENT · MATCHING IA"
         tagColor="text-violet"
-        title={`Matching — ${JOB_TITLE}`}
-        subtitle="Classement des candidats par score 6D, analysé par l'IA Teranga Align"
+        title={`Matching — ${selectedJob.title}`}
+        subtitle={`${candidates.length} candidat${candidates.length > 1 ? 's' : ''} · Score 6D · Analyse Teranga Align`}
       />
 
-      <div className="space-y-4">
-        {matchResults.map((match, rank) => {
-          const hex = match.result.color === 'emerald' ? '#10B981'
-                    : match.result.color === 'sky'     ? '#0EA5E9'
-                    : match.result.color === 'amber'   ? '#F59E0B'
-                    :                                    '#F43F5E';
+      {jobSelector}
 
+      <div className="space-y-4">
+        {candidates.map((c, rank) => {
+          const hex = c.result.color === 'emerald' ? '#10B981'
+                    : c.result.color === 'sky'     ? '#0EA5E9'
+                    : c.result.color === 'amber'   ? '#F59E0B'
+                    :                                '#F43F5E';
           return (
-            <div key={match.id} className="card border-l-4" style={{ borderLeftColor: hex }}>
-              {/* En-tête candidat */}
+            <div key={c.id} className="card border-l-4" style={{ borderLeftColor: hex }}>
               <div className="flex items-start gap-4 mb-4">
-                {/* Rang */}
                 <div className="w-7 h-7 rounded-full bg-bg-surface flex items-center justify-center flex-shrink-0 mt-1">
                   <span className="font-mono text-xs font-bold text-slate-400">#{rank + 1}</span>
                 </div>
-
-                {/* Avatar */}
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0"
-                  style={{ backgroundColor: `${hex}20`, color: hex, border: `1px solid ${hex}40` }}
-                >
-                  {match.avatar}
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0"
+                  style={{ backgroundColor: `${hex}20`, color: hex, border: `1px solid ${hex}40` }}>
+                  {c.avatar}
                 </div>
-
-                {/* Nom + score */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-white font-semibold">{match.name}</p>
-                  <p className="text-slate-400 text-xs">{JOB_TITLE}</p>
+                  <p className="text-white font-semibold">{c.name}</p>
+                  <p className="text-slate-400 text-xs capitalize">{selectedJob.title}</p>
                 </div>
-
-                <ScoreCircle value={match.result.composite} size="md" label="Score 6D" />
+                <ScoreCircle value={c.result.composite} size="md" label="Score 6D" />
               </div>
 
-              {/* Décomposition 6D */}
-              <ScoreBreakdown result={match.result} className="mb-4" />
+              <ScoreBreakdown result={c.result} className="mb-4" />
 
-              {/* Forces / Risques */}
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div>
                   <p className="section-tag text-emerald mb-2">FORCES</p>
                   <ul className="space-y-1">
-                    {match.strengths.map((s, i) => (
+                    {c.strengths.map((s, i) => (
                       <li key={i} className="text-slate-300 text-xs flex gap-1.5">
                         <span className="text-emerald">+</span>{s}
                       </li>
@@ -99,7 +204,7 @@ export default async function MatchingPage() {
                 <div>
                   <p className="section-tag text-rose mb-2">RISQUES</p>
                   <ul className="space-y-1">
-                    {match.risks.map((r, i) => (
+                    {c.risks.map((r, i) => (
                       <li key={i} className="text-slate-300 text-xs flex gap-1.5">
                         <span className="text-rose">!</span>{r}
                       </li>
@@ -108,8 +213,13 @@ export default async function MatchingPage() {
                 </div>
               </div>
 
-              {/* Recommandation IA */}
-              <AIInsightCard content={match.recommendation} />
+              {c.aiInsight ? (
+                <AIInsightCard content={c.aiInsight} />
+              ) : (
+                <p className="text-slate-500 text-xs italic">
+                  Analyse IA non encore générée — déclenchez le scoring complet depuis le pipeline.
+                </p>
+              )}
             </div>
           );
         })}
