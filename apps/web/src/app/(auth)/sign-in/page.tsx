@@ -1,5 +1,4 @@
 import { getSignInUrl } from '@workos-inc/authkit-nextjs';
-import Link from 'next/link';
 
 export default async function SignInPage() {
   const signInUrl = await getSignInUrl();
@@ -26,12 +25,12 @@ export default async function SignInPage() {
             Connectez-vous pour accéder à votre espace Teranga Align
           </p>
 
-          <Link
+          <a
             href={signInUrl}
             className="btn-primary w-full block text-center py-3 rounded-lg"
           >
             Se connecter
-          </Link>
+          </a>
 
           <p className="text-slate-500 text-xs mt-6">
             En vous connectant, vous acceptez nos{' '}
