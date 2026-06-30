@@ -49,7 +49,7 @@ export default function AssessmentForm({ steps, profileId }: Props) {
     setLoading(false);
     if (res.ok) {
       setDone(true);
-      setTimeout(() => router.push('/talent/passport'), 2000);
+      setTimeout(() => router.push('/passport'), 2000);
     }
   }
 

@@ -511,7 +511,7 @@ export function TalentOnboardingWizard({ workosEmail, workosFirstName, workosLas
         setError(result.error);
         return;
       }
-      router.push('/talent/assessment');
+      router.push('/assessment');
     });
   }
 

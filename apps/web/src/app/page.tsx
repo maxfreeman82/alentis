@@ -15,11 +15,11 @@ export default async function HomePage() {
     .maybeSingle();
 
   // Nouveau talent sans profil → onboarding
-  if (!profile || !profile.onboarding_completed) redirect('/talent/onboarding');
+  if (!profile || !profile.onboarding_completed) redirect('/onboarding');
 
   // Talent externe → espace talent
   if (profile.role === 'talent_free' || profile.role === 'talent_premium') {
-    redirect('/talent/passport');
+    redirect('/passport');
   }
 
   // Tous les rôles organisation → dashboard

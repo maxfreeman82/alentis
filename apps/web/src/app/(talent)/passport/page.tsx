@@ -24,7 +24,7 @@ function scoreColor(v: number) {
 export default async function PassportPage() {
   const { user } = await withAuth({ ensureSignedIn: true });
   const ctx = await getTalentProfile(user.id);
-  if (!ctx) { redirect('/talent/onboarding'); return null; }
+  if (!ctx) { redirect('/onboarding'); return null; }
 
   const { supabase, profileId } = ctx;
 
@@ -49,7 +49,7 @@ export default async function PassportPage() {
         <Star className="w-12 h-12 text-slate-700 mx-auto" />
         <h2 className="font-display text-white text-xl">Aucun Talent Passport</h2>
         <p className="text-slate-400 text-sm">Complétez l'évaluation pour générer votre profil complet.</p>
-        <Link href="/talent/assessment" className="inline-flex items-center gap-2 bg-emerald-500 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-emerald-600 transition-colors mt-2">
+        <Link href="/assessment" className="inline-flex items-center gap-2 bg-emerald-500 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-emerald-600 transition-colors mt-2">
           <ClipboardList className="w-4 h-4" /> Commencer l'évaluation
         </Link>
       </div>
@@ -93,7 +93,7 @@ export default async function PassportPage() {
             <button className="p-2 rounded-lg border border-white/[0.06] text-slate-400 hover:text-white transition-colors">
               <Share2 className="w-4 h-4" />
             </button>
-            <Link href="/talent/assessment"
+            <Link href="/assessment"
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/[0.04] text-slate-400 hover:text-white text-xs transition-colors">
               <ClipboardList className="w-3.5 h-3.5" /> Refaire
             </Link>
@@ -162,7 +162,7 @@ export default async function PassportPage() {
       </div>
 
       {/* CTA suggestions */}
-      <Link href="/talent/suggestions"
+      <Link href="/suggestions"
         className="block w-full text-center py-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold hover:bg-emerald-500/15 transition-colors">
         Découvrir les opportunités qui correspondent à mon profil →
       </Link>

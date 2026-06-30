@@ -58,7 +58,7 @@ export default async function CommunityJobsPage() {
           <p className="text-slate-400 text-xs mt-0.5">{jobs.length} offre{jobs.length > 1 ? 's' : ''} · marché africain</p>
         </div>
         {passport && (
-          <Link href="/talent/suggestions"
+          <Link href="/suggestions"
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/10 text-emerald-400 text-xs font-semibold hover:bg-emerald-500/20 transition-colors">
             <Star className="w-3.5 h-3.5" /> Matching personnalisé
           </Link>
@@ -67,7 +67,7 @@ export default async function CommunityJobsPage() {
 
       {!passport && (
         <div className="border border-violet-500/20 bg-violet-500/5 rounded-xl px-4 py-3 text-sm text-violet-400">
-          <Link href="/talent/assessment" className="underline underline-offset-2 font-semibold">Générez votre Talent Passport</Link>{' '}
+          <Link href="/assessment" className="underline underline-offset-2 font-semibold">Générez votre Talent Passport</Link>{' '}
           pour voir votre score de compatibilité avec chaque offre.
         </div>
       )}

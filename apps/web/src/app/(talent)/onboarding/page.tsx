@@ -8,7 +8,7 @@ export default async function TalentOnboardingPage() {
   const ctx = await getTalentProfile(user.id);
 
   // Onboarding déjà complété → espace talent
-  if (ctx?.onboardingDone) redirect('/talent/passport');
+  if (ctx?.onboardingDone) redirect('/passport');
 
   return (
     <div className="min-h-screen bg-bg py-12 px-4">

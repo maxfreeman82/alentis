@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { Compass, User, Lightbulb, ClipboardList } from 'lucide-react';
+import { User, Lightbulb, ClipboardList } from 'lucide-react';
 
 export default function TalentLayout({ children }: { children: ReactNode }) {
   return (
@@ -18,9 +18,9 @@ export default function TalentLayout({ children }: { children: ReactNode }) {
 
           <nav className="flex items-center gap-1">
             {[
-              { href: '/talent/assessment', icon: ClipboardList, label: 'Évaluation' },
-              { href: '/talent/passport',   icon: User,          label: 'Mon Passport' },
-              { href: '/talent/suggestions', icon: Lightbulb,   label: 'Opportunités' },
+              { href: '/assessment',  icon: ClipboardList, label: 'Évaluation' },
+              { href: '/passport',   icon: User,          label: 'Mon Passport' },
+              { href: '/suggestions', icon: Lightbulb,   label: 'Opportunités' },
             ].map(item => {
               const Icon = item.icon;
               return (

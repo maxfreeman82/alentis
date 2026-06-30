@@ -66,7 +66,7 @@ export default async function SuggestionsPage() {
         <Briefcase className="w-12 h-12 text-slate-700 mx-auto" />
         <h2 className="font-display text-white text-xl">Complétez votre profil d'abord</h2>
         <p className="text-slate-400 text-sm">Pour voir des opportunités personnalisées, vous devez d'abord générer votre Talent Passport.</p>
-        <Link href="/talent/assessment" className="inline-flex items-center gap-2 bg-emerald-500 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-emerald-600 transition-colors mt-2">
+        <Link href="/assessment" className="inline-flex items-center gap-2 bg-emerald-500 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-emerald-600 transition-colors mt-2">
           <ClipboardList className="w-4 h-4" /> Commencer l'évaluation
         </Link>
       </div>
@@ -121,7 +121,7 @@ export default async function SuggestionsPage() {
             </div>
           ))}
         </div>
-        <Link href="/talent/passport" className="text-slate-500 hover:text-slate-300 transition-colors">
+        <Link href="/passport" className="text-slate-500 hover:text-slate-300 transition-colors">
           <ChevronRight className="w-4 h-4" />
         </Link>
       </div>

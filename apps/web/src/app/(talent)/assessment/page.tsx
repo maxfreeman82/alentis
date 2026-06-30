@@ -9,7 +9,7 @@ export default async function AssessmentPage() {
   const ctx = await getTalentProfile(user.id);
 
   // Rediriger vers l'onboarding si le profil n'existe pas encore
-  if (!ctx) redirect('/talent/onboarding');
+  if (!ctx) redirect('/onboarding');
 
   const { supabase, profileId } = ctx;
 
