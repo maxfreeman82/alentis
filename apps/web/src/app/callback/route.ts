@@ -1,3 +1,4 @@
 import { handleAuth } from '@workos-inc/authkit-nextjs';
 
-export const GET = handleAuth({ returnPathname: '/dashboard' });
+// Retour vers / → page.tsx gère le routing selon profil (onboarding/talent/dashboard)
+export const GET = handleAuth({ returnPathname: '/' });
