@@ -1,11 +1,13 @@
 import { withAuth } from '@workos-inc/authkit-nextjs';
 import { redirect } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { LandingPage } from '@/components/landing/LandingPage';
 
 export default async function HomePage() {
   const { user } = await withAuth();
 
-  if (!user) redirect('/sign-in');
+  // Non connecté → Landing Page publique
+  if (!user) return <LandingPage />;
 
   const admin = createAdminClient();
   const { data: profile } = await admin
