@@ -1,4 +1,3 @@
-import { getSignInUrl } from '@workos-inc/authkit-nextjs';
 import Link from 'next/link';
 import { Star, Briefcase, Rocket, ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react';
 
@@ -50,9 +49,7 @@ const PROFILES = [
   },
 ];
 
-export default async function ChoisirProfilPage() {
-  const signInUrl = await getSignInUrl();
-
+export default function ChoisirProfilPage() {
   return (
     <div className="min-h-screen bg-bg flex flex-col">
       {/* Header minimal */}
@@ -109,7 +106,7 @@ export default async function ChoisirProfilPage() {
             {PROFILES.map(p => {
               const Icon = p.icon;
               return (
-                <a key={p.id} href={signInUrl}
+                <a key={p.id} href={`/api/auth/start?profile=${p.id}`}
                   className={`group flex items-start gap-4 p-5 rounded-2xl border bg-card transition-all cursor-pointer ${p.border}`}>
                   <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${p.iconBg}`}>
                     <Icon className="w-5 h-5" />

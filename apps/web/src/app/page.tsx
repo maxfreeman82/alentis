@@ -1,5 +1,6 @@
 import { withAuth } from '@workos-inc/authkit-nextjs';
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { LandingPage } from '@/components/landing/LandingPage';
 
@@ -16,14 +17,30 @@ export default async function HomePage() {
     .eq('workos_user_id', user.id)
     .maybeSingle();
 
-  // Nouveau talent sans profil → onboarding
-  if (!profile || !profile.onboarding_completed) redirect('/onboarding');
-
-  // Talent externe → espace talent
-  if (profile.role === 'talent_free' || profile.role === 'talent_premium') {
-    redirect('/passport');
+  // Utilisateur existant avec profil complet → espace correspondant
+  if (profile?.onboarding_completed) {
+    if (profile.role === 'talent_free' || profile.role === 'talent_premium') {
+      redirect('/passport');
+    }
+    if (profile.role === 'org_admin' || profile.role === 'org_hr' ||
+        profile.role === 'org_manager' || profile.role === 'org_recruiter' ||
+        profile.role === 'org_employee') {
+      redirect('/dashboard');
+    }
+    if (profile.role === 'founder') {
+      redirect('/boussole');
+    }
+    redirect('/dashboard');
   }
 
-  // Tous les rôles organisation → dashboard
-  redirect('/dashboard');
+  // Nouvel utilisateur (pas de profil ou onboarding non complété)
+  // → lire le cookie de choix de profil pour router vers le bon onboarding
+  const jar         = await cookies();
+  const profileType = jar.get('ta_profile_type')?.value ?? 'talent';
+
+  if (profileType === 'fondateur') redirect('/demarrer');
+  if (profileType === 'entreprise') redirect('/dashboard');
+
+  // Talent par défaut
+  redirect('/onboarding');
 }
