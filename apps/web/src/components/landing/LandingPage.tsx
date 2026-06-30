@@ -18,7 +18,7 @@ const PROFILES = [
       'Portable d\'une entreprise à l\'autre',
     ],
     cta: 'Créer mon Talent Passport',
-    href: '/sign-in',
+    href: '/choisir-profil',
     border: 'border-emerald/30 hover:border-emerald/50',
     iconBg: 'bg-emerald/10 text-emerald',
     btn: 'bg-emerald text-white hover:bg-emerald-500',
@@ -36,7 +36,7 @@ const PROFILES = [
       'Analytics alignement équipe',
     ],
     cta: 'Accéder à l\'espace entreprise',
-    href: '/sign-in',
+    href: '/choisir-profil',
     border: 'border-sky-500/30 hover:border-sky-500/50',
     iconBg: 'bg-sky-500/10 text-sky-400',
     btn: 'bg-sky-500 text-white hover:bg-sky-600',
@@ -54,7 +54,7 @@ const PROFILES = [
       'Coût employeur calculé',
     ],
     cta: 'Démarrer en mode Fondateur',
-    href: '/sign-in',
+    href: '/choisir-profil',
     border: 'border-violet-500/30 hover:border-violet-500/50',
     iconBg: 'bg-violet-500/10 text-violet-400',
     btn: 'bg-violet-500 text-white hover:bg-violet-600',
@@ -237,7 +237,7 @@ export function LandingPage() {
           </p>
           <Link href="/sign-in"
             className="inline-flex items-center gap-2 bg-emerald text-white px-8 py-3.5 rounded-xl font-semibold text-sm hover:bg-emerald-500 transition-colors">
-            Commencer maintenant — c&apos;est gratuit
+            Choisir mon profil — c&apos;est gratuit
             <ArrowRight className="w-4 h-4" />
           </Link>
         </section>
