@@ -31,22 +31,37 @@ function SignUpForm() {
     e.preventDefault();
     setError('');
     startTransition(async () => {
-      // Stocker le contexte OTP (mot de passe + type de profil) temporairement
-      sessionStorage.setItem('ta_otp_ctx', JSON.stringify({ pw: password, pt: profile }));
-
-      // signInWithOtp envoie un code à 6 chiffres (pas de magic link)
-      const { error: err } = await supabase.auth.signInWithOtp({
-        email,
-        options: { shouldCreateUser: true },
-      });
-      if (err) {
-        sessionStorage.removeItem('ta_otp_ctx');
-        setError(err.message === 'User already registered'
+      // 1. Créer le compte
+      const { error: signUpErr } = await supabase.auth.signUp({ email, password });
+      if (signUpErr) {
+        setError(signUpErr.message.includes('already registered')
           ? 'Ce compte existe déjà. Connectez-vous.'
-          : err.message);
+          : signUpErr.message);
         return;
       }
-      router.push(`/verifier-email?email=${encodeURIComponent(email)}&step=signup`);
+
+      // 2. Se connecter immédiatement (fonctionne si "Confirm email" est désactivé)
+      const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInErr) {
+        // "Confirm email" est activé → flux OTP/vérification
+        router.push(`/verifier-email?email=${encodeURIComponent(email)}&step=signup`);
+        return;
+      }
+
+      // 3. Créer le profil via l'API
+      const res = await fetch('/api/auth/post-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profileType: profile }),
+      });
+      if (!res.ok) {
+        const json = await res.json() as { error?: string };
+        setError(json.error ?? 'Erreur serveur');
+        return;
+      }
+      const { redirect } = await res.json() as { redirect: string };
+      router.push(redirect ?? '/onboarding');
+      router.refresh();
     });
   }
 
