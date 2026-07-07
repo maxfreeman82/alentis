@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { Suspense, useState, useTransition, useMemo } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
+import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { UserPlus, ArrowRight, ArrowLeft, Eye, EyeOff } from 'lucide-react';
@@ -25,10 +25,7 @@ function SignUpForm() {
   const [showPwd,  setShowPwd]  = useState(false);
   const [error,    setError]    = useState('');
 
-  const supabase = useMemo(() => createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  ), []);
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

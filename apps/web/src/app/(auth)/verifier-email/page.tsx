@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { Suspense, useState, useRef, useTransition, useMemo, useEffect } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
+import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Mail, ArrowLeft, RefreshCw, CheckCircle2, Loader2 } from 'lucide-react';
@@ -25,10 +25,7 @@ function OtpInput() {
   const [isPending,  startTransition] = useTransition();
   const boxRefs = useRef<(HTMLInputElement | null)[]>(Array(6).fill(null));
 
-  const supabase = useMemo(() => createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  ), []);
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
 
   // Compte à rebours renvoi
   useEffect(() => {

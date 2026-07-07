@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { useState, useTransition, useMemo } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
+import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { KeyRound, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
@@ -12,10 +12,7 @@ export default function MotDePasseOubliePage() {
   const [error,      setError]      = useState('');
   const [isPending,  startTransition] = useTransition();
 
-  const supabase = useMemo(() => createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  ), []);
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

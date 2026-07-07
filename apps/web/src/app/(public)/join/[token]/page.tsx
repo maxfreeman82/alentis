@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { createBrowserClient } from '@supabase/ssr';
+import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import Link from 'next/link';
 import { CheckCircle2, Loader2, Eye, EyeOff, Building2, LogIn, UserPlus } from 'lucide-react';
 
@@ -46,10 +46,7 @@ export default function JoinPage() {
   const [existErr,     setExistErr]     = useState<string | null>(null);
   const [joinDone,     setJoinDone]     = useState(false);
 
-  const supabase = useMemo(() => createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  ), []);
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
 
   useEffect(() => {
     void (async () => {
