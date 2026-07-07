@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { NextResponse } from 'next/server';
+import { checkPermission } from '@/lib/api-auth';
 import { z } from 'zod';
 import { createServerClient } from '@/lib/supabase/server';
 import { computeFounderArchetype } from '@/lib/founder/archetypes';
@@ -11,16 +11,18 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
-  const { user } = await withAuth({ ensureSignedIn: true });
-  const supabase  = createServerClient();
+  const { ctx: auth, error: authErr } = await checkPermission('view:founder_space');
+  if (authErr) return authErr;
+
+  const supabase = createServerClient();
 
   const body   = await req.json() as unknown;
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
-  // Récupérer le profile
+  // Récupérer le profile — déjà vérifié dans checkPermission, mais on a besoin de l'id DB
   const { data: profile } = await supabase
-    .from('profiles').select('id').eq('workos_user_id', user.id).maybeSingle();
+    .from('profiles').select('id').eq('user_id', auth.userId).maybeSingle();
   if (!profile) return NextResponse.json({ error: 'Profil introuvable' }, { status: 404 });
 
   const { archetype, scores, confidence } = computeFounderArchetype(parsed.data.responses);

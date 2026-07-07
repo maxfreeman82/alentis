@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getUserOrg } from '@/lib/supabase/auth';
+import { checkPermission } from '@/lib/api-auth';
 
 // Colonnes réelles : id, organization_id, okr_id, title, description,
 // requirements (jsonb), soft_thresholds (jsonb), weights_6d (jsonb),
@@ -29,8 +29,10 @@ const patchSchema = z.object({
 });
 
 export async function GET() {
-  const { user } = await withAuth({ ensureSignedIn: true });
-  const ctx = await getUserOrg(user.id);
+  const { ctx: auth, error: authErr } = await checkPermission('view:jobs');
+  if (authErr) return authErr;
+
+  const ctx = await getUserOrg(auth.userId);
   if (!ctx) return NextResponse.json({ error: 'Organisation introuvable' }, { status: 403 });
 
   const { supabase, organizationId } = ctx;
@@ -46,8 +48,10 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const { user } = await withAuth({ ensureSignedIn: true });
-  const ctx = await getUserOrg(user.id);
+  const { ctx: auth, error: authErr } = await checkPermission('manage:jobs');
+  if (authErr) return authErr;
+
+  const ctx = await getUserOrg(auth.userId);
   if (!ctx) return NextResponse.json({ error: 'Organisation introuvable' }, { status: 403 });
 
   const { supabase, organizationId } = ctx;
@@ -77,8 +81,10 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const { user } = await withAuth({ ensureSignedIn: true });
-  const ctx = await getUserOrg(user.id);
+  const { ctx: auth, error: authErr } = await checkPermission('manage:jobs');
+  if (authErr) return authErr;
+
+  const ctx = await getUserOrg(auth.userId);
   if (!ctx) return NextResponse.json({ error: 'Organisation introuvable' }, { status: 403 });
 
   const { supabase, organizationId } = ctx;

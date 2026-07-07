@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { Briefcase, KanbanSquare, Sparkles, ArrowRight, TrendingUp } from 'lucide-react';
 import { SectionHeader } from '@/components/shared';
@@ -6,7 +6,7 @@ import { CreateJobButton } from '@/components/recrutement/CreateJobButton';
 import { getUserOrg } from '@/lib/supabase/auth';
 
 export default async function RecrutementPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return null;
 
@@ -78,7 +78,7 @@ export default async function RecrutementPage() {
             <Briefcase size={18} className="text-emerald" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white font-medium text-sm">Postes</p>
+            <p className="text-slate-900 font-medium text-sm">Postes</p>
             <p className="text-slate-400 text-xs">{openJobs} actif{openJobs !== 1 ? 's' : ''} · Créer &amp; gérer</p>
           </div>
           <ArrowRight size={14} className="text-slate-600 group-hover:text-emerald transition-colors" />
@@ -89,7 +89,7 @@ export default async function RecrutementPage() {
             <KanbanSquare size={18} className="text-sky" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white font-medium text-sm">Pipeline</p>
+            <p className="text-slate-900 font-medium text-sm">Pipeline</p>
             <p className="text-slate-400 text-xs">{totalCandidats} candidat{totalCandidats !== 1 ? 's' : ''} · Vue Kanban</p>
           </div>
           <ArrowRight size={14} className="text-slate-600 group-hover:text-sky transition-colors" />
@@ -100,7 +100,7 @@ export default async function RecrutementPage() {
             <Sparkles size={18} className="text-violet" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white font-medium text-sm">Matching IA</p>
+            <p className="text-slate-900 font-medium text-sm">Matching IA</p>
             <p className="text-slate-400 text-xs">Score 6D · Recommandations</p>
           </div>
           <ArrowRight size={14} className="text-slate-600 group-hover:text-violet transition-colors" />
@@ -113,9 +113,9 @@ export default async function RecrutementPage() {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <TrendingUp size={14} className="text-emerald" />
-              <h2 className="text-white font-semibold text-sm">Postes actifs</h2>
+              <h2 className="text-slate-900 font-semibold text-sm">Postes actifs</h2>
             </div>
-            <Link href="/recrutement/jobs" className="text-slate-500 text-xs hover:text-white transition-colors">
+            <Link href="/recrutement/jobs" className="text-slate-500 text-xs hover:text-slate-800 transition-colors">
               Voir tous →
             </Link>
           </div>
@@ -124,12 +124,12 @@ export default async function RecrutementPage() {
               <Link
                 key={job.id}
                 href={`/recrutement/pipeline?job=${job.id}`}
-                className="card hover:border-white/10 flex items-center gap-3 cursor-pointer"
+                className="card hover:border-slate-200 flex items-center gap-3 cursor-pointer"
               >
                 <div className="w-8 h-8 bg-bg rounded-lg flex items-center justify-center flex-shrink-0">
                   <Briefcase size={13} className="text-slate-400" />
                 </div>
-                <p className="flex-1 text-slate-300 text-sm truncate">{job.title}</p>
+                <p className="flex-1 text-slate-600 text-sm truncate">{job.title}</p>
                 {job.ias_impact && (
                   <span className="font-mono text-xs text-violet flex-shrink-0">+{job.ias_impact} IAS</span>
                 )}

@@ -1,7 +1,10 @@
 'use server';
 
-import { signOut } from '@workos-inc/authkit-nextjs';
+import { createUserClient } from '@/lib/supabase/user';
+import { redirect } from 'next/navigation';
 
 export async function signOutAction() {
-  await signOut();
+  const supabase = await createUserClient();
+  await supabase.auth.signOut();
+  redirect('/');
 }

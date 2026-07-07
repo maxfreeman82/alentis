@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+﻿import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 
@@ -14,14 +14,14 @@ export default function FounderLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-bg flex flex-col">
       {/* Header */}
-      <header className="border-b border-white/[0.04] bg-bg-card sticky top-0 z-40">
+      <header className="border-b border-slate-200 bg-bg-card sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <Link href="/demarrer" className="flex items-center gap-2 flex-shrink-0">
             <div className="w-7 h-7 bg-amber-500 rounded-lg flex items-center justify-center">
-              <span className="text-white text-xs font-bold">F</span>
+              <span className="text-slate-900 text-xs font-bold">F</span>
             </div>
             <div>
-              <span className="font-display text-white text-sm font-semibold">Mode Fondateur</span>
+              <span className="font-display text-slate-900 text-sm font-semibold">Mode Fondateur</span>
               <span className="text-slate-600 text-xs ml-1.5">· gratuit</span>
             </div>
           </Link>
@@ -31,8 +31,8 @@ export default function FounderLayout({ children }: { children: ReactNode }) {
             {STEPS.map((s, i) => (
               <div key={s.href} className="flex items-center gap-1">
                 <Link href={s.href}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-white/[0.04] transition-all">
-                  <span className="w-4 h-4 rounded-full bg-white/[0.06] flex items-center justify-center text-[9px] font-bold text-slate-500">
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-600 hover:bg-slate-50 transition-all">
+                  <span className="w-4 h-4 rounded-full bg-slate-50 flex items-center justify-center text-[9px] font-bold text-slate-500">
                     {s.step}
                   </span>
                   {s.label}
@@ -52,7 +52,7 @@ export default function FounderLayout({ children }: { children: ReactNode }) {
         {children}
       </main>
 
-      <footer className="border-t border-white/[0.04] py-4 text-center">
+      <footer className="border-t border-slate-200 py-4 text-center">
         <p className="text-slate-700 text-xs">Teranga Align · Mode Fondateur · 100% gratuit jusqu'à 5 employés</p>
       </footer>
     </div>

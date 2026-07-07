@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { SectionHeader } from '@/components/shared';
 import { getUserOrg } from '@/lib/supabase/auth';
 import SimulateurClient from '@/components/boussole/SimulateurClient';
@@ -9,7 +9,7 @@ import type { Archetype } from '@teranga/types';
 const FAMILIES: EnergyFamily[] = ['Pilotes', 'Initialiseurs', 'Accomplisseurs', 'Dynamiseurs', 'Regulateurs'];
 
 export default async function SimulateurPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return <div className="flex items-center justify-center h-64"><p className="text-slate-400">Profil en cours de configuration…</p></div>;
 

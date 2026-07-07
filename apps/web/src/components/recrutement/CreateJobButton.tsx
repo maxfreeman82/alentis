@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Plus, X, Loader2 } from 'lucide-react';
@@ -78,12 +78,12 @@ export function CreateJobButton() {
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-bg-card border border-white/10 rounded-2xl w-full max-w-md shadow-2xl">
+          <div className="bg-bg-card border border-slate-200 rounded-2xl w-full max-w-md shadow-2xl">
             {/* En-tête */}
-            <div className="flex items-center justify-between p-5 border-b border-white/[0.06]">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200">
               <div>
                 <p className="section-tag text-emerald mb-0.5">RECRUTEMENT</p>
-                <h2 className="font-display text-white text-lg">Nouveau poste</h2>
+                <h2 className="font-display text-slate-900 text-lg">Nouveau poste</h2>
               </div>
               <button onClick={() => setOpen(false)} className="p-1.5 rounded-lg hover:bg-white/5 text-slate-500">
                 <X size={16} />
@@ -99,7 +99,7 @@ export function CreateJobButton() {
                   value={form.title}
                   onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                   placeholder="ex : Lead Product Manager"
-                  className="w-full bg-bg border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-emerald/40"
+                  className="w-full bg-bg border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 text-sm placeholder:text-slate-600 focus:outline-none focus:border-emerald/40"
                 />
               </div>
 
@@ -111,7 +111,7 @@ export function CreateJobButton() {
                   onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                   placeholder="Missions principales, contexte…"
                   rows={3}
-                  className="w-full bg-bg border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-emerald/40 resize-none"
+                  className="w-full bg-bg border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 text-sm placeholder:text-slate-600 focus:outline-none focus:border-emerald/40 resize-none"
                 />
               </div>
 
@@ -122,7 +122,7 @@ export function CreateJobButton() {
                   <select
                     value={form.required_family}
                     onChange={e => setForm(f => ({ ...f, required_family: e.target.value }))}
-                    className="w-full bg-bg border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-emerald/40"
+                    className="w-full bg-bg border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-emerald/40"
                   >
                     <option value="">Toutes</option>
                     {ENERGY_FAMILIES.map(f => <option key={f} value={f}>{f}</option>)}
@@ -138,7 +138,7 @@ export function CreateJobButton() {
                     max={100}
                     value={form.min_score_global}
                     onChange={e => setForm(f => ({ ...f, min_score_global: parseInt(e.target.value) || 60 }))}
-                    className="w-full bg-bg border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-emerald/40"
+                    className="w-full bg-bg border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-emerald/40"
                   />
                 </div>
               </div>
@@ -152,7 +152,7 @@ export function CreateJobButton() {
                   value={form.ias_impact}
                   onChange={e => setForm(f => ({ ...f, ias_impact: e.target.value }))}
                   placeholder="ex : 2.5"
-                  className="w-full bg-bg border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-emerald/40"
+                  className="w-full bg-bg border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 text-sm placeholder:text-slate-600 focus:outline-none focus:border-emerald/40"
                 />
               </div>
 
@@ -162,7 +162,7 @@ export function CreateJobButton() {
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-white/10 text-slate-400 text-sm hover:text-white transition-colors"
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-400 text-sm hover:text-slate-800 transition-colors"
                 >
                   Annuler
                 </button>

@@ -1,5 +1,5 @@
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { NextResponse } from 'next/server';
-import { withAuth } from '@workos-inc/authkit-nextjs';
 import { z } from 'zod';
 import { getUserOrg } from '@/lib/supabase/auth';
 import { consolidatePassport } from '@/lib/tour-de-table/consolidation';
@@ -8,7 +8,7 @@ import type { TdtAggregateData, PassportSoftScores } from '@/lib/tour-de-table/c
 const schema = z.object({ sessionId: z.string().uuid() });
 
 export async function POST(req: Request) {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
 
   const ctx = await getUserOrg(user.id);
   if (!ctx) return NextResponse.json({ error: 'Organisation introuvable' }, { status: 403 });

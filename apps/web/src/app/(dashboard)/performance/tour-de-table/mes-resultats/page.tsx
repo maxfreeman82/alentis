@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { getUserOrg } from '@/lib/supabase/auth';
 import { TDT_DIMENSIONS } from '@/lib/tour-de-table/dimensions';
 import { computePerceptionDeltas } from '@/lib/tour-de-table/consolidation';
@@ -6,14 +6,14 @@ import type { PassportSoftScores } from '@/lib/tour-de-table/consolidation';
 import { ArrowUp, ArrowDown, Minus, AlertTriangle, Eye } from 'lucide-react';
 
 export default async function MesResultatsPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
 
   const ctx = await getUserOrg(user.id);
   if (!ctx) return <p className="text-slate-500 p-8">Organisation introuvable.</p>;
   const { supabase, organizationId } = ctx;
 
   const { data: myProfile } = await supabase
-    .from('profiles').select('id, first_name').eq('workos_user_id', user.id).maybeSingle();
+    .from('profiles').select('id, first_name').eq('user_id', user.id).maybeSingle();
   if (!myProfile) return null;
 
   // Récupérer les agrégats (toutes sessions confondues, triées par date)
@@ -37,7 +37,7 @@ export default async function MesResultatsPage() {
     return (
       <div className="text-center py-16 space-y-3">
         <Eye className="w-8 h-8 text-slate-700 mx-auto" />
-        <p className="text-white font-display text-xl">Pas encore de résultats</p>
+        <p className="text-slate-900 font-display text-xl">Pas encore de résultats</p>
         <p className="text-slate-500 text-sm max-w-sm mx-auto">
           Vos résultats de Tour de Table apparaîtront ici une fois qu'une session sera clôturée
           et que vous aurez été observé par au moins {3} collègues.
@@ -65,7 +65,7 @@ export default async function MesResultatsPage() {
     <div className="space-y-8">
       <div>
         <p className="text-violet-400 text-xs font-semibold uppercase tracking-widest mb-1">MES OBSERVATIONS PAIRS</p>
-        <h1 className="font-display text-white text-2xl">Comment mes collègues me perçoivent</h1>
+        <h1 className="font-display text-slate-900 text-2xl">Comment mes collègues me perçoivent</h1>
         <p className="text-slate-400 text-sm mt-1">
           Ces résultats sont anonymes — agrégés à partir de {latest.observer_count} observateurs minimum.
           Vous ne pouvez pas identifier qui a dit quoi.
@@ -109,7 +109,7 @@ export default async function MesResultatsPage() {
 
       {/* Scores par dimension */}
       <div className="space-y-3">
-        <h2 className="font-display text-white text-sm">Par dimension comportementale</h2>
+        <h2 className="font-display text-slate-900 text-sm">Par dimension comportementale</h2>
         <div className="space-y-2">
           {TDT_DIMENSIONS.map(dim => {
             const score = latest[`score_${dim.id}` as keyof typeof latest] as number ?? 0;
@@ -133,7 +133,7 @@ export default async function MesResultatsPage() {
       {/* Perception gaps */}
       {deltas.length > 0 && (
         <div className="space-y-3">
-          <h2 className="font-display text-white text-sm">Écarts de perception (vous vs pairs)</h2>
+          <h2 className="font-display text-slate-900 text-sm">Écarts de perception (vous vs pairs)</h2>
           <p className="text-slate-500 text-xs">+ = vos pairs vous voient MIEUX que vous vous voyez. − = vos pairs vous voient différemment.</p>
           <div className="space-y-2">
             {deltas.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta)).map(d => (
@@ -147,7 +147,7 @@ export default async function MesResultatsPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-white text-xs font-semibold">{d.dimension}</span>
+                    <span className="text-slate-900 text-xs font-semibold">{d.dimension}</span>
                     <span className={`font-mono text-xs font-bold flex-shrink-0 ${
                       d.delta > 5 ? 'text-emerald-400' : d.delta < -5 ? 'text-rose-400' : 'text-slate-500'
                     }`}>
@@ -165,16 +165,16 @@ export default async function MesResultatsPage() {
       {/* Historique */}
       {aggregates && aggregates.length > 1 && (
         <div className="space-y-3">
-          <h2 className="font-display text-white text-sm">Évolution trimestrielle</h2>
+          <h2 className="font-display text-slate-900 text-sm">Évolution trimestrielle</h2>
           <div className="card overflow-hidden p-0">
-            <div className="grid grid-cols-4 text-[10px] font-semibold uppercase tracking-wider text-slate-500 px-4 py-2.5 bg-bg border-b border-white/[0.04]">
+            <div className="grid grid-cols-4 text-[10px] font-semibold uppercase tracking-wider text-slate-500 px-4 py-2.5 bg-bg border-b border-slate-200">
               <span>Session</span>
               <span className="text-center">Observateurs</span>
               <span className="text-center">Score</span>
               <span className="text-center">Delta</span>
             </div>
             {aggregates.map(a => (
-              <div key={a.id} className="grid grid-cols-4 px-4 py-2.5 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.01]">
+              <div key={a.id} className="grid grid-cols-4 px-4 py-2.5 border-b border-slate-200 last:border-0 hover:bg-slate-50">
                 <span className="text-slate-400 text-xs">Q{a.session_id?.slice(-2)} {new Date(a.computed_at ?? '').getFullYear()}</span>
                 <span className="font-mono text-xs text-center text-slate-400">{a.observer_count}</span>
                 <span className={`font-mono text-xs text-center font-bold ${

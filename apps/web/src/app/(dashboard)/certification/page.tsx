@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { Award, CheckCircle, Circle, ArrowRight } from 'lucide-react';
 import { SectionHeader, ScoreCircle, CertBadge } from '@/components/shared';
 import { getUserOrg } from '@/lib/supabase/auth';
@@ -52,7 +52,7 @@ const LEVELS: {
 ];
 
 export default async function CertificationPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return <div className="flex items-center justify-center h-64"><p className="text-slate-400">Profil en cours de configuration…</p></div>;
 
@@ -113,13 +113,13 @@ export default async function CertificationPage() {
         <ScoreCircle value={orgIasScore} size="lg" />
         <div className="flex-1">
           <p className="section-tag text-slate-500 mb-1">NIVEAU ACTUEL</p>
-          <p className="font-display text-2xl text-white">{LEVELS[(orgCertLevel as number) - 1]?.label}</p>
+          <p className="font-display text-2xl text-slate-900">{LEVELS[(orgCertLevel as number) - 1]?.label}</p>
           <p className="text-slate-400 text-sm mt-1">IAS : {orgIasScore}/100</p>
         </div>
         {orgCertLevel < 4 && (
           <div className="text-right">
             <p className="text-slate-500 text-xs mb-1">Prochain niveau</p>
-            <p className="font-display text-white">{LEVELS[orgCertLevel]?.label}</p>
+            <p className="font-display text-slate-900">{LEVELS[orgCertLevel]?.label}</p>
             <p className="text-slate-500 text-xs">IAS requis : {LEVELS[orgCertLevel]?.minIas}</p>
           </div>
         )}
@@ -142,7 +142,7 @@ export default async function CertificationPage() {
 
           return (
             <div key={lvl.level}
-              className={`card space-y-4 border transition-all ${isCurrent ? 'border-white/10' : isUnlocked ? 'border-emerald-500/20 bg-emerald-500/3' : 'border-transparent opacity-70'}`}>
+              className={`card space-y-4 border transition-all ${isCurrent ? 'border-slate-200' : isUnlocked ? 'border-emerald-500/20 bg-emerald-500/3' : 'border-transparent opacity-70'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center"
@@ -150,7 +150,7 @@ export default async function CertificationPage() {
                     <Award className="w-5 h-5" style={{ color: lvl.color }} />
                   </div>
                   <div>
-                    <p className="text-white font-semibold text-sm">{lvl.label}</p>
+                    <p className="text-slate-900 font-semibold text-sm">{lvl.label}</p>
                     <p className="text-slate-500 text-xs">IAS minimum requis : {lvl.minIas}</p>
                   </div>
                 </div>
@@ -191,7 +191,7 @@ export default async function CertificationPage() {
                     ) : (
                       <Circle className="w-4 h-4 text-slate-600 flex-shrink-0" />
                     )}
-                    <span className={c.met ? 'text-slate-300' : 'text-slate-500'}>{c.label}</span>
+                    <span className={c.met ? 'text-slate-600' : 'text-slate-500'}>{c.label}</span>
                     {!c.met && c.key !== 'hasAssessment' && c.key !== 'hasPulse' && c.key !== 'hasOkr' && c.key !== 'noBurnout' && (
                       <span className="ml-auto font-mono text-xs text-slate-600">
                         {c.current}{c.unit ?? ''} / {c.threshold}{c.unit ?? ''}
@@ -203,7 +203,7 @@ export default async function CertificationPage() {
 
               {/* CTA niveau suivant */}
               {isNext && orgCertLevel < 4 && (
-                <div className="pt-2 border-t border-white/[0.04]">
+                <div className="pt-2 border-t border-slate-200">
                   <p className="text-slate-400 text-xs mb-2">
                     {lvl.criteria.length - metCount} critère{lvl.criteria.length - metCount > 1 ? 's' : ''} restant{lvl.criteria.length - metCount > 1 ? 's' : ''} pour progresser
                   </p>

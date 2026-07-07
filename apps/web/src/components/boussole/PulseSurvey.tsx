@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -58,7 +58,7 @@ export default function PulseSurvey({ organizationId, quarter, year }: Props) {
       <div className="card flex flex-col items-center justify-center py-16 gap-6 text-center">
         <CheckCircle className="w-16 h-16 text-emerald-400" />
         <div>
-          <h2 className="font-display text-2xl text-white mb-2">Merci pour votre réponse !</h2>
+          <h2 className="font-display text-2xl text-slate-900 mb-2">Merci pour votre réponse !</h2>
           <p className="text-slate-400">Votre contribution compte pour améliorer l&apos;alignement de l&apos;organisation.</p>
         </div>
         <button
@@ -118,7 +118,7 @@ export default function PulseSurvey({ organizationId, quarter, year }: Props) {
         <div className="space-y-6">
           {dimQuestions.map((q, qi) => (
             <div key={q.id} className="space-y-3">
-              <p className="text-white text-sm leading-relaxed">
+              <p className="text-slate-900 text-sm leading-relaxed">
                 <span className="text-slate-500 mr-2">{qi + 1}.</span>
                 {q.text}
               </p>

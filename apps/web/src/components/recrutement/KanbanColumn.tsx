@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useDroppable } from '@dnd-kit/core';
 import { cn } from '@/lib/utils';
@@ -19,7 +19,7 @@ export function KanbanColumn({ id, label, color, count, children }: KanbanColumn
       ref={setNodeRef}
       className={cn(
         'w-60 flex flex-col rounded-xl border transition-all duration-200',
-        isOver ? 'border-white/20' : 'border-white/[0.06]'
+        isOver ? 'border-slate-200' : 'border-slate-200'
       )}
       style={{
         backgroundColor: isOver ? `${color}08` : 'transparent',

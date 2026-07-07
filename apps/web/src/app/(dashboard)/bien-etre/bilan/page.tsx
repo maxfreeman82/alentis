@@ -1,9 +1,9 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { SectionHeader } from '@/components/shared';
 import WellbeingSurvey from '@/components/bien-etre/WellbeingSurvey';
 
 export default async function BilanPage() {
-  await withAuth({ ensureSignedIn: true });
+  await requireAuth();
   const now = new Date();
   return (
     <div className="space-y-8 animate-fade-in">

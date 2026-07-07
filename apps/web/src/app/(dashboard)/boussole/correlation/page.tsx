@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { ArrowRight, TrendingUp, Users, AlertTriangle, CheckCircle } from 'lucide-react';
 import { SectionHeader, ScoreCircle, AIInsightCard } from '@/components/shared';
 import { getUserOrg } from '@/lib/supabase/auth';
@@ -20,7 +20,7 @@ const FAMILY_COLORS: Record<EnergyFamily, string> = {
 const FAMILIES: EnergyFamily[] = ['Pilotes', 'Initialiseurs', 'Accomplisseurs', 'Dynamiseurs', 'Regulateurs'];
 
 export default async function CorrelationPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return <div className="flex items-center justify-center h-64"><p className="text-slate-400">Profil en cours de configuration…</p></div>;
 
@@ -105,7 +105,7 @@ export default async function CorrelationPage() {
           <ScoreCircle value={orgIasScore} size="lg" />
           <div>
             <p className="section-tag text-slate-500 mb-1">INDEX D'ALIGNEMENT STRATÉGIQUE</p>
-            <p className="font-display text-white text-xl">Décomposition IAS</p>
+            <p className="font-display text-slate-900 text-xl">Décomposition IAS</p>
           </div>
         </div>
         <div className="space-y-2">
@@ -136,7 +136,7 @@ export default async function CorrelationPage() {
       <div className="card" style={{ borderLeft: `4px solid ${archColor}` }}>
         <div className="flex items-center gap-3 mb-1">
           <span className="w-3 h-3 rounded-full" style={{ backgroundColor: archColor }} />
-          <p className="font-display text-white">{ARCHETYPE_LABELS[archetype]}</p>
+          <p className="font-display text-slate-900">{ARCHETYPE_LABELS[archetype]}</p>
           <span className="ml-auto text-xs text-slate-500">Mix requis</span>
         </div>
         {assessmentRes.data?.vision_statement && (
@@ -147,7 +147,7 @@ export default async function CorrelationPage() {
       {/* Gaps énergétiques */}
       <div className="card space-y-5">
         <div className="flex items-center justify-between">
-          <h3 className="font-display text-white text-sm flex items-center gap-2">
+          <h3 className="font-display text-slate-900 text-sm flex items-center gap-2">
             <Users className="w-4 h-4 text-violet-400" /> Gaps énergétiques
           </h3>
           <span className="text-xs font-mono font-bold px-2 py-1 rounded-full"
@@ -174,8 +174,8 @@ export default async function CorrelationPage() {
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-medium" style={{ color }}>{f}</span>
                     <div className="flex items-center gap-3 text-slate-500">
-                      <span>Requis : <strong className="text-white">{req}%</strong></span>
-                      <span>Actuel : <strong className="text-white">{act}%</strong></span>
+                      <span>Requis : <strong className="text-slate-900">{req}%</strong></span>
+                      <span>Actuel : <strong className="text-slate-900">{act}%</strong></span>
                       <span className={`font-mono font-bold ${isDeficit ? 'text-rose-400' : isExcess ? 'text-amber-400' : 'text-emerald-400'}`}>
                         {gap > 0 ? `−${gap}%` : gap < 0 ? `+${Math.abs(gap)}%` : '≈ OK'}
                       </span>
@@ -226,17 +226,17 @@ export default async function CorrelationPage() {
       {/* Profils à risque */}
       {atRisk.length > 0 && (
         <div className="card space-y-3">
-          <h3 className="font-display text-white text-sm flex items-center gap-2">
+          <h3 className="font-display text-slate-900 text-sm flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-rose-400" /> Profils à risque de départ
           </h3>
           <div className="space-y-2">
             {atRisk.map(p => (
-              <div key={p.profile_id} className="flex items-center gap-3 py-2 border-b border-white/[0.04] last:border-0">
+              <div key={p.profile_id} className="flex items-center gap-3 py-2 border-b border-slate-200 last:border-0">
                 <div className="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center">
                   <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-slate-300 text-sm">{p.dominant_family ?? '—'}</p>
+                  <p className="text-slate-600 text-sm">{p.dominant_family ?? '—'}</p>
                   <p className="text-slate-600 text-xs">Score global : {p.score_global ?? '—'}</p>
                 </div>
                 <span className="font-mono text-sm font-bold text-rose-400">{p.score_risk ?? 0}% risque</span>

@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { getUserOrg } from '@/lib/supabase/auth';
 import Link from 'next/link';
 import { Briefcase, ArrowRight, Plus, KanbanSquare } from 'lucide-react';
@@ -10,7 +10,7 @@ const STATUS_LABELS  = { active: 'Actif', draft: 'Brouillon', closed: 'Fermé' }
 const STAGE_SHORT    = ['N', 'S', 'I', 'A', 'O', 'E'];
 
 export default async function JobsPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
 
   const ctx = await getUserOrg(user.id);
   if (!ctx) return null;
@@ -49,21 +49,21 @@ export default async function JobsPage() {
       {enriched.length === 0 ? (
         <div className="card text-center py-16 space-y-3">
           <Briefcase className="w-10 h-10 text-slate-700 mx-auto" />
-          <p className="text-white font-display text-xl">Aucun poste créé</p>
+          <p className="text-slate-900 font-display text-xl">Aucun poste créé</p>
           <p className="text-slate-500 text-sm">Commencez par créer votre premier poste de recrutement.</p>
           <CreateJobButton />
         </div>
       ) : (
         <div className="space-y-2">
           {enriched.map(job => (
-            <div key={job.id} className="card group hover:border-white/10 flex items-center gap-4">
+            <div key={job.id} className="card group hover:border-slate-200 flex items-center gap-4">
               <div className="w-9 h-9 bg-bg-surface rounded-lg flex items-center justify-center flex-shrink-0">
                 <Briefcase size={15} className="text-slate-400" />
               </div>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <p className="text-white font-medium text-sm truncate">{job.title}</p>
+                  <p className="text-slate-900 font-medium text-sm truncate">{job.title}</p>
                   <span className={`text-[10px] font-bold ${STATUS_COLORS[job.status as keyof typeof STATUS_COLORS] ?? 'text-slate-500'}`}>
                     {STATUS_LABELS[job.status as keyof typeof STATUS_LABELS] ?? job.status}
                   </span>

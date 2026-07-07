@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { Send } from 'lucide-react';
@@ -86,7 +86,7 @@ export default function MessageThread({ myProfileId, contactId, contactName, ini
                 <div className={`max-w-[75%] px-3 py-2 rounded-2xl text-sm ${
                   isMe
                     ? 'bg-emerald-500/20 text-emerald-100 rounded-br-sm'
-                    : 'bg-white/[0.06] text-slate-200 rounded-bl-sm'
+                    : 'bg-slate-50 text-slate-700 rounded-bl-sm'
                 }`}>
                   <p className="whitespace-pre-wrap break-words">{m.content}</p>
                   <p className={`text-[10px] mt-0.5 ${isMe ? 'text-emerald-400/60 text-right' : 'text-slate-600'}`}>
@@ -102,7 +102,7 @@ export default function MessageThread({ myProfileId, contactId, contactName, ini
       </div>
 
       {/* Formulaire envoi */}
-      <form onSubmit={send} className="flex gap-2 pt-3 border-t border-white/[0.04]">
+      <form onSubmit={send} className="flex gap-2 pt-3 border-t border-slate-200">
         <input
           type="text"
           placeholder={`Message à ${contactName}…`}

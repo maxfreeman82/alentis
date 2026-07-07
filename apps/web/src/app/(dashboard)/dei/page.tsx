@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { Scale, Users, TrendingUp, Globe, Plus } from 'lucide-react';
 import { SectionHeader, ScoreCircle } from '@/components/shared';
@@ -21,7 +21,7 @@ const BAND_LABELS: Record<string, string> = {
 };
 
 export default async function DeiPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return <div className="flex items-center justify-center h-64"><p className="text-slate-400">Profil en cours de configuration…</p></div>;
 
@@ -70,7 +70,7 @@ export default async function DeiPage() {
                 </div>
               )}
               <div>
-                <p className="text-white font-bold text-xl font-mono">{k.value}</p>
+                <p className="text-slate-900 font-bold text-xl font-mono">{k.value}</p>
                 <p className="text-slate-500 text-[10px]">{k.label}</p>
               </div>
             </div>
@@ -91,7 +91,7 @@ export default async function DeiPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Distribution genre */}
           <div className="card space-y-4">
-            <h3 className="font-display text-white text-sm flex items-center gap-2">
+            <h3 className="font-display text-slate-900 text-sm flex items-center gap-2">
               <Users className="w-4 h-4 text-pink-400" /> Répartition par genre
             </h3>
             <div className="space-y-3">
@@ -101,7 +101,7 @@ export default async function DeiPage() {
                 return (
                   <div key={g} className="space-y-1">
                     <div className="flex justify-between text-xs">
-                      <span className="text-white">{cfg.label}</span>
+                      <span className="text-slate-900">{cfg.label}</span>
                       <span className="font-mono text-slate-400">{cnt} · {pct}%</span>
                     </div>
                     <div className="h-2 bg-bg rounded-full overflow-hidden">
@@ -115,7 +115,7 @@ export default async function DeiPage() {
 
           {/* Distribution âge */}
           <div className="card space-y-4">
-            <h3 className="font-display text-white text-sm flex items-center gap-2">
+            <h3 className="font-display text-slate-900 text-sm flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-sky-400" /> Répartition par tranche d&apos;âge
             </h3>
             <div className="space-y-3">
@@ -125,7 +125,7 @@ export default async function DeiPage() {
                 return (
                   <div key={a} className="space-y-1">
                     <div className="flex justify-between text-xs">
-                      <span className="text-white">{a} ans</span>
+                      <span className="text-slate-900">{a} ans</span>
                       <span className="font-mono text-slate-400">{cnt} · {pct}%</span>
                     </div>
                     <div className="h-2 bg-bg rounded-full overflow-hidden">
@@ -139,7 +139,7 @@ export default async function DeiPage() {
 
           {/* Équité salariale par genre */}
           <div className="card space-y-4">
-            <h3 className="font-display text-white text-sm flex items-center gap-2">
+            <h3 className="font-display text-slate-900 text-sm flex items-center gap-2">
               <Scale className="w-4 h-4 text-violet-400" /> Équité salariale — Répartition par bande
             </h3>
             <div className="space-y-3">
@@ -152,7 +152,7 @@ export default async function DeiPage() {
                 return (
                   <div key={band} className="space-y-1">
                     <div className="flex justify-between text-xs">
-                      <span className="text-white">{BAND_LABELS[band]}</span>
+                      <span className="text-slate-900">{BAND_LABELS[band]}</span>
                       <span className="text-slate-400">{bData.femme}F · {bData.homme}H</span>
                     </div>
                     <div className="h-2 bg-[#0EA5E9] rounded-full overflow-hidden">
@@ -167,21 +167,21 @@ export default async function DeiPage() {
 
           {/* Stats diversité */}
           <div className="card space-y-4">
-            <h3 className="font-display text-white text-sm flex items-center gap-2">
+            <h3 className="font-display text-slate-900 text-sm flex items-center gap-2">
               <Globe className="w-4 h-4 text-amber-400" /> Diversité & inclusion
             </h3>
             <div className="space-y-3 text-sm">
-              <div className="flex justify-between py-2 border-b border-white/[0.04]">
+              <div className="flex justify-between py-2 border-b border-slate-200">
                 <span className="text-slate-400">Nationalités représentées</span>
-                <span className="font-mono text-white font-bold">{metrics.nationalityCount}</span>
+                <span className="font-mono text-slate-900 font-bold">{metrics.nationalityCount}</span>
               </div>
-              <div className="flex justify-between py-2 border-b border-white/[0.04]">
+              <div className="flex justify-between py-2 border-b border-slate-200">
                 <span className="text-slate-400">Index de diversité</span>
                 <span className="font-mono font-bold" style={{ color: metrics.diversityIndex > 0.7 ? '#10B981' : metrics.diversityIndex > 0.4 ? '#F59E0B' : '#F43F5E' }}>
                   {metrics.diversityIndex.toFixed(2)} / 1.00
                 </span>
               </div>
-              <div className="flex justify-between py-2 border-b border-white/[0.04]">
+              <div className="flex justify-between py-2 border-b border-slate-200">
                 <span className="text-slate-400">Parité managériale</span>
                 <span className={`font-mono font-bold ${metrics.femaleManagerPct >= 40 ? 'text-emerald-400' : 'text-amber-400'}`}>
                   {metrics.femaleManagerPct}% femmes managers
@@ -189,7 +189,7 @@ export default async function DeiPage() {
               </div>
               <div className="flex justify-between py-2">
                 <span className="text-slate-400">Inclusion handicap déclaré</span>
-                <span className="font-mono text-white">{metrics.disabilityPct}%</span>
+                <span className="font-mono text-slate-900">{metrics.disabilityPct}%</span>
               </div>
             </div>
           </div>

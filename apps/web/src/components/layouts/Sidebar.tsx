@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -66,14 +66,14 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-60 h-screen bg-bg-card border-r border-white/[0.04] flex flex-col fixed left-0 top-0 z-40">
+    <aside className="w-60 h-screen bg-bg-card border-r border-slate-200 flex flex-col fixed left-0 top-0 z-40">
       {/* Logo */}
-      <div className="flex items-center gap-3 p-4 border-b border-white/[0.04]">
+      <div className="flex items-center gap-3 p-4 border-b border-slate-200">
         <div className="w-7 h-7 bg-emerald rounded-md flex items-center justify-center flex-shrink-0">
-          <span className="font-display text-white font-bold text-sm">TA</span>
+          <span className="font-display text-slate-900 font-bold text-sm">TA</span>
         </div>
         <div>
-          <p className="font-display text-white text-sm font-semibold">Teranga Align</p>
+          <p className="font-display text-slate-900 text-sm font-semibold">Teranga Align</p>
           <p className="text-slate-500 text-[10px]">Alignement stratégique</p>
         </div>
       </div>
@@ -93,7 +93,7 @@ export function Sidebar() {
                   'flex items-center gap-3 px-3 py-2 mx-2 rounded-lg text-sm transition-all duration-150',
                   isActive
                     ? 'bg-emerald/10 text-emerald font-semibold'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
+                    : 'text-slate-400 hover:text-slate-700 hover:bg-slate-50'
                 )}
               >
                 <Icon
@@ -106,7 +106,7 @@ export function Sidebar() {
               </Link>
 
               {showChildren && (
-                <div className="ml-4 mt-0.5 mb-1 border-l border-white/[0.06] pl-3 space-y-0.5">
+                <div className="ml-4 mt-0.5 mb-1 border-l border-slate-200 pl-3 space-y-0.5">
                   {item.children!.map((child) => {
                     const childActive = pathname === child.href || pathname.startsWith(`${child.href}/`);
                     const ChildIcon   = child.icon;
@@ -118,7 +118,7 @@ export function Sidebar() {
                           'flex items-center gap-2 px-2 py-1.5 mx-1 rounded-md text-xs transition-all duration-150',
                           childActive
                             ? 'text-orange font-semibold bg-orange/5'
-                            : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.03]'
+                            : 'text-slate-500 hover:text-slate-600 hover:bg-slate-50'
                         )}
                       >
                         <ChildIcon size={13} className={childActive ? 'text-orange' : 'text-slate-600'} />
@@ -134,7 +134,7 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-white/[0.04] space-y-2">
+      <div className="p-3 border-t border-slate-200 space-y-2">
         <form action={signOutAction}>
           <button
             type="submit"

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -82,7 +82,7 @@ export default function FounderQuestionnaire({ questions }: Props) {
 
       {/* Question */}
       <div className="card space-y-6">
-        <p className="text-white text-base leading-relaxed font-medium">
+        <p className="text-slate-900 text-base leading-relaxed font-medium">
           {current.text}
         </p>
 
@@ -94,7 +94,7 @@ export default function FounderQuestionnaire({ questions }: Props) {
                 className={`w-full flex items-start gap-3 px-4 py-3 rounded-xl text-sm text-left transition-all border ${
                   isSelected
                     ? 'border-amber-500 bg-amber-500/10 text-white font-medium'
-                    : 'border-white/[0.04] text-slate-400 hover:border-white/10 hover:text-slate-300 hover:bg-white/[0.02]'
+                    : 'border-slate-200 text-slate-400 hover:border-slate-200 hover:text-slate-600 hover:bg-slate-50'
                 }`}>
                 <span className={`w-6 h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center text-xs font-bold mt-0.5 transition-all ${
                   isSelected ? 'border-amber-500 bg-amber-500 text-white' : 'border-slate-600 text-slate-600'
@@ -112,7 +112,7 @@ export default function FounderQuestionnaire({ questions }: Props) {
       <div className="flex gap-3">
         {step > 0 && (
           <button onClick={() => setStep(s => s - 1)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/[0.06] text-slate-400 hover:text-white hover:border-white/10 text-sm transition-all">
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-slate-800 hover:border-slate-200 text-sm transition-all">
             <ChevronLeft className="w-4 h-4" /> Précédent
           </button>
         )}
@@ -122,7 +122,7 @@ export default function FounderQuestionnaire({ questions }: Props) {
             className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all ${
               answered
                 ? 'bg-amber-500 text-white hover:bg-amber-600'
-                : 'bg-white/[0.04] text-slate-600 cursor-not-allowed'
+                : 'bg-slate-50 text-slate-600 cursor-not-allowed'
             }`}>
             Suivant <ChevronRight className="w-4 h-4" />
           </button>

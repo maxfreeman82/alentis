@@ -1,5 +1,5 @@
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { NextResponse } from 'next/server';
-import { withAuth } from '@workos-inc/authkit-nextjs';
 import { z } from 'zod';
 import { getUserOrg } from '@/lib/supabase/auth';
 
@@ -22,7 +22,7 @@ const createSchema = z.object({
 const ALLOWED_ROLES = ['admin', 'hr', 'manager'];
 
 export async function POST(req: Request) {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   if (!ALLOWED_ROLES.includes(ctx.role)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -74,7 +74,7 @@ export async function GET(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   if (!ALLOWED_ROLES.includes(ctx.role)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });

@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { CheckCircle, Zap, Building2, Gift } from 'lucide-react';
 import { SectionHeader } from '@/components/shared';
 import { getUserOrg } from '@/lib/supabase/auth';
@@ -62,8 +62,8 @@ const PLANS = [
 export default async function AbonnementPage({
   searchParams,
 }: { searchParams: Promise<{ status?: string }> }) {
-  const [{ user }, params] = await Promise.all([
-    withAuth({ ensureSignedIn: true }),
+  const [user, params] = await Promise.all([
+    requireAuth(),
     searchParams,
   ]);
 
@@ -94,14 +94,14 @@ export default async function AbonnementPage({
         <div className="card border border-emerald/30 bg-emerald/5 flex items-center gap-3">
           <CheckCircle className="w-5 h-5 text-emerald flex-shrink-0" />
           <div>
-            <p className="text-white font-semibold text-sm">Paiement confirmé !</p>
+            <p className="text-slate-900 font-semibold text-sm">Paiement confirmé !</p>
             <p className="text-slate-400 text-xs">Votre abonnement est maintenant actif.</p>
           </div>
         </div>
       )}
       {params.status === 'cancel' && (
         <div className="card border border-rose/30 bg-rose/5">
-          <p className="text-slate-300 text-sm">Paiement annulé — vous pouvez réessayer à tout moment.</p>
+          <p className="text-slate-600 text-sm">Paiement annulé — vous pouvez réessayer à tout moment.</p>
         </div>
       )}
 
@@ -109,7 +109,7 @@ export default async function AbonnementPage({
       {isActive && subscription && (
         <div className="card border border-emerald/20" style={{ borderLeft: '4px solid #10B981' }}>
           <p className="section-tag text-emerald mb-1">ABONNEMENT ACTUEL</p>
-          <p className="text-white font-semibold capitalize">{subscription.plan}</p>
+          <p className="text-slate-900 font-semibold capitalize">{subscription.plan}</p>
           <p className="text-slate-400 text-xs mt-1">
             {subscription.amount_fcfa.toLocaleString('fr-FR')} FCFA/mois
             {subscription.next_billing && ` · Prochain renouvellement : ${new Date(subscription.next_billing).toLocaleDateString('fr-FR')}`}
@@ -124,7 +124,7 @@ export default async function AbonnementPage({
           const isCurrent = currentPlan === plan.id;
 
           return (
-            <div key={plan.id} className={`card flex flex-col gap-5 ${isCurrent ? 'border border-white/10' : ''}`}
+            <div key={plan.id} className={`card flex flex-col gap-5 ${isCurrent ? 'border border-slate-200' : ''}`}
               style={isCurrent ? { borderColor: plan.color + '40' } : {}}>
               {/* En-tête */}
               <div className="flex items-center gap-3">
@@ -133,7 +133,7 @@ export default async function AbonnementPage({
                   <Icon className="w-5 h-5" style={{ color: plan.color }} />
                 </div>
                 <div>
-                  <p className="text-white font-semibold">{plan.label}</p>
+                  <p className="text-slate-900 font-semibold">{plan.label}</p>
                   {isCurrent && (
                     <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: plan.color + '20', color: plan.color }}>
                       ACTUEL
@@ -144,14 +144,14 @@ export default async function AbonnementPage({
 
               {/* Prix */}
               <div>
-                <p className="font-display text-2xl text-white font-bold">{plan.price}</p>
+                <p className="font-display text-2xl text-slate-900 font-bold">{plan.price}</p>
                 <p className="text-slate-500 text-xs">{plan.sub}</p>
               </div>
 
               {/* Fonctionnalités */}
               <ul className="space-y-2 flex-1">
                 {plan.features.map((f, i) => (
-                  <li key={i} className="flex items-start gap-2 text-xs text-slate-300">
+                  <li key={i} className="flex items-start gap-2 text-xs text-slate-600">
                     <CheckCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: plan.color }} />
                     {f}
                   </li>
@@ -166,7 +166,7 @@ export default async function AbonnementPage({
                   disabled={isCurrent && isActive}
                 />
               ) : (
-                <div className="py-2.5 px-4 rounded-lg text-center text-sm text-slate-500 bg-white/[0.03] border border-white/[0.04]">
+                <div className="py-2.5 px-4 rounded-lg text-center text-sm text-slate-500 bg-slate-50 border border-slate-200">
                   {isCurrent ? 'Plan actuel' : 'Gratuit'}
                 </div>
               )}

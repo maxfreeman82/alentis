@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { Calendar, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { SectionHeader } from '@/components/shared';
@@ -20,7 +20,7 @@ export default async function CalendarPage({
 }: {
   searchParams: Promise<{ month?: string; year?: string }>;
 }) {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return <div className="flex items-center justify-center h-64"><p className="text-slate-400">Profil en cours de configuration…</p></div>;
 
@@ -106,12 +106,12 @@ export default async function CalendarPage({
       {/* Navigation mois */}
       <div className="card flex items-center justify-between py-3">
         <Link href={`/calendar?month=${prevMonth}&year=${prevYear}`}
-          className="p-2 rounded-lg hover:bg-white/[0.04] text-slate-400 hover:text-white transition-colors">
+          className="p-2 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-slate-800 transition-colors">
           <ChevronLeft className="w-5 h-5" />
         </Link>
-        <h2 className="font-display text-white text-base capitalize">{monthLabel}</h2>
+        <h2 className="font-display text-slate-900 text-base capitalize">{monthLabel}</h2>
         <Link href={`/calendar?month=${nextMonth}&year=${nextYear}`}
-          className="p-2 rounded-lg hover:bg-white/[0.04] text-slate-400 hover:text-white transition-colors">
+          className="p-2 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-slate-800 transition-colors">
           <ChevronRight className="w-5 h-5" />
         </Link>
       </div>
@@ -131,7 +131,7 @@ export default async function CalendarPage({
 
       {/* Liste événements du mois */}
       <div className="card space-y-3">
-        <h3 className="font-display text-white text-sm flex items-center gap-2">
+        <h3 className="font-display text-slate-900 text-sm flex items-center gap-2">
           <Calendar className="w-4 h-4 text-sky-400" />
           Événements du mois ({allEvents.length})
         </h3>
@@ -140,10 +140,10 @@ export default async function CalendarPage({
         ) : (
           <div className="space-y-2">
             {allEvents.sort((a, b) => a.start.localeCompare(b.start)).map(ev => (
-              <div key={ev.id} className="flex items-center gap-3 py-2 border-b border-white/[0.04] last:border-0">
+              <div key={ev.id} className="flex items-center gap-3 py-2 border-b border-slate-200 last:border-0">
                 <div className="w-2 h-2 rounded-full flex-shrink-0 mt-0.5" style={{ backgroundColor: ev.color }} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-medium">{ev.title}</p>
+                  <p className="text-slate-900 text-sm font-medium">{ev.title}</p>
                   <p className="text-slate-500 text-xs">
                     {new Date(ev.start).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                     {ev.end && ev.end !== ev.start && ` → ${new Date(ev.end).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}`}

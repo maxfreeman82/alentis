@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { checkPermission } from '@/lib/api-auth';
 import {
   computeEnergyProfile,
   computeSoftSkills,
@@ -20,8 +20,8 @@ const BodySchema = z.object({
 });
 
 export async function POST(req: Request) {
-  const { user } = await withAuth({ ensureSignedIn: true });
-  if (!user) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const { error: authErr } = await checkPermission('edit:passport');
+  if (authErr) return authErr;
 
   const parsed = BodySchema.safeParse(await req.json());
   if (!parsed.success) {

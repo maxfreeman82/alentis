@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -61,7 +61,7 @@ export default function ObservationForm({ sessionId, observed, totalPeople, curr
       {/* Qui on observe */}
       <div className="text-center space-y-1">
         <p className="text-slate-500 text-xs">{current} sur {totalPeople}</p>
-        <p className="text-white font-display text-lg">
+        <p className="text-slate-900 font-display text-lg">
           {observed.first_name} {observed.last_name}
         </p>
         <p className="text-slate-500 text-xs">Répondez selon vos observations réelles, pas selon ce que vous aimeriez voir.</p>
@@ -96,7 +96,7 @@ export default function ObservationForm({ sessionId, observed, totalPeople, curr
       <div className="flex gap-3">
         {step > 0 && (
           <button onClick={() => setStep(s => s - 1)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/[0.06] text-slate-400 hover:text-white hover:border-white/10 text-sm transition-all">
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-slate-800 hover:border-slate-200 text-sm transition-all">
             <ChevronLeft className="w-4 h-4" /> Précédent
           </button>
         )}
@@ -104,7 +104,7 @@ export default function ObservationForm({ sessionId, observed, totalPeople, curr
         {!isLast ? (
           <button onClick={() => setStep(s => s + 1)} disabled={!dimDone}
             className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-              dimDone ? 'text-white hover:opacity-90' : 'bg-white/[0.04] text-slate-600 cursor-not-allowed'
+              dimDone ? 'text-slate-900 hover:opacity-90' : 'bg-slate-50 text-slate-600 cursor-not-allowed'
             }`}
             style={dimDone ? { backgroundColor: dim.color } : {}}>
             Suivant <ChevronRight className="w-4 h-4" />
@@ -132,10 +132,10 @@ function DimensionCard({
   onRate:     (key: string, val: number) => void;
 }) {
   return (
-    <div className="rounded-2xl border border-white/[0.06] overflow-hidden"
+    <div className="rounded-2xl border border-slate-200 overflow-hidden"
       style={{ borderTop: `3px solid ${dimension.color}` }}>
       <div className="px-5 py-3.5" style={{ backgroundColor: `${dimension.color}08` }}>
-        <p className="font-display text-white text-sm">{dimension.label}</p>
+        <p className="font-display text-slate-900 text-sm">{dimension.label}</p>
         <p className="text-slate-500 text-[11px] mt-0.5">{dimension.description}</p>
       </div>
       <div className="p-4 space-y-6">
@@ -143,14 +143,14 @@ function DimensionCard({
           const val = responses[item.key];
           return (
             <div key={item.key} className="space-y-2.5">
-              <p className="text-slate-300 text-sm leading-relaxed">{item.text}</p>
+              <p className="text-slate-600 text-sm leading-relaxed">{item.text}</p>
               <div className="flex gap-2">
                 {[1, 2, 3, 4, 5].map(n => (
                   <button key={n} onClick={() => onRate(item.key, n)}
                     className={`flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl border text-xs font-semibold transition-all ${
                       val === n
-                        ? 'border-current text-white'
-                        : 'border-white/[0.04] text-slate-600 hover:border-white/10 hover:text-slate-400'
+                        ? 'border-current text-slate-900'
+                        : 'border-slate-200 text-slate-600 hover:border-slate-200 hover:text-slate-400'
                     }`}
                     style={val === n ? { borderColor: dimension.color, backgroundColor: `${dimension.color}15`, color: dimension.color } : {}}>
                     <span className="text-base leading-none">{n}</span>

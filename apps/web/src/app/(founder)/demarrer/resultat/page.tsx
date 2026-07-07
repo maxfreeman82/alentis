@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowRight, Star, AlertTriangle, Users, Banknote, Sparkles } from 'lucide-react';
@@ -11,11 +11,11 @@ const SCORE_BAR_COLORS: Record<FounderArchetype, string> = {
 };
 
 export default async function ResultatPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const supabase  = createServerClient();
 
   const { data: profile } = await supabase
-    .from('profiles').select('id, first_name').eq('workos_user_id', user.id).maybeSingle();
+    .from('profiles').select('id, first_name').eq('user_id', user.id).maybeSingle();
 
   const { data: founder } = profile
     ? await supabase.from('founders')
@@ -35,13 +35,13 @@ export default async function ResultatPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header résultat */}
-      <div className="rounded-2xl border border-white/[0.06] p-6 text-center space-y-3"
+      <div className="rounded-2xl border border-slate-200 p-6 text-center space-y-3"
         style={{ borderTop: `4px solid ${color}`, background: `linear-gradient(135deg, ${color}08 0%, transparent 60%)` }}>
         <p className="text-xs font-semibold uppercase tracking-widest" style={{ color }}>
           VOTRE ARCHÉTYPE FONDATEUR
         </p>
-        <h1 className="font-display text-white text-3xl">{meta.label}</h1>
-        <p className="text-slate-300 text-base italic">&ldquo;{meta.tagline}&rdquo;</p>
+        <h1 className="font-display text-slate-900 text-3xl">{meta.label}</h1>
+        <p className="text-slate-600 text-base italic">&ldquo;{meta.tagline}&rdquo;</p>
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold"
           style={{ backgroundColor: `${color}15`, color }}>
           <Star className="w-3 h-3" /> Confiance {founder.confidence}% · Énergie {meta.energyFamily}
@@ -54,13 +54,13 @@ export default async function ResultatPage() {
           <p className="text-violet-400 text-[10px] font-semibold uppercase tracking-widest flex items-center gap-1">
             <Sparkles className="w-3 h-3" /> ÉNONCÉ DE VISION
           </p>
-          <p className="text-slate-300 text-sm leading-relaxed italic">{founder.vision_statement}</p>
+          <p className="text-slate-600 text-sm leading-relaxed italic">{founder.vision_statement}</p>
         </div>
       )}
 
       {/* Distribution des scores */}
       <div className="card space-y-3">
-        <h2 className="font-display text-white text-sm">Distribution de vos réponses</h2>
+        <h2 className="font-display text-slate-900 text-sm">Distribution de vos réponses</h2>
         {Object.entries(scores).sort(([, a], [, b]) => b - a).map(([arch, score]) => {
           const pct   = Math.round((score / total) * 100);
           const c     = SCORE_BAR_COLORS[arch as FounderArchetype] ?? '#64748B';
@@ -84,7 +84,7 @@ export default async function ResultatPage() {
         <div className="card space-y-3">
           <div className="flex items-center gap-2">
             <Star className="w-4 h-4" style={{ color }} />
-            <h3 className="text-white text-sm font-semibold">Vos forces naturelles</h3>
+            <h3 className="text-slate-900 text-sm font-semibold">Vos forces naturelles</h3>
           </div>
           <ul className="space-y-1.5">
             {meta.strengths.map(s => (
@@ -97,7 +97,7 @@ export default async function ResultatPage() {
         <div className="card space-y-3">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-rose-400" />
-            <h3 className="text-white text-sm font-semibold">Points de vigilance</h3>
+            <h3 className="text-slate-900 text-sm font-semibold">Points de vigilance</h3>
           </div>
           <ul className="space-y-1.5">
             {meta.blindspots.map(b => (
@@ -113,7 +113,7 @@ export default async function ResultatPage() {
       <div className="card space-y-3">
         <div className="flex items-center gap-2">
           <Users className="w-4 h-4 text-sky-400" />
-          <h3 className="text-white text-sm font-semibold">L&apos;associé qui vous complète</h3>
+          <h3 className="text-slate-900 text-sm font-semibold">L&apos;associé qui vous complète</h3>
         </div>
         <p className="text-slate-400 text-xs leading-relaxed">{meta.needsPartner}</p>
       </div>
@@ -122,7 +122,7 @@ export default async function ResultatPage() {
       <div className="card space-y-3">
         <div className="flex items-center gap-2">
           <Banknote className="w-4 h-4 text-emerald-400" />
-          <h3 className="text-white text-sm font-semibold">Financement adapté à votre profil</h3>
+          <h3 className="text-slate-900 text-sm font-semibold">Financement adapté à votre profil</h3>
         </div>
         <div className="flex flex-wrap gap-2">
           {meta.fundingMatch.map(f => (

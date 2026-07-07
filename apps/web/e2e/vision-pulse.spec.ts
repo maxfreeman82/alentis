@@ -15,7 +15,7 @@ test.describe('Vision Pulse', () => {
     const form   = page.locator('form, fieldset, [role="radiogroup"]').first();
     const done   = page.locator('text=soumis, text=Merci, text=complété').first();
     const header = page.locator('.card').first();
-    await expect(form.or(done).or(header)).toBeVisible({ timeout: 10_000 });
+    await expect(form.or(done).or(header).first()).toBeVisible({ timeout: 10_000 });
   });
 
   test('navigation Lancer le sondage depuis le dashboard', async ({ page }) => {

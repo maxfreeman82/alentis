@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -54,11 +54,11 @@ export default function CreateSessionModal({ participants, organizationId }: Pro
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-bg-card border border-white/[0.08] rounded-2xl w-full max-w-md shadow-2xl">
+          <div className="bg-bg-card border border-slate-200 rounded-2xl w-full max-w-md shadow-2xl">
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-              <h2 className="font-display text-white text-lg">Nouveau Tour de Table</h2>
-              <button onClick={() => setOpen(false)} className="text-slate-500 hover:text-white transition-colors">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+              <h2 className="font-display text-slate-900 text-lg">Nouveau Tour de Table</h2>
+              <button onClick={() => setOpen(false)} className="text-slate-500 hover:text-slate-800 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -69,7 +69,7 @@ export default function CreateSessionModal({ participants, organizationId }: Pro
                 <div className="space-y-1.5">
                   <label className="text-slate-400 text-xs">Trimestre</label>
                   <select value={quarter} onChange={e => setQuarter(Number(e.target.value))}
-                    className="w-full bg-bg border border-white/[0.06] rounded-xl px-3 py-2 text-slate-300 text-sm focus:outline-none focus:border-violet-500/50">
+                    className="w-full bg-bg border border-slate-200 rounded-xl px-3 py-2 text-slate-600 text-sm focus:outline-none focus:border-violet-500/50">
                     <option value={1}>T1 (Jan–Mar)</option>
                     <option value={2}>T2 (Avr–Jun)</option>
                     <option value={3}>T3 (Jul–Sep)</option>
@@ -79,7 +79,7 @@ export default function CreateSessionModal({ participants, organizationId }: Pro
                 <div className="space-y-1.5">
                   <label className="text-slate-400 text-xs">Année</label>
                   <select value={year} onChange={e => setYear(Number(e.target.value))}
-                    className="w-full bg-bg border border-white/[0.06] rounded-xl px-3 py-2 text-slate-300 text-sm focus:outline-none focus:border-violet-500/50">
+                    className="w-full bg-bg border border-slate-200 rounded-xl px-3 py-2 text-slate-600 text-sm focus:outline-none focus:border-violet-500/50">
                     {[now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1].map(y => (
                       <option key={y} value={y}>{y}</option>
                     ))}
@@ -99,7 +99,7 @@ export default function CreateSessionModal({ participants, organizationId }: Pro
                 </div>
                 <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
                   {participants.map(p => (
-                    <label key={p.id} className="flex items-center gap-2.5 cursor-pointer hover:bg-white/[0.02] px-2 py-1.5 rounded-lg">
+                    <label key={p.id} className="flex items-center gap-2.5 cursor-pointer hover:bg-slate-50 px-2 py-1.5 rounded-lg">
                       <input type="checkbox" checked={selected.has(p.id)}
                         onChange={() => {
                           const next = new Set(selected);
@@ -112,7 +112,7 @@ export default function CreateSessionModal({ participants, organizationId }: Pro
                           {(p.first_name ?? '?').slice(0, 1)}{(p.last_name ?? '').slice(0, 1)}
                         </span>
                       </div>
-                      <span className="text-slate-300 text-xs">{p.first_name} {p.last_name}</span>
+                      <span className="text-slate-600 text-xs">{p.first_name} {p.last_name}</span>
                     </label>
                   ))}
                 </div>
@@ -122,7 +122,7 @@ export default function CreateSessionModal({ participants, organizationId }: Pro
 
               <div className="flex gap-3 pt-1">
                 <button onClick={() => setOpen(false)}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/[0.08] text-slate-400 hover:text-white text-sm transition-all">
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-slate-800 text-sm transition-all">
                   Annuler
                 </button>
                 <button onClick={submit} disabled={loading || selected.size < 2}

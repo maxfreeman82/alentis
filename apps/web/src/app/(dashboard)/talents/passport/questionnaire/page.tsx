@@ -1,9 +1,9 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { SectionHeader } from '@/components/shared';
 import { AssessmentQuestionnaire } from '@/components/passport/AssessmentQuestionnaire';
 
 export default async function QuestionnairePage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
 
   // En prod : orgId récupéré via profil Supabase lié à user.id
   const orgId     = 'mock-org-id';

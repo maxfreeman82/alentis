@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { getUserOrg } from '@/lib/supabase/auth';
 import { Star, Clock, Languages, Plus, CheckCircle } from 'lucide-react';
 import MentoringRegisterBtn from '@/components/community/MentoringRegisterBtn';
@@ -10,7 +10,7 @@ const EXPERTISE_COLORS: Record<string, string> = {
 };
 
 export default async function MentoringPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return null;
 
@@ -46,7 +46,7 @@ export default async function MentoringPage() {
       <div className="space-y-4">
         {/* Mon statut */}
         <div className="card space-y-3">
-          <h2 className="font-display text-white text-sm">Mon statut mentor</h2>
+          <h2 className="font-display text-slate-900 text-sm">Mon statut mentor</h2>
           {myProfile ? (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -66,14 +66,14 @@ export default async function MentoringPage() {
         {/* Mes sessions */}
         {mySessions.length > 0 && (
           <div className="card space-y-3">
-            <h2 className="font-display text-white text-sm">Mes sessions</h2>
+            <h2 className="font-display text-slate-900 text-sm">Mes sessions</h2>
             {mySessions.map(s => {
               const statusColor = s.status === 'confirmed' ? '#10B981' : s.status === 'pending' ? '#F59E0B' : '#64748B';
               return (
                 <div key={s.id} className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: statusColor }} />
                   <div>
-                    <p className="text-slate-300 text-xs">{s.topic}</p>
+                    <p className="text-slate-600 text-xs">{s.topic}</p>
                     <p className="text-slate-600 text-[10px] capitalize">{s.status}</p>
                   </div>
                 </div>
@@ -87,7 +87,7 @@ export default async function MentoringPage() {
       <div className="lg:col-span-2 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="font-display text-white text-xl">Mentors disponibles</h1>
+            <h1 className="font-display text-slate-900 text-xl">Mentors disponibles</h1>
             <p className="text-slate-400 text-xs mt-0.5">{mentors.length} expert{mentors.length > 1 ? 's' : ''} prêt{mentors.length > 1 ? 's' : ''} à vous accompagner</p>
           </div>
         </div>
@@ -105,13 +105,13 @@ export default async function MentoringPage() {
               const areas   = (m.expertise_areas ?? []) as string[];
 
               return (
-                <div key={m.id} className="card space-y-3 hover:border-white/10 transition-all">
+                <div key={m.id} className="card space-y-3 hover:border-slate-200 transition-all">
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0 text-violet-400 font-bold text-sm">
                       {ini}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-semibold truncate">{name}</p>
+                      <p className="text-slate-900 text-sm font-semibold truncate">{name}</p>
                       {profile?.role && <p className="text-slate-500 text-xs capitalize">{profile.role}</p>}
                       {m.rating && (
                         <div className="flex items-center gap-1 mt-0.5">
@@ -136,7 +136,7 @@ export default async function MentoringPage() {
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between pt-1 border-t border-white/[0.04]">
+                  <div className="flex items-center justify-between pt-1 border-t border-slate-200">
                     <div className="flex items-center gap-3 text-[10px] text-slate-600">
                       <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{m.available_hours}h/sem</span>
                       {((m.languages ?? []) as string[]).length > 0 && (

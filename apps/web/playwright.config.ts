@@ -28,20 +28,26 @@ export default defineConfig({
       testMatch: /smoke\.spec\.ts/,
       use: { ...devices['Desktop Chrome'] },
     },
-    // ── Setup : login WorkOS une fois ─────────────────────────────────────
+    // ── Setup : login Supabase org_admin une fois ──────────────────────────
     {
       name: 'setup',
       testMatch: /auth\.setup\.ts/,
     },
-    // ── Auth-required : toutes les autres specs ────────────────────────────
+    // ── Auth-required org : dashboard, recrutement, etc. ──────────────────
     {
       name: 'chromium',
-      testMatch: /(?<!smoke)\.spec\.ts/,
+      testMatch: /(?<!smoke|talent-onboarding)\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'e2e/.auth/user.json',
       },
       dependencies: ['setup'],
+    },
+    // ── Talent onboarding : spec indépendante (login inline) ──────────────
+    {
+      name: 'talent',
+      testMatch: /talent-onboarding\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'] },
     },
   ],
   webServer: {

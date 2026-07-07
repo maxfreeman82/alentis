@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -46,7 +46,7 @@ export default function PostComposer({ profileId, initials }: Props) {
           onFocus={() => setExpanded(true)}
           placeholder="Partagez une réflexion, une ressource, une question RH…"
           rows={expanded ? 4 : 2}
-          className="flex-1 bg-bg rounded-xl px-3 py-2.5 text-slate-300 text-sm resize-none border border-white/[0.04] focus:border-emerald-500/30 focus:outline-none placeholder-slate-600 transition-all"
+          className="flex-1 bg-bg rounded-xl px-3 py-2.5 text-slate-600 text-sm resize-none border border-slate-200 focus:border-emerald-500/30 focus:outline-none placeholder-slate-400 transition-all"
         />
       </div>
 
@@ -59,7 +59,7 @@ export default function PostComposer({ profileId, initials }: Props) {
                 className={`text-[11px] px-2 py-0.5 rounded-full transition-all ${
                   tags.includes(t)
                     ? 'bg-emerald-500/20 text-emerald-400'
-                    : 'bg-white/[0.04] text-slate-500 hover:text-slate-300'
+                    : 'bg-slate-50 text-slate-500 hover:text-slate-600'
                 }`}>
                 #{t}
               </button>
@@ -67,7 +67,7 @@ export default function PostComposer({ profileId, initials }: Props) {
           </div>
           <div className="flex justify-end pl-12">
             <button onClick={submit} disabled={!content.trim() || loading}
-              className="flex items-center gap-2 px-5 py-2 bg-emerald-500 text-white rounded-xl text-sm font-semibold hover:bg-emerald-600 disabled:opacity-40 transition-all">
+              className="flex items-center gap-2 px-5 py-2 bg-emerald-500 text-slate-900 rounded-xl text-sm font-semibold hover:bg-emerald-600 disabled:opacity-40 transition-all">
               <Send className="w-3.5 h-3.5" />
               {loading ? 'Publication…' : 'Publier'}
             </button>

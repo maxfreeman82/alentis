@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { ArrowRight, TrendingUp, Target, Users, Banknote, MapPin, BarChart3 } from 'lucide-react';
 import { createServerClient } from '@/lib/supabase/server';
@@ -14,11 +14,11 @@ const BP_SECTIONS = [
 ];
 
 export default async function BusinessPlanPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const supabase  = createServerClient();
 
   const { data: profile } = await supabase
-    .from('profiles').select('id').eq('workos_user_id', user.id).maybeSingle();
+    .from('profiles').select('id').eq('user_id', user.id).maybeSingle();
 
   const { data: founder } = profile
     ? await supabase.from('founders')
@@ -35,7 +35,7 @@ export default async function BusinessPlanPage() {
     <div className="space-y-8">
       <div>
         <p className="text-amber-400 text-xs font-semibold uppercase tracking-widest mb-2">ÉTAPE 3</p>
-        <h1 className="font-display text-white text-2xl">
+        <h1 className="font-display text-slate-900 text-2xl">
           {founder?.company_name ? `Business Plan · ${founder.company_name}` : 'Business Plan Fondateur'}
         </h1>
         <p className="text-slate-400 text-sm mt-1">

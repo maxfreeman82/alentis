@@ -1,5 +1,5 @@
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { NextResponse } from 'next/server';
-import { withAuth } from '@workos-inc/authkit-nextjs';
 import { z } from 'zod';
 import { getTalentProfile } from '@/lib/supabase/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -10,7 +10,7 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getTalentProfile(user.id);
   if (!ctx) return NextResponse.json({ error: 'Profil introuvable — complétez l\'onboarding d\'abord.' }, { status: 401 });
 

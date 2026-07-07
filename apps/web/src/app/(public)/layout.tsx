@@ -1,14 +1,14 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-bg text-slate-300">
-      <header className="border-b border-white/[0.04] px-6 py-4 flex items-center justify-between max-w-5xl mx-auto">
+    <div className="min-h-screen bg-bg text-slate-600">
+      <header className="border-b border-slate-200 px-6 py-4 flex items-center justify-between max-w-5xl mx-auto">
         <Link href="/" className="flex items-center gap-2">
-          <span className="font-display text-white font-bold text-lg">Teranga</span>
+          <span className="font-display text-slate-900 font-bold text-lg">Teranga</span>
           <span className="text-emerald font-bold text-lg">Align</span>
         </Link>
-        <Link href="/sign-in" className="text-sm text-slate-400 hover:text-white transition-colors">
+        <Link href="/sign-in" className="text-sm text-slate-400 hover:text-slate-800 transition-colors">
           Espace entreprise →
         </Link>
       </header>

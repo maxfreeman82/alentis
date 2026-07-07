@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getUserOrg } from '@/lib/supabase/auth';
@@ -13,7 +13,7 @@ const LeaveSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
   const ctx = await getUserOrg(user.id);
@@ -52,7 +52,7 @@ const ApproveSchema = z.object({
 });
 
 export async function PATCH(req: NextRequest) {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
   const ctx = await getUserOrg(user.id);

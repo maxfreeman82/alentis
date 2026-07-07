@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { LayoutGrid, Pin, Users, Link2, Plus } from 'lucide-react';
 import { SectionHeader } from '@/components/shared';
 import { getUserOrg } from '@/lib/supabase/auth';
@@ -21,7 +21,7 @@ const LINK_CATEGORY_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 export default async function WorkspacePage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return <div className="flex items-center justify-center h-64"><p className="text-slate-400">Profil en cours de configuration…</p></div>;
 
@@ -71,7 +71,7 @@ export default async function WorkspacePage() {
         {/* Annonces — colonne principale */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-white text-sm flex items-center gap-2">
+            <h2 className="font-display text-slate-900 text-sm flex items-center gap-2">
               <LayoutGrid className="w-4 h-4 text-sky-400" /> Annonces
             </h2>
             {isAdmin && <AnnouncementForm />}
@@ -93,9 +93,9 @@ export default async function WorkspacePage() {
                   {pinned.map(a => {
                     const pCfg = PRIORITY_CFG[a.priority as keyof typeof PRIORITY_CFG] ?? PRIORITY_CFG.normal;
                     return (
-                      <div key={a.id} className="card border border-white/10">
+                      <div key={a.id} className="card border border-slate-200">
                         <div className="flex items-start justify-between gap-2 mb-2">
-                          <h3 className="text-white font-medium text-sm">{a.title}</h3>
+                          <h3 className="text-slate-900 font-medium text-sm">{a.title}</h3>
                           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${pCfg.bg}`} style={{ color: pCfg.color }}>
                             {pCfg.label}
                           </span>
@@ -113,7 +113,7 @@ export default async function WorkspacePage() {
                   return (
                     <div key={a.id} className="card">
                       <div className="flex items-start justify-between gap-2 mb-1">
-                        <h3 className="text-white font-medium text-sm">{a.title}</h3>
+                        <h3 className="text-slate-900 font-medium text-sm">{a.title}</h3>
                         <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${pCfg.bg}`} style={{ color: pCfg.color }}>
                           {pCfg.label}
                         </span>
@@ -133,7 +133,7 @@ export default async function WorkspacePage() {
           {/* Liens utiles */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="font-display text-white text-sm flex items-center gap-2">
+              <h2 className="font-display text-slate-900 text-sm flex items-center gap-2">
                 <Link2 className="w-4 h-4 text-violet-400" /> Liens utiles
               </h2>
               {isAdmin && <LinkForm />}
@@ -150,7 +150,7 @@ export default async function WorkspacePage() {
                     <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: cfg.color }}>{cfg.label}</p>
                     {catLinks.map(l => (
                       <a key={l.id} href={l.url} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-white/[0.04] hover:border-white/10 transition-colors text-sm text-sky-400 hover:text-sky-300">
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-slate-200 hover:border-slate-200 transition-colors text-sm text-sky-400 hover:text-sky-300">
                         <Link2 className="w-3.5 h-3.5 flex-shrink-0" />
                         <span className="truncate">{l.title}</span>
                       </a>
@@ -163,7 +163,7 @@ export default async function WorkspacePage() {
 
           {/* Annuaire équipe */}
           <div className="space-y-2">
-            <h2 className="font-display text-white text-sm flex items-center gap-2">
+            <h2 className="font-display text-slate-900 text-sm flex items-center gap-2">
               <Users className="w-4 h-4 text-emerald-400" /> Équipe ({team.length})
             </h2>
             <div className="card space-y-2 max-h-72 overflow-y-auto">
@@ -176,7 +176,7 @@ export default async function WorkspacePage() {
                       {initials}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-white text-xs font-medium truncate">{name}</p>
+                      <p className="text-slate-900 text-xs font-medium truncate">{name}</p>
                       <p className="text-slate-600 text-[10px]">{p.role?.replace('org_', '')}</p>
                     </div>
                   </div>

@@ -1,0 +1,12 @@
+.git
+.github
+node_modules
+apps/web/node_modules
+apps/web/.next
+apps/web/e2e
+apps/web/playwright-report
+packages/*/node_modules
+**/.DS_Store
+*.log
+.env*
+!.env.production.example

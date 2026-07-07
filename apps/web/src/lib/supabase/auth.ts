@@ -1,6 +1,3 @@
-// Résolution WorkOS user → profil Supabase → organisation
-// Utilise le client admin (service_role, bypass RLS) pour la lookup initiale.
-
 import { createAdminClient } from './admin';
 import { createServerClient, setOrgContext } from './server';
 
@@ -20,23 +17,23 @@ export interface UserContext {
 }
 
 export interface TalentContext {
-  profileId:          string;
-  role:               string;
-  firstName:          string | null;
-  lastName:           string | null;
-  email:              string;
-  onboardingDone:     boolean;
-  supabase:           ReturnType<typeof createServerClient>;
+  profileId:      string;
+  role:           string;
+  firstName:      string | null;
+  lastName:       string | null;
+  email:          string;
+  onboardingDone: boolean;
+  supabase:       ReturnType<typeof createServerClient>;
 }
 
-// Lookup profil talent sans exiger d'organisation — pour talent_free et l'espace talent
-export async function getTalentProfile(workosUserId: string): Promise<TalentContext | null> {
+// Lookup profil talent par user_id Supabase Auth (sans organisation requise)
+export async function getTalentProfile(userId: string): Promise<TalentContext | null> {
   const admin = createAdminClient();
 
   const { data: profile, error } = await admin
     .from('profiles')
     .select('id, role, first_name, last_name, email, onboarding_completed, organization_id')
-    .eq('workos_user_id', workosUserId)
+    .eq('user_id', userId)
     .maybeSingle();
 
   if (error || !profile) return null;
@@ -57,14 +54,14 @@ export async function getTalentProfile(workosUserId: string): Promise<TalentCont
   };
 }
 
-export async function getUserOrg(workosUserId: string): Promise<UserContext | null> {
+// Lookup profil + organisation par user_id Supabase Auth
+export async function getUserOrg(userId: string): Promise<UserContext | null> {
   const admin = createAdminClient();
 
-  // Lookup profil sans RLS
   const { data: profile, error: profileErr } = await admin
     .from('profiles')
     .select('id, organization_id, role, first_name, last_name, email')
-    .eq('workos_user_id', workosUserId)
+    .eq('user_id', userId)
     .maybeSingle();
 
   if (profileErr || !profile || !profile.organization_id) return null;
@@ -77,7 +74,6 @@ export async function getUserOrg(workosUserId: string): Promise<UserContext | nu
 
   if (orgErr || !org) return null;
 
-  // Client RLS configuré pour cette org
   const supabase = createServerClient();
   await setOrgContext(supabase, profile.organization_id);
 

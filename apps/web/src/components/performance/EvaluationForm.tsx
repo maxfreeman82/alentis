@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -121,7 +121,7 @@ export function EvaluationForm({
         <p className="section-tag mb-0.5" style={{ color: currentSection.meta?.color }}>
           ÉVALUATION 360° · {evaluatorRole === 'self' ? 'AUTO-ÉVALUATION' : evaluatorRole === 'manager' ? 'MANAGER' : 'PAIR'}
         </p>
-        <h2 className="text-white font-semibold text-lg">{currentSection.meta?.label}</h2>
+        <h2 className="text-slate-900 font-semibold text-lg">{currentSection.meta?.label}</h2>
         <p className="text-slate-400 text-sm mt-0.5">
           {evaluatorRole === 'self' ? 'Votre auto-évaluation' : `Évaluation de ${targetName}`} · Q{quarter} {year}
         </p>
@@ -133,7 +133,7 @@ export function EvaluationForm({
           const selected = scores[q.id];
           return (
             <div key={q.id} className="card space-y-3">
-              <p className="text-slate-300 text-sm leading-relaxed">
+              <p className="text-slate-600 text-sm leading-relaxed">
                 <span className="text-slate-500 font-mono text-xs mr-2">{idx + 1}.</span>
                 {q.text}
               </p>
@@ -147,8 +147,8 @@ export function EvaluationForm({
                     title={SCORE_LABELS[val]}
                     className={cn(
                       'flex-1 py-2.5 rounded-lg text-sm font-bold transition-all duration-150',
-                      'border border-white/[0.06] hover:border-white/[0.15]',
-                      selected === val ? 'text-white border-transparent' : 'text-slate-500 bg-bg-surface'
+                      'border border-slate-200 hover:border-slate-200',
+                      selected === val ? 'text-slate-900 border-transparent' : 'text-slate-500 bg-bg-surface'
                     )}
                     style={selected === val
                       ? { backgroundColor: currentSection.meta?.color, borderColor: currentSection.meta?.color }
@@ -169,7 +169,7 @@ export function EvaluationForm({
                 value={comments[q.id] ?? ''}
                 onChange={(e) => handleComment(q.id, e.target.value)}
                 rows={2}
-                className="w-full bg-bg-surface border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-slate-300 placeholder-slate-600 resize-none focus:outline-none focus:border-white/[0.15]"
+                className="w-full bg-bg-surface border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-600 placeholder-slate-400 resize-none focus:outline-none focus:border-slate-200"
               />
             </div>
           );

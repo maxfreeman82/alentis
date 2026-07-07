@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -38,7 +38,7 @@ export default function MentoringRegisterBtn({ profileId }: { profileId: string 
   );
 
   return (
-    <div className="space-y-3 border border-white/[0.06] rounded-xl p-3">
+    <div className="space-y-3 border border-slate-200 rounded-xl p-3">
       <div className="flex gap-2">
         {(['mentor', 'mentee', 'both'] as const).map(t => (
           <button key={t} onClick={() => setType(t)}
@@ -48,17 +48,17 @@ export default function MentoringRegisterBtn({ profileId }: { profileId: string 
         ))}
       </div>
       <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="Bio courte (expertise, secteur…)" rows={2}
-        className="w-full bg-bg rounded-lg px-2.5 py-2 text-slate-300 text-xs resize-none border border-white/[0.04] focus:outline-none focus:border-violet-500/30" />
+        className="w-full bg-bg rounded-lg px-2.5 py-2 text-slate-600 text-xs resize-none border border-slate-200 focus:outline-none focus:border-violet-500/30" />
       <div className="flex flex-wrap gap-1">
         {EXPERTISE_OPTIONS.map(a => (
           <button key={a} onClick={() => setAreas(prev => prev.includes(a) ? prev.filter(x => x !== a) : [...prev, a])}
-            className={`text-[10px] px-2 py-0.5 rounded-full transition-all ${areas.includes(a) ? 'bg-violet-500/20 text-violet-400' : 'bg-white/[0.04] text-slate-500 hover:text-slate-300'}`}>
+            className={`text-[10px] px-2 py-0.5 rounded-full transition-all ${areas.includes(a) ? 'bg-violet-500/20 text-violet-400' : 'bg-slate-50 text-slate-500 hover:text-slate-300'}`}>
             {a}
           </button>
         ))}
       </div>
       <div className="flex items-center justify-between">
-        <label className="text-slate-500 text-xs">Dispo : <strong className="text-white">{hours}h</strong>/sem</label>
+        <label className="text-slate-500 text-xs">Dispo : <strong className="text-slate-900">{hours}h</strong>/sem</label>
         <input type="range" min={1} max={10} value={hours} onChange={e => setHours(+e.target.value)} className="w-24 accent-violet-500" />
       </div>
       <button onClick={submit} disabled={loading || areas.length === 0}

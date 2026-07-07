@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { getUserOrg } from '@/lib/supabase/auth';
 import { Briefcase, MapPin, Building2, Clock, Star } from 'lucide-react';
 import Link from 'next/link';
@@ -13,7 +13,7 @@ const FAMILY_LABELS: Record<string, string> = {
 };
 
 export default async function CommunityJobsPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return null;
 
@@ -54,7 +54,7 @@ export default async function CommunityJobsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-white text-xl">Offres d&apos;emploi</h1>
+          <h1 className="font-display text-slate-900 text-xl">Offres d&apos;emploi</h1>
           <p className="text-slate-400 text-xs mt-0.5">{jobs.length} offre{jobs.length > 1 ? 's' : ''} · marché africain</p>
         </div>
         {passport && (
@@ -86,7 +86,7 @@ export default async function CommunityJobsPage() {
               <div key={family} className="space-y-3">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
-                  <span className="font-display text-white text-sm" style={{ color }}>{label}</span>
+                  <span className="font-display text-slate-900 text-sm" style={{ color }}>{label}</span>
                   <span className="text-slate-600 text-xs">({familyJobs.length})</span>
                 </div>
                 <div className="space-y-2">
@@ -95,7 +95,7 @@ export default async function CommunityJobsPage() {
                     const compatColor = !compat ? '#64748B' : compat >= 70 ? '#10B981' : compat >= 50 ? '#F59E0B' : '#F43F5E';
 
                     return (
-                      <div key={job.id} className="card hover:border-white/10 transition-all">
+                      <div key={job.id} className="card hover:border-slate-200 transition-all">
                         <div className="flex items-start gap-4">
                           {compat !== null && (
                             <div className="flex-shrink-0 text-center w-12">
@@ -105,7 +105,7 @@ export default async function CommunityJobsPage() {
                           )}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start gap-2 flex-wrap">
-                              <h3 className="text-white text-sm font-semibold">{job.title}</h3>
+                              <h3 className="text-slate-900 text-sm font-semibold">{job.title}</h3>
                               {job.is_premium && <span className="text-amber-400 text-[10px] font-semibold">★ Premium</span>}
                             </div>
                             <div className="flex items-center gap-3 mt-1 flex-wrap">

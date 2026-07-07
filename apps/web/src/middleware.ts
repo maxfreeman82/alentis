@@ -1,11 +1,27 @@
-import { authkitMiddleware } from '@workos-inc/authkit-nextjs';
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
 
-// NEXT_PUBLIC_APP_URL est embedded au build → disponible dans l'Edge runtime
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://ecranalentis.vercel.app';
+export async function middleware(request: NextRequest) {
+  let response = NextResponse.next({ request });
 
-export default authkitMiddleware({
-  redirectUri: `${appUrl}/callback`,
-});
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll()     { return request.cookies.getAll(); },
+        setAll(list) {
+          list.forEach(({ name, value }) => request.cookies.set(name, value));
+          response = NextResponse.next({ request });
+          list.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+        },
+      },
+    }
+  );
+
+  await supabase.auth.getUser();
+  return response;
+}
 
 export const config = {
   matcher: ['/((?!_next/static|_next/image|favicon|api/webhooks|api/public|candidats).*)'],

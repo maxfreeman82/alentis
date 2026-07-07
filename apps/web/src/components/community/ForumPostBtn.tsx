@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -40,17 +40,17 @@ export default function ForumPostBtn({ categories, profileId }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => setOpen(false)}>
-      <div className="bg-bg-card rounded-2xl border border-white/[0.08] w-full max-w-lg space-y-4 p-6"
+      <div className="bg-bg-card rounded-2xl border border-slate-200 w-full max-w-lg space-y-4 p-6"
         onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between">
-          <h3 className="font-display text-white">Nouvelle discussion</h3>
+          <h3 className="font-display text-slate-900">Nouvelle discussion</h3>
           <button onClick={() => setOpen(false)}><X className="w-4 h-4 text-slate-500" /></button>
         </div>
 
         <div className="space-y-1">
           <label className="text-slate-400 text-xs">Catégorie</label>
           <select value={form.category_id} onChange={e => set('category_id', e.target.value)}
-            className="w-full bg-bg rounded-lg px-3 py-2 text-slate-300 text-xs border border-white/[0.04] focus:outline-none">
+            className="w-full bg-bg rounded-lg px-3 py-2 text-slate-600 text-xs border border-slate-200 focus:outline-none">
             {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </div>
@@ -59,21 +59,21 @@ export default function ForumPostBtn({ categories, profileId }: Props) {
           <label className="text-slate-400 text-xs">Titre *</label>
           <input type="text" value={form.title} onChange={e => set('title', e.target.value)}
             placeholder="Votre question ou sujet…"
-            className="w-full bg-bg rounded-lg px-3 py-2 text-slate-300 text-xs border border-white/[0.04] focus:outline-none" />
+            className="w-full bg-bg rounded-lg px-3 py-2 text-slate-600 text-xs border border-slate-200 focus:outline-none" />
         </div>
 
         <div className="space-y-1">
           <label className="text-slate-400 text-xs">Contenu *</label>
           <textarea value={form.content} onChange={e => set('content', e.target.value)}
             placeholder="Décrivez votre situation, votre question…" rows={5}
-            className="w-full bg-bg rounded-lg px-3 py-2 text-slate-300 text-xs border border-white/[0.04] focus:outline-none resize-none" />
+            className="w-full bg-bg rounded-lg px-3 py-2 text-slate-600 text-xs border border-slate-200 focus:outline-none resize-none" />
         </div>
 
         <div className="space-y-1">
           <label className="text-slate-400 text-xs">Tags (virgule)</label>
           <input type="text" value={form.tags} onChange={e => set('tags', e.target.value)}
             placeholder="recrutement, SIRH, Sénégal…"
-            className="w-full bg-bg rounded-lg px-3 py-2 text-slate-300 text-xs border border-white/[0.04] focus:outline-none" />
+            className="w-full bg-bg rounded-lg px-3 py-2 text-slate-600 text-xs border border-slate-200 focus:outline-none" />
         </div>
 
         <button onClick={submit} disabled={!form.title.trim() || !form.content.trim() || loading}

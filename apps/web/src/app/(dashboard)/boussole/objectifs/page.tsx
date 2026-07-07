@@ -1,11 +1,11 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { SectionHeader, EmptyState } from '@/components/shared';
 import { OKRBoard } from '@/components/boussole/OKRBoard';
 import { Target } from 'lucide-react';
 import { getUserOrg } from '@/lib/supabase/auth';
 
 export default async function ObjectifsPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
 
   if (!ctx) {

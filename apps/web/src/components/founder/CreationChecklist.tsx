@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { CheckCircle, Circle } from 'lucide-react';
@@ -36,14 +36,14 @@ export default function CreationChecklist({ steps }: { steps: Step[] }) {
           return (
             <button key={s.id} onClick={() => toggle(s.id)}
               className={`w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all ${
-                done ? 'bg-emerald-500/5 border border-emerald-500/20' : 'bg-white/[0.02] border border-white/[0.04] hover:border-white/10'
+                done ? 'bg-emerald-500/5 border border-emerald-500/20' : 'bg-slate-50 border border-slate-200 hover:border-slate-200'
               }`}>
               {done
                 ? <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
                 : <Circle className="w-5 h-5 text-slate-600 flex-shrink-0 mt-0.5" />
               }
               <div>
-                <p className={`text-sm font-medium ${done ? 'text-emerald-400 line-through' : 'text-white'}`}>{s.label}</p>
+                <p className={`text-sm font-medium ${done ? 'text-emerald-400 line-through' : 'text-slate-900'}`}>{s.label}</p>
                 <p className="text-slate-500 text-xs mt-0.5">{s.desc}</p>
               </div>
             </button>

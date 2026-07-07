@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { SectionHeader, AIInsightCard, AlertCard } from '@/components/shared';
 import { DIMENSIONS, type EvalDimension } from '@/lib/performance/evaluation';
@@ -7,7 +7,7 @@ import { getUserOrg } from '@/lib/supabase/auth';
 const dimKeys: EvalDimension[] = ['results', 'collaboration', 'growth', 'alignment', 'energy'];
 
 export default async function PerformancePage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
 
   if (!ctx) {
@@ -110,12 +110,12 @@ export default async function PerformancePage() {
 
       {/* Table évaluations */}
       <div className="card !p-0 overflow-hidden">
-        <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
-          <p className="text-white font-semibold text-sm">Scores de corrélation — Q{quarter} {year}</p>
+        <div className="px-5 py-3 border-b border-slate-200 flex items-center justify-between">
+          <p className="text-slate-900 font-semibold text-sm">Scores de corrélation — Q{quarter} {year}</p>
           <p className="text-slate-500 text-xs">{evals.length} évaluation{evals.length > 1 ? 's' : ''}</p>
         </div>
 
-        <div className="hidden md:grid grid-cols-[1fr_auto_auto_auto_auto_auto_auto_auto] gap-4 px-5 py-2 border-b border-white/[0.04] text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+        <div className="hidden md:grid grid-cols-[1fr_auto_auto_auto_auto_auto_auto_auto] gap-4 px-5 py-2 border-b border-slate-200 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
           <span>Collaborateur</span>
           {dimKeys.map(d => (
             <span key={d} className="text-center" style={{ color: DIMENSIONS[d].color }}>
@@ -131,7 +131,7 @@ export default async function PerformancePage() {
             <p className="text-slate-500">Aucune évaluation pour Q{quarter} {year} — lancez la première évaluation.</p>
           </div>
         ) : (
-          <div className="divide-y divide-white/[0.04]">
+          <div className="divide-y divide-slate-200">
             {evals.map(e => {
               const corrColor = e.correlation >= 80 ? '#10B981' : e.correlation >= 65 ? '#F59E0B' : '#F43F5E';
               const riskColor = e.risk > 40 ? '#F43F5E' : e.risk > 25 ? '#F59E0B' : '#10B981';
@@ -140,10 +140,10 @@ export default async function PerformancePage() {
                 <Link
                   key={e.id}
                   href={`/performance/evaluation/${e.profileId}`}
-                  className="flex flex-col md:grid md:grid-cols-[1fr_auto_auto_auto_auto_auto_auto_auto] gap-4 items-center px-5 py-3 hover:bg-white/[0.02] transition-colors"
+                  className="flex flex-col md:grid md:grid-cols-[1fr_auto_auto_auto_auto_auto_auto_auto] gap-4 items-center px-5 py-3 hover:bg-slate-50 transition-colors"
                 >
                   <div className="w-full md:w-auto">
-                    <p className="text-white text-sm font-medium">{e.name}</p>
+                    <p className="text-slate-900 text-sm font-medium">{e.name}</p>
                     <p className="text-slate-500 text-xs">{e.role}</p>
                   </div>
 

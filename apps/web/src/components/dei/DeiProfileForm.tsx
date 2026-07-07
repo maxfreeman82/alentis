@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -48,7 +48,7 @@ export default function DeiProfileForm() {
         <div className="grid grid-cols-2 gap-2">
           {GENDERS.map(g => (
             <button key={g.value} type="button"
-              className={`px-3 py-2 rounded-lg text-sm text-left transition-all border ${form.gender === g.value ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' : 'border-white/5 text-slate-400 hover:border-white/10'}`}
+              className={`px-3 py-2 rounded-lg text-sm text-left transition-all border ${form.gender === g.value ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' : 'border-slate-200 text-slate-400 hover:border-slate-200'}`}
               onClick={() => setForm(f => ({ ...f, gender: g.value }))}>
               {g.label}
             </button>
@@ -61,7 +61,7 @@ export default function DeiProfileForm() {
         <div className="flex flex-wrap gap-2">
           {AGES.map(a => (
             <button key={a.value} type="button"
-              className={`px-3 py-2 rounded-lg text-sm transition-all border ${form.age_range === a.value ? 'border-sky-500 bg-sky-500/10 text-sky-400' : 'border-white/5 text-slate-400 hover:border-white/10'}`}
+              className={`px-3 py-2 rounded-lg text-sm transition-all border ${form.age_range === a.value ? 'border-sky-500 bg-sky-500/10 text-sky-400' : 'border-slate-200 text-slate-400 hover:border-slate-200'}`}
               onClick={() => setForm(f => ({ ...f, age_range: a.value }))}>
               {a.label}
             </button>
@@ -88,7 +88,7 @@ export default function DeiProfileForm() {
         <div className="flex flex-wrap gap-2">
           {BANDS.map(b => (
             <button key={b.value} type="button"
-              className={`px-3 py-2 rounded-lg text-sm transition-all border ${form.salary_band === b.value ? 'border-violet-500 bg-violet-500/10 text-violet-400' : 'border-white/5 text-slate-400 hover:border-white/10'}`}
+              className={`px-3 py-2 rounded-lg text-sm transition-all border ${form.salary_band === b.value ? 'border-violet-500 bg-violet-500/10 text-violet-400' : 'border-slate-200 text-slate-400 hover:border-slate-200'}`}
               onClick={() => setForm(f => ({ ...f, salary_band: b.value }))}>
               {b.label}
             </button>
@@ -97,13 +97,13 @@ export default function DeiProfileForm() {
       </div>
 
       <div className="flex gap-6">
-        <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-300">
-          <input type="checkbox" className="w-4 h-4 rounded border-white/10 bg-card accent-emerald-500"
+        <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-600">
+          <input type="checkbox" className="w-4 h-4 rounded border-slate-200 bg-card accent-emerald-500"
             checked={form.is_manager} onChange={e => setForm(f => ({ ...f, is_manager: e.target.checked }))} />
           Je suis manager
         </label>
-        <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-300">
-          <input type="checkbox" className="w-4 h-4 rounded border-white/10 bg-card accent-emerald-500"
+        <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-600">
+          <input type="checkbox" className="w-4 h-4 rounded border-slate-200 bg-card accent-emerald-500"
             checked={form.disability} onChange={e => setForm(f => ({ ...f, disability: e.target.checked }))} />
           Situation de handicap
         </label>

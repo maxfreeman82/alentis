@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+﻿import { cn } from '@/lib/utils';
 
 interface EmptyStateProps {
   icon?: React.ReactNode;
@@ -16,7 +16,7 @@ export function EmptyState({ icon, title, description, action, className }: Empt
           {icon}
         </div>
       )}
-      <h3 className="text-white font-medium mb-1">{title}</h3>
+      <h3 className="text-slate-900 font-medium mb-1">{title}</h3>
       {description && (
         <p className="text-slate-400 text-sm max-w-sm">{description}</p>
       )}

@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { classifyVision } from '@/lib/ai';
 import { createServerClient, setOrgContext } from '@/lib/supabase/server';
 import { scoreResponsesByArchetype } from '@/lib/boussole/questions';
@@ -12,7 +12,7 @@ const BodySchema = z.object({
 });
 
 export async function POST(req: Request) {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   if (!user) return Response.json({ error: 'Non autorisé' }, { status: 401 });
 
   const parsed = BodySchema.safeParse(await req.json());

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -43,10 +43,10 @@ export default function EventCreateBtn({ profileId }: { profileId: string }) {
 
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => setOpen(false)}>
-      <div className="bg-bg-card rounded-2xl border border-white/[0.08] w-full max-w-md space-y-4 p-6"
+      <div className="bg-bg-card rounded-2xl border border-slate-200 w-full max-w-md space-y-4 p-6"
         onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between">
-          <h3 className="font-display text-white">Nouvel événement</h3>
+          <h3 className="font-display text-slate-900">Nouvel événement</h3>
           <button onClick={() => setOpen(false)}><X className="w-4 h-4 text-slate-500" /></button>
         </div>
 
@@ -63,11 +63,11 @@ export default function EventCreateBtn({ profileId }: { profileId: string }) {
             {f.type === 'textarea' ? (
               <textarea value={String((form as Record<string, unknown>)[f.k] ?? '')} onChange={e => set(f.k, e.target.value)}
                 placeholder={f.ph} rows={2}
-                className="w-full bg-bg rounded-lg px-3 py-2 text-slate-300 text-xs border border-white/[0.04] focus:outline-none resize-none" />
+                className="w-full bg-bg rounded-lg px-3 py-2 text-slate-600 text-xs border border-slate-200 focus:outline-none resize-none" />
             ) : (
               <input type={f.type} value={String((form as Record<string, unknown>)[f.k] ?? '')} onChange={e => set(f.k, e.target.value)}
                 placeholder={f.ph}
-                className="w-full bg-bg rounded-lg px-3 py-2 text-slate-300 text-xs border border-white/[0.04] focus:outline-none" />
+                className="w-full bg-bg rounded-lg px-3 py-2 text-slate-600 text-xs border border-slate-200 focus:outline-none" />
             )}
           </div>
         ))}

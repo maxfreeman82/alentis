@@ -9,22 +9,33 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Backgrounds
+        // ── Backgrounds (light theme) ──────────────────────────────────────
         bg: {
-          DEFAULT: '#060B18',
-          card:    '#0C1324',
-          surface: '#111D35',
-          raised:  '#162040',
+          DEFAULT: '#F0F4FC',
+          card:    '#FFFFFF',
+          surface: '#F8FAFF',
+          raised:  '#EEF2FF',
         },
-        // Brand
+        // ── Primary brand — Violet (toute l'échelle redéfinie)
+        // text-emerald, bg-emerald, text-emerald-400… → violet automatiquement
         emerald: {
-          DEFAULT: '#10B981',
-          dark:    '#059669',
+          DEFAULT: '#6336F1',
+          dark:    '#5B21B6',
+          50:  '#F5F3FF',
+          100: '#EDE9FE',
+          200: '#DDD6FE',
+          300: '#C4B5FD',
+          400: '#A78BFA',
+          500: '#8B5CF6',
+          600: '#7C3AED',
+          700: '#6D28D9',
+          800: '#5B21B6',
+          900: '#4C1D95',
         },
         amber: {
           DEFAULT: '#F59E0B',
         },
-        // Accents sémantiques
+        // ── Accents sémantiques ───────────────────────────────────────────
         violet:  '#8B5CF6',
         sky:     '#0EA5E9',
         rose:    '#F43F5E',
@@ -40,10 +51,13 @@ const config: Config = {
       borderRadius: {
         xl: '12px',
       },
+      boxShadow: {
+        card: '0 1px 3px rgba(99,54,241,0.04), 0 1px 2px rgba(0,0,0,0.04)',
+        'card-hover': '0 4px 16px rgba(99,54,241,0.10), 0 1px 4px rgba(0,0,0,0.06)',
+      },
       animation: {
-        'fade-in':    'fadeIn 0.3s ease-out',
-        'slide-up':   'slideUp 0.3s ease-out',
-        'stagger':    'stagger 0.1s ease-out',
+        'fade-in':  'fadeIn 0.3s ease-out',
+        'slide-up': 'slideUp 0.3s ease-out',
       },
       keyframes: {
         fadeIn: {

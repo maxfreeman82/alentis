@@ -1,10 +1,10 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { getUserOrg } from '@/lib/supabase/auth';
 import { Rss, Users, CalendarDays, ShoppingBag, MessageSquare, Briefcase, ArrowRight } from 'lucide-react';
 
 export default async function CommunityHomePage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return null;
 
@@ -32,7 +32,7 @@ export default async function CommunityHomePage() {
     <div className="space-y-8">
       {/* Hero */}
       <div className="text-center space-y-3 py-6">
-        <h1 className="font-display text-white text-3xl">Communauté Teranga Align</h1>
+        <h1 className="font-display text-slate-900 text-3xl">Communauté Teranga Align</h1>
         <p className="text-slate-400 text-sm max-w-lg mx-auto leading-relaxed">
           Réseau panafricain des professionnels RH. Partagez, apprenez, collaborez et trouvez des opportunités.
         </p>
@@ -44,13 +44,13 @@ export default async function CommunityHomePage() {
           const Icon = s.icon;
           return (
             <Link key={s.href} href={s.href}
-              className="card hover:border-white/10 transition-all group flex items-start gap-4">
+              className="card hover:border-slate-200 transition-all group flex items-start gap-4">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{ backgroundColor: `${s.color}15` }}>
                 <Icon className="w-5 h-5" style={{ color: s.color }} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-white text-sm font-semibold">{s.label}</p>
+                <p className="text-slate-900 text-sm font-semibold">{s.label}</p>
                 <p className="font-mono text-xl font-bold mt-0.5" style={{ color: s.color }}>
                   {s.count}
                 </p>

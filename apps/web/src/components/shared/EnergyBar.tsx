@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+﻿import { cn } from '@/lib/utils';
 import type { EnergyFamily } from '@teranga/scoring';
 
 const ENERGY_COLORS: Record<EnergyFamily, string> = {
@@ -22,7 +22,7 @@ export function EnergyBar({ family, value, required, className }: EnergyBarProps
 
   return (
     <div className={cn('flex items-center gap-3', className)}>
-      <span className="text-slate-300 text-sm w-28 flex-shrink-0">{family}</span>
+      <span className="text-slate-600 text-sm w-28 flex-shrink-0">{family}</span>
       <div className="flex-1 relative h-2 bg-bg rounded-full overflow-hidden">
         <div
           className="absolute left-0 top-0 h-full rounded-full transition-all duration-500"

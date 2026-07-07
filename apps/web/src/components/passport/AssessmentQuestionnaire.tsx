@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -132,7 +132,7 @@ export function AssessmentQuestionnaire({ organizationId, profileId }: Props) {
         <p className="section-tag mb-0.5" style={{ color: currentSection?.color ?? '#10B981' }}>
           {currentSection?.id === 'soft' ? 'COMPÉTENCES COMPORTEMENTALES' : 'PROFIL ÉNERGÉTIQUE'}
         </p>
-        <h2 className="text-white font-semibold text-lg">{currentSection?.label}</h2>
+        <h2 className="text-slate-900 font-semibold text-lg">{currentSection?.label}</h2>
         {currentSection && currentSection.id !== 'soft' && ENERGY_FAMILIES[currentSection.id as EnergyFamilyId] && (
           <p className="text-slate-400 text-sm mt-0.5">
             {ENERGY_FAMILIES[currentSection.id as EnergyFamilyId].description}
@@ -148,7 +148,7 @@ export function AssessmentQuestionnaire({ organizationId, profileId }: Props) {
 
           return (
             <div key={q.id} className="card">
-              <p className="text-slate-300 text-sm mb-3 leading-relaxed">
+              <p className="text-slate-600 text-sm mb-3 leading-relaxed">
                 <span className="text-slate-500 font-mono text-xs mr-2">{idx + 1}.</span>
                 {q.text}
               </p>
@@ -160,10 +160,10 @@ export function AssessmentQuestionnaire({ organizationId, profileId }: Props) {
                     onClick={() => handleSelect(q.id, opt.value)}
                     className={cn(
                       'flex-1 min-w-[80px] py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 text-center',
-                      'border border-white/[0.06] hover:border-white/[0.12]',
+                      'border border-slate-200 hover:border-slate-200',
                       selected === opt.value
-                        ? 'text-white border-transparent'
-                        : 'text-slate-400 bg-bg-surface hover:text-white'
+                        ? 'text-slate-900 border-transparent'
+                        : 'text-slate-400 bg-bg-surface hover:text-slate-800'
                     )}
                     style={
                       selected === opt.value

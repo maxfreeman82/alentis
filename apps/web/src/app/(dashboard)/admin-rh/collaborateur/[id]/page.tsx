@@ -1,8 +1,8 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, Calendar, FileText, BookOpen, TrendingUp } from 'lucide-react';
-import { SectionHeader, ScoreCircle } from '@/components/shared';
+import { SectionHeader, ScoreCircle, DocumentGallery } from '@/components/shared';
 import { getUserOrg } from '@/lib/supabase/auth';
 
 const ROLE_LABELS: Record<string, string> = {
@@ -19,7 +19,7 @@ interface PageProps { params: Promise<{ id: string }> }
 
 export default async function CollaborateurDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return notFound();
 
@@ -86,7 +86,7 @@ export default async function CollaborateurDetailPage({ params }: PageProps) {
         <div className="card space-y-3">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-violet-400" />
-            <h3 className="font-display text-white text-sm">Performance</h3>
+            <h3 className="font-display text-slate-900 text-sm">Performance</h3>
           </div>
           {evals.length === 0 ? (
             <p className="text-slate-500 text-xs">Aucune évaluation enregistrée.</p>
@@ -103,7 +103,7 @@ export default async function CollaborateurDetailPage({ params }: PageProps) {
               })}
             </div>
           )}
-          <Link href={`/performance/results/${id}`} className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
+          <Link href={`/performance/results/${id}`} className="text-xs text-slate-500 hover:text-slate-600 transition-colors">
             Voir détail →
           </Link>
         </div>
@@ -112,7 +112,7 @@ export default async function CollaborateurDetailPage({ params }: PageProps) {
         <div className="card space-y-3">
           <div className="flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-sky-400" />
-            <h3 className="font-display text-white text-sm">Formations ({enrollments.length})</h3>
+            <h3 className="font-display text-slate-900 text-sm">Formations ({enrollments.length})</h3>
           </div>
           {enrollments.length === 0 ? (
             <p className="text-slate-500 text-xs">Aucune inscription enregistrée.</p>
@@ -122,7 +122,7 @@ export default async function CollaborateurDetailPage({ params }: PageProps) {
                 const training = Array.isArray(e.trainings) ? e.trainings[0] : e.trainings;
                 return (
                   <div key={i} className="flex items-center justify-between py-2">
-                    <p className="text-white text-xs truncate pr-2">{training?.title ?? '—'}</p>
+                    <p className="text-slate-900 text-xs truncate pr-2">{training?.title ?? '—'}</p>
                     <span className={`text-[10px] font-semibold ${e.status === 'completed' ? 'text-emerald-400' : e.status === 'in_progress' ? 'text-amber-400' : 'text-slate-400'}`}>
                       {e.progress}%
                     </span>
@@ -138,7 +138,7 @@ export default async function CollaborateurDetailPage({ params }: PageProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-amber-400" />
-              <h3 className="font-display text-white text-sm">Congés</h3>
+              <h3 className="font-display text-slate-900 text-sm">Congés</h3>
             </div>
             <span className="text-xs text-slate-500">{totalLeaveDays}j approuvés</span>
           </div>
@@ -150,7 +150,7 @@ export default async function CollaborateurDetailPage({ params }: PageProps) {
                 <Link key={l.id} href={`/admin-rh/conges/${l.id}`}
                   className="flex items-center justify-between py-2 hover:opacity-80 transition-opacity">
                   <div>
-                    <p className="text-white text-xs">{LEAVE_TYPE_LABELS[l.type] ?? l.type}</p>
+                    <p className="text-slate-900 text-xs">{LEAVE_TYPE_LABELS[l.type] ?? l.type}</p>
                     <p className="text-slate-500 text-[10px]">
                       {new Date(l.start_date).toLocaleDateString('fr-FR')} · {l.days}j
                     </p>
@@ -165,27 +165,12 @@ export default async function CollaborateurDetailPage({ params }: PageProps) {
         </div>
 
         {/* Documents */}
-        <div className="card space-y-3">
+        <div className="card space-y-4">
           <div className="flex items-center gap-2">
             <FileText className="w-4 h-4 text-slate-400" />
-            <h3 className="font-display text-white text-sm">Documents ({docs.length})</h3>
+            <h3 className="font-display text-slate-900 text-sm">Documents ({docs.length})</h3>
           </div>
-          {docs.length === 0 ? (
-            <p className="text-slate-500 text-xs">Aucun document enregistré.</p>
-          ) : (
-            <div className="divide-y divide-white/[0.04]">
-              {docs.map(d => (
-                <div key={d.id} className="flex items-center justify-between py-2">
-                  <p className="text-white text-xs truncate pr-2">{d.title}</p>
-                  {d.expiry_date && (
-                    <p className="text-slate-500 text-[10px] flex-shrink-0">
-                      exp. {new Date(d.expiry_date).toLocaleDateString('fr-FR')}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+          <DocumentGallery docs={docs} />
         </div>
       </div>
     </div>

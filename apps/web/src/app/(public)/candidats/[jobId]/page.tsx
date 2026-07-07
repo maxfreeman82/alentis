@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/admin';
+﻿import { createAdminClient } from '@/lib/supabase/admin';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Building2, MapPin, ArrowLeft, TrendingUp, FileText } from 'lucide-react';
@@ -30,7 +30,7 @@ export default async function JobDetailPage({ params }: Props) {
     <div className="max-w-2xl mx-auto space-y-6">
       <Link
         href="/candidats"
-        className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-300 text-sm transition-colors"
+        className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-600 text-sm transition-colors"
       >
         <ArrowLeft size={14} /> Toutes les offres
       </Link>
@@ -42,7 +42,7 @@ export default async function JobDetailPage({ params }: Props) {
             {org?.name?.[0] ?? '?'}
           </div>
           <div>
-            <h1 className="font-display text-2xl text-white font-bold">{job.title}</h1>
+            <h1 className="font-display text-2xl text-slate-900 font-bold">{job.title}</h1>
             <div className="flex items-center gap-3 mt-1.5 flex-wrap">
               {org && (
                 <span className="flex items-center gap-1.5 text-slate-400 text-sm">
@@ -79,18 +79,18 @@ export default async function JobDetailPage({ params }: Props) {
 
       {/* Description */}
       {job.description && (
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 space-y-3">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 space-y-3">
           <div className="flex items-center gap-2 text-slate-400 text-sm font-medium">
             <FileText size={14} />
             Description du poste
           </div>
-          <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{job.description}</p>
+          <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap">{job.description}</p>
         </div>
       )}
 
       {/* Formulaire candidature */}
-      <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 space-y-4">
-        <h2 className="font-display text-white font-semibold text-base">Postuler maintenant</h2>
+      <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 space-y-4">
+        <h2 className="font-display text-slate-900 font-semibold text-base">Postuler maintenant</h2>
         <p className="text-slate-500 text-xs">
           Votre candidature sera transmise directement à l&apos;équipe RH de {org?.name ?? 'l&apos;entreprise'}.
         </p>

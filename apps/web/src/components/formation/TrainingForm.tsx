@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -67,7 +67,7 @@ export default function TrainingForm() {
     <form onSubmit={handleSubmit} className="card space-y-5">
       {/* Titre */}
       <div className="space-y-1.5">
-        <label className="text-slate-300 text-sm font-medium">Titre de la formation *</label>
+        <label className="text-slate-600 text-sm font-medium">Titre de la formation *</label>
         <input
           required
           value={form.title}
@@ -79,7 +79,7 @@ export default function TrainingForm() {
 
       {/* Description */}
       <div className="space-y-1.5">
-        <label className="text-slate-300 text-sm font-medium">Description</label>
+        <label className="text-slate-600 text-sm font-medium">Description</label>
         <textarea
           value={form.description}
           onChange={e => set('description', e.target.value)}
@@ -92,13 +92,13 @@ export default function TrainingForm() {
       {/* Catégorie + Format */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <label className="text-slate-300 text-sm font-medium">Catégorie</label>
+          <label className="text-slate-600 text-sm font-medium">Catégorie</label>
           <select value={form.category} onChange={e => set('category', e.target.value)} className="input w-full">
             {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
           </select>
         </div>
         <div className="space-y-1.5">
-          <label className="text-slate-300 text-sm font-medium">Format</label>
+          <label className="text-slate-600 text-sm font-medium">Format</label>
           <select value={form.format} onChange={e => set('format', e.target.value)} className="input w-full">
             {FORMATS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
           </select>
@@ -108,7 +108,7 @@ export default function TrainingForm() {
       {/* Durée + Max participants */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <label className="text-slate-300 text-sm font-medium">Durée (heures)</label>
+          <label className="text-slate-600 text-sm font-medium">Durée (heures)</label>
           <input
             type="number" min="0.5" step="0.5"
             value={form.duration_hours}
@@ -118,7 +118,7 @@ export default function TrainingForm() {
           />
         </div>
         <div className="space-y-1.5">
-          <label className="text-slate-300 text-sm font-medium">Participants max</label>
+          <label className="text-slate-600 text-sm font-medium">Participants max</label>
           <input
             type="number" min="1"
             value={form.max_participants}
@@ -131,7 +131,7 @@ export default function TrainingForm() {
 
       {/* Formateur */}
       <div className="space-y-1.5">
-        <label className="text-slate-300 text-sm font-medium">Formateur / Intervenant</label>
+        <label className="text-slate-600 text-sm font-medium">Formateur / Intervenant</label>
         <input
           value={form.instructor}
           onChange={e => set('instructor', e.target.value)}
@@ -143,11 +143,11 @@ export default function TrainingForm() {
       {/* Dates */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <label className="text-slate-300 text-sm font-medium">Date de début</label>
+          <label className="text-slate-600 text-sm font-medium">Date de début</label>
           <input type="date" value={form.start_date} onChange={e => set('start_date', e.target.value)} className="input w-full" />
         </div>
         <div className="space-y-1.5">
-          <label className="text-slate-300 text-sm font-medium">Date de fin</label>
+          <label className="text-slate-600 text-sm font-medium">Date de fin</label>
           <input type="date" value={form.end_date} onChange={e => set('end_date', e.target.value)} className="input w-full" />
         </div>
       </div>

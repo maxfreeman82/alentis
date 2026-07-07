@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { WorkOS } from '@workos-inc/node';
-import { sealData } from 'iron-session';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 
-// Route uniquement disponible hors production — ne jamais monter en prod
+// Route E2E uniquement disponible hors production
 export async function GET(req: NextRequest): Promise<NextResponse> {
   if (process.env.NODE_ENV === 'production') {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
@@ -15,33 +15,34 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'email et password requis' }, { status: 400 });
   }
 
-  const workos = new WorkOS(process.env.WORKOS_API_KEY!);
+  const cookieStore = await cookies();
 
-  const { accessToken, refreshToken, user } =
-    await workos.userManagement.authenticateWithPassword({
-      email,
-      password,
-      clientId: process.env.WORKOS_CLIENT_ID!,
-    });
+  // Construire la réponse d'abord pour pouvoir y écrire les cookies
+  const response = NextResponse.json({ ok: true });
 
-  // Reproduire exactement le format de cookie de @workos-inc/authkit-nextjs
-  const cookiePassword = process.env.WORKOS_COOKIE_PASSWORD!;
-  const sealed = await sealData(
-    { accessToken, refreshToken, user },
-    { password: cookiePassword, ttl: 0 },
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll()  { return cookieStore.getAll(); },
+        setAll(list) {
+          // Écrire dans le cookie store ET dans la réponse (nécessaire pour e2e)
+          list.forEach(({ name, value, options }) => {
+            try { cookieStore.set({ name, value, ...options }); } catch { /* ignore */ }
+            response.cookies.set({ name, value, ...options });
+          });
+        },
+      },
+    }
   );
 
-  const cookieName = process.env.WORKOS_COOKIE_NAME ?? 'wos-session';
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-  // Cookie défini directement sur la réponse redirect (pas via cookies() — incompatible avec redirect)
-  const res = NextResponse.redirect(new URL('/dashboard', req.url));
-  res.cookies.set(cookieName, sealed, {
-    httpOnly: true,
-    secure:   false,
-    sameSite: 'lax',
-    path:     '/',
-    maxAge:   60 * 60 * 24,
-  });
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 401 });
+  }
 
-  return res;
+  // Retourner 200 avec les cookies — le test navigue ensuite lui-même
+  return response;
 }

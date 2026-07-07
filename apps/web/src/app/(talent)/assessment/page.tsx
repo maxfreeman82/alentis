@@ -1,11 +1,11 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { getTalentProfile } from '@/lib/supabase/auth';
 import { redirect } from 'next/navigation';
 import { QUESTION_STEPS } from '@/lib/talent/assessment';
 import AssessmentForm from '@/components/talent/AssessmentForm';
 
 export default async function AssessmentPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getTalentProfile(user.id);
 
   // Rediriger vers l'onboarding si le profil n'existe pas encore
@@ -24,7 +24,7 @@ export default async function AssessmentPage() {
     <div className="space-y-6">
       <div>
         <p className="text-emerald-400 text-xs font-semibold uppercase tracking-widest mb-2">QUESTIONNAIRE 6D</p>
-        <h1 className="font-display text-white text-2xl">Évaluation Talent Passport</h1>
+        <h1 className="font-display text-slate-900 text-2xl">Évaluation Talent Passport</h1>
         <p className="text-slate-400 text-sm mt-1">
           40 questions · ~15 minutes · Votre profil complet : compétences, expérience, énergie et life score
         </p>

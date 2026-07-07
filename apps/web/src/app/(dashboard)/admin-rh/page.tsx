@@ -1,8 +1,9 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { Users, FileText, Calendar, AlertTriangle, Plus, CheckCircle, Clock, Activity, UserPlus, Award, Heart } from 'lucide-react';
 import { SectionHeader, AlertCard } from '@/components/shared';
 import { getUserOrg } from '@/lib/supabase/auth';
+import { InviteButton } from '@/components/admin-rh/InviteButton';
 
 const LEAVE_TYPE_LABELS: Record<string, string> = {
   conge_annuel: 'Congé annuel',
@@ -23,7 +24,7 @@ const DOC_TYPE_LABELS: Record<string, string> = {
 };
 
 export default async function AdminRHPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
 
   if (!ctx) {
@@ -202,7 +203,7 @@ export default async function AdminRHPage() {
                 <Icon className="w-5 h-5" style={{ color: k.color }} />
               </div>
               <div>
-                <p className="text-white font-bold text-xl font-mono">{k.value}</p>
+                <p className="text-slate-900 font-bold text-xl font-mono">{k.value}</p>
                 <p className="text-slate-500 text-[10px]">{k.label}</p>
               </div>
             </div>
@@ -234,14 +235,14 @@ export default async function AdminRHPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-amber-400" />
-              <h3 className="font-display text-white text-sm">Congés à valider</h3>
+              <h3 className="font-display text-slate-900 text-sm">Congés à valider</h3>
               {pendingLeaves.length > 0 && (
                 <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400">
                   {pendingLeaves.length}
                 </span>
               )}
             </div>
-            <Link href="/admin-rh/conges/nouveau" className="text-xs text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1">
+            <Link href="/admin-rh/conges/nouveau" className="text-xs text-slate-500 hover:text-slate-600 transition-colors flex items-center gap-1">
               <Plus className="w-3 h-3" /> Ajouter
             </Link>
           </div>
@@ -249,14 +250,14 @@ export default async function AdminRHPage() {
           {pendingLeaves.length === 0 ? (
             <p className="text-slate-500 text-sm py-4 text-center">Aucun congé en attente de validation.</p>
           ) : (
-            <div className="divide-y divide-white/[0.04]">
+            <div className="divide-y divide-slate-200">
               {pendingLeaves.slice(0, 6).map(l => {
                 const profile = Array.isArray(l.profiles) ? l.profiles[0] : l.profiles;
                 const name = profile ? `${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim() : 'Inconnu';
                 return (
                   <div key={l.id} className="py-3 flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-medium">{name}</p>
+                      <p className="text-slate-900 text-sm font-medium">{name}</p>
                       <p className="text-slate-500 text-xs mt-0.5">
                         {LEAVE_TYPE_LABELS[l.type] ?? l.type}
                         {' · '}
@@ -282,9 +283,9 @@ export default async function AdminRHPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4 text-sky-400" />
-              <h3 className="font-display text-white text-sm">Documents RH</h3>
+              <h3 className="font-display text-slate-900 text-sm">Documents RH</h3>
             </div>
-            <Link href="/admin-rh/documents/nouveau" className="text-xs text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1">
+            <Link href="/admin-rh/documents/nouveau" className="text-xs text-slate-500 hover:text-slate-600 transition-colors flex items-center gap-1">
               <Plus className="w-3 h-3" /> Ajouter
             </Link>
           </div>
@@ -292,7 +293,7 @@ export default async function AdminRHPage() {
           {docs.length === 0 ? (
             <p className="text-slate-500 text-sm py-4 text-center">Aucun document enregistré.</p>
           ) : (
-            <div className="divide-y divide-white/[0.04]">
+            <div className="divide-y divide-slate-200">
               {docs.slice(0, 6).map(d => {
                 const profile = Array.isArray(d.profiles) ? d.profiles[0] : d.profiles;
                 const name = profile ? `${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim() : null;
@@ -300,7 +301,7 @@ export default async function AdminRHPage() {
                 return (
                   <div key={d.id} className="py-3 flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-medium truncate">{d.title}</p>
+                      <p className="text-slate-900 text-sm font-medium truncate">{d.title}</p>
                       <p className="text-slate-500 text-xs mt-0.5">
                         {DOC_TYPE_LABELS[d.type] ?? d.type}
                         {name ? ` · ${name}` : ''}
@@ -322,7 +323,7 @@ export default async function AdminRHPage() {
       <div className="card space-y-4">
         <div className="flex items-center gap-2">
           <Activity className="w-4 h-4 text-violet-400" />
-          <h3 className="font-display text-white text-sm">Activité RH récente</h3>
+          <h3 className="font-display text-slate-900 text-sm">Activité RH récente</h3>
           <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-violet-500/10 text-violet-400">
             {activityLog.length}
           </span>
@@ -331,7 +332,7 @@ export default async function AdminRHPage() {
         {activityLog.length === 0 ? (
           <p className="text-slate-500 text-sm py-2">Aucune activité récente.</p>
         ) : (
-          <div className="space-y-0 divide-y divide-white/[0.04]">
+          <div className="space-y-0 divide-y divide-slate-200">
             {activityLog.map(entry => {
               const Icon = entry.icon === 'application' ? FileText
                          : entry.icon === 'passport'    ? Award
@@ -346,7 +347,7 @@ export default async function AdminRHPage() {
                     <Icon size={13} style={{ color: entry.color }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-xs font-medium">{entry.title}</p>
+                    <p className="text-slate-900 text-xs font-medium">{entry.title}</p>
                     <p className="text-slate-500 text-[11px] mt-0.5 truncate">{entry.desc}</p>
                   </div>
                   <span className="text-slate-600 text-[10px] flex-shrink-0 mt-1">
@@ -361,15 +362,12 @@ export default async function AdminRHPage() {
 
       {/* Annuaire collaborateurs */}
       <div className="card !p-0 overflow-hidden">
-        <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
+        <div className="px-5 py-3 border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-emerald-400" />
-            <p className="text-white font-semibold text-sm">Effectif ({profiles.length})</p>
+            <p className="text-slate-900 font-semibold text-sm">Effectif ({profiles.length})</p>
           </div>
-          <Link href="/admin-rh/collaborateur/nouveau"
-            className="text-xs text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1">
-            <Plus className="w-3 h-3" /> Ajouter
-          </Link>
+          <InviteButton />
         </div>
 
         {profiles.length === 0 ? (
@@ -377,18 +375,18 @@ export default async function AdminRHPage() {
             <p className="text-slate-500">Aucun collaborateur — invitez votre équipe.</p>
           </div>
         ) : (
-          <div className="divide-y divide-white/[0.04]">
+          <div className="divide-y divide-slate-200">
             {profiles.map(p => {
               const name = `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() || p.email;
               const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
               return (
                 <Link key={p.id} href={`/admin-rh/collaborateur/${p.id}`}
-                  className="flex items-center gap-4 px-5 py-3 hover:bg-white/[0.02] transition-colors">
+                  className="flex items-center gap-4 px-5 py-3 hover:bg-slate-50 transition-colors">
                   <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center font-bold text-xs text-emerald-400 flex-shrink-0">
                     {initials}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-medium truncate">{name}</p>
+                    <p className="text-slate-900 text-sm font-medium truncate">{name}</p>
                     <p className="text-slate-500 text-xs truncate">{p.email}</p>
                   </div>
                   <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400 flex-shrink-0 hidden sm:block">

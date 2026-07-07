@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Users, Play, Lock, Sparkles, AlertTriangle, CheckCircle, Copy } from 'lucide-react';
@@ -9,7 +9,7 @@ interface Props { params: Promise<{ sessionId: string }> }
 
 export default async function SessionDetailPage({ params }: Props) {
   const { sessionId } = await params;
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
 
   const ctx = await getUserOrg(user.id);
   if (!ctx) return notFound();
@@ -57,13 +57,13 @@ export default async function SessionDetailPage({ params }: Props) {
       {/* Header */}
       <div>
         <Link href="/performance/tour-de-table"
-          className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-300 text-xs mb-4 transition-colors">
+          className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-600 text-xs mb-4 transition-colors">
           <ArrowLeft className="w-3 h-3" /> Tour de Table
         </Link>
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-violet-400 text-xs font-semibold uppercase tracking-widest mb-1">SESSION</p>
-            <h1 className="font-display text-white text-2xl">
+            <h1 className="font-display text-slate-900 text-2xl">
               Q{session.quarter} {session.year}
             </h1>
             <p className="text-slate-400 text-sm mt-1">{participantIds.length} participants · {participationRate}% de participation</p>
@@ -103,9 +103,9 @@ export default async function SessionDetailPage({ params }: Props) {
           <p className="text-slate-400 text-xs leading-relaxed">
             Partagez ce lien avec les participants. Chaque personne connectée verra ses collègues à observer.
           </p>
-          <div className="flex items-center gap-2 bg-bg rounded-xl px-3 py-2 border border-white/[0.06]">
+          <div className="flex items-center gap-2 bg-bg rounded-xl px-3 py-2 border border-slate-200">
             <code className="text-emerald-400 text-xs flex-1 truncate">{observerLink}</code>
-            <button className="text-slate-500 hover:text-slate-300 flex-shrink-0">
+            <button className="text-slate-500 hover:text-slate-600 flex-shrink-0">
               <Copy className="w-4 h-4" />
             </button>
           </div>
@@ -114,7 +114,7 @@ export default async function SessionDetailPage({ params }: Props) {
 
       {/* Liste participants + statut */}
       <div className="space-y-3">
-        <h2 className="font-display text-white text-sm">
+        <h2 className="font-display text-slate-900 text-sm">
           Participants ({participantIds.length})
         </h2>
         <div className="space-y-1.5">
@@ -123,14 +123,14 @@ export default async function SessionDetailPage({ params }: Props) {
             const observed     = observations?.filter(o => o.observed_id === p.id).length ?? 0;
             const aggregate    = aggregates?.find(a => a.observed_id === p.id);
             return (
-              <div key={p.id} className="flex items-center gap-3 px-4 py-3 rounded-xl border border-white/[0.04] hover:border-white/[0.06] transition-all">
+              <div key={p.id} className="flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 hover:border-slate-200 transition-all">
                 <div className="w-8 h-8 rounded-xl bg-violet-500/15 flex items-center justify-center flex-shrink-0">
                   <span className="text-violet-400 text-xs font-bold">
                     {(p.first_name ?? '?').slice(0, 1)}{(p.last_name ?? '').slice(0, 1)}
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-medium truncate">
+                  <p className="text-slate-900 text-sm font-medium truncate">
                     {p.first_name} {p.last_name}
                   </p>
                   <p className="text-slate-600 text-[10px]">{p.role}</p>
@@ -170,11 +170,11 @@ export default async function SessionDetailPage({ params }: Props) {
       {/* Agrégats si disponibles */}
       {aggregates && aggregates.length > 0 && session.status !== 'active' && (
         <div className="space-y-3">
-          <h2 className="font-display text-white text-sm flex items-center gap-2">
+          <h2 className="font-display text-slate-900 text-sm flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-violet-400" /> Résultats observés
           </h2>
           <div className="card overflow-hidden p-0">
-            <div className="grid grid-cols-8 text-[10px] font-semibold uppercase tracking-wider text-slate-500 px-4 py-2.5 bg-bg border-b border-white/[0.04]">
+            <div className="grid grid-cols-8 text-[10px] font-semibold uppercase tracking-wider text-slate-500 px-4 py-2.5 bg-bg border-b border-slate-200">
               <span className="col-span-2">Personne</span>
               <span className="text-center">Fiab.</span>
               <span className="text-center">Collab.</span>
@@ -187,8 +187,8 @@ export default async function SessionDetailPage({ params }: Props) {
               const p    = participants?.find(p => p.id === agg.observed_id);
               const name = p ? `${p.first_name ?? ''} ${(p.last_name ?? '').slice(0, 1)}.` : '—';
               return (
-                <div key={agg.id} className="grid grid-cols-8 px-4 py-2.5 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.01]">
-                  <span className="col-span-2 text-slate-300 text-xs">{name}</span>
+                <div key={agg.id} className="grid grid-cols-8 px-4 py-2.5 border-b border-slate-200 last:border-0 hover:bg-slate-50">
+                  <span className="col-span-2 text-slate-600 text-xs">{name}</span>
                   {[agg.score_fiabilite, agg.score_collaboration, agg.score_communication, agg.score_initiative, agg.score_adaptabilite].map((s, i) => (
                     <span key={i} className="font-mono text-xs text-center text-slate-400">{Math.round(s ?? 0)}</span>
                   ))}

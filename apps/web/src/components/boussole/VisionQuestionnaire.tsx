@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -119,8 +119,8 @@ export function VisionQuestionnaire() {
                 className={cn(
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
                   active
-                    ? 'text-white'
-                    : 'text-slate-400 hover:text-slate-200 bg-bg-surface'
+                    ? 'text-slate-900'
+                    : 'text-slate-400 hover:text-slate-700 bg-bg-surface'
                 )}
                 style={active ? { backgroundColor: `${CATEGORY_COLORS[cat]}20`, color: CATEGORY_COLORS[cat], border: `1px solid ${CATEGORY_COLORS[cat]}40` } : {}}
               >
@@ -155,7 +155,7 @@ export function VisionQuestionnaire() {
           const selected = responses[question.id];
           return (
             <div key={question.id} className="card animate-slide-up">
-              <p className="text-white text-sm font-medium mb-4">
+              <p className="text-slate-900 text-sm font-medium mb-4">
                 <span className="font-mono text-xs mr-2" style={{ color: categoryColor }}>
                   {qi + 1}/{categoryQuestions.length}
                 </span>
@@ -171,8 +171,8 @@ export function VisionQuestionnaire() {
                       className={cn(
                         'w-full text-left px-4 py-3 rounded-lg border text-sm transition-all duration-150',
                         isSelected
-                          ? 'text-white font-medium'
-                          : 'border-white/[0.06] text-slate-300 hover:border-white/10 hover:bg-bg-surface'
+                          ? 'text-slate-900 font-medium'
+                          : 'border-slate-200 text-slate-600 hover:border-slate-200 hover:bg-bg-surface'
                       )}
                       style={isSelected ? {
                         backgroundColor: `${categoryColor}15`,
@@ -211,7 +211,7 @@ export function VisionQuestionnaire() {
         <button
           onClick={goPrev}
           disabled={currentCategoryIndex === 0}
-          className="flex items-center gap-2 text-slate-400 hover:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-2 text-slate-400 hover:text-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronLeft size={16} />
           Précédent

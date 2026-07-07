@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 const DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
@@ -43,7 +43,7 @@ export default function CalendarGrid({ month, year, events }: Props) {
   return (
     <div className="card p-0 overflow-hidden">
       {/* En-têtes jours */}
-      <div className="grid grid-cols-7 border-b border-white/[0.04]">
+      <div className="grid grid-cols-7 border-b border-slate-200">
         {DAYS.map(d => (
           <div key={d} className="py-2 text-center text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
             {d}
@@ -59,13 +59,13 @@ export default function CalendarGrid({ month, year, events }: Props) {
 
           return (
             <div key={idx}
-              className={`min-h-[80px] p-1 border-b border-r border-white/[0.04] last:border-r-0 ${
-                day ? '' : 'bg-white/[0.01]'
+              className={`min-h-[80px] p-1 border-b border-r border-slate-200 last:border-r-0 ${
+                day ? '' : 'bg-slate-50'
               } ${isToday ? 'bg-emerald-500/5' : ''}`}>
               {day && (
                 <>
                   <div className={`w-6 h-6 flex items-center justify-center rounded-full text-xs mb-1 ${
-                    isToday ? 'bg-emerald-500 text-white font-bold' : 'text-slate-400'
+                    isToday ? 'bg-emerald-500 text-slate-900 font-bold' : 'text-slate-400'
                   }`}>
                     {day}
                   </div>

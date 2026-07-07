@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { getUserOrg } from '@/lib/supabase/auth';
 import { ShoppingBag, Clock, Tag, Eye, Plus } from 'lucide-react';
 import MarketplaceCreateBtn from '@/components/community/MarketplaceCreateBtn';
@@ -19,7 +19,7 @@ const PRICE_LABELS: Record<string, string> = { fixed: 'Fixe', hourly: '/heure', 
 const CATEGORIES = Object.keys(CAT_CONFIG).filter(k => k !== 'autre');
 
 export default async function MarketplacePage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return null;
 
@@ -53,7 +53,7 @@ export default async function MarketplacePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-white text-xl">Marketplace RH</h1>
+          <h1 className="font-display text-slate-900 text-xl">Marketplace RH</h1>
           <p className="text-slate-400 text-xs mt-0.5">
             {listings.length} service{listings.length > 1 ? 's' : ''} · consultants & experts africains
           </p>
@@ -81,7 +81,7 @@ export default async function MarketplacePage() {
               <div key={cat} className="space-y-3">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">{cfg.icon}</span>
-                  <span className="font-display text-white text-sm">{cat}</span>
+                  <span className="font-display text-slate-900 text-sm">{cat}</span>
                   <span className="text-slate-600 text-xs">({items.length})</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -93,14 +93,14 @@ export default async function MarketplacePage() {
                     const isOwn   = author?.id === profileId;
 
                     return (
-                      <div key={l.id} className={`card hover:border-white/10 transition-all space-y-3 ${isOwn ? 'border-amber-500/20' : ''}`}>
+                      <div key={l.id} className={`card hover:border-slate-200 transition-all space-y-3 ${isOwn ? 'border-amber-500/20' : ''}`}>
                         <div className="flex items-start gap-2">
                           <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold"
                             style={{ backgroundColor: `${cfg.color}15`, color: cfg.color }}>
                             {ini}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-white text-xs font-semibold leading-snug">{l.title}</p>
+                            <p className="text-slate-900 text-xs font-semibold leading-snug">{l.title}</p>
                             <p className="text-slate-500 text-[10px]">{name}</p>
                           </div>
                         </div>
@@ -112,12 +112,12 @@ export default async function MarketplacePage() {
                         {skills.length > 0 && (
                           <div className="flex flex-wrap gap-1">
                             {skills.slice(0, 3).map(s => (
-                              <span key={s} className="text-[9px] px-1.5 py-0.5 bg-white/[0.04] text-slate-500 rounded">{s}</span>
+                              <span key={s} className="text-[9px] px-1.5 py-0.5 bg-slate-50 text-slate-500 rounded">{s}</span>
                             ))}
                           </div>
                         )}
 
-                        <div className="flex items-center justify-between pt-1 border-t border-white/[0.04]">
+                        <div className="flex items-center justify-between pt-1 border-t border-slate-200">
                           <div className="space-y-0.5">
                             {l.price_fcfa ? (
                               <p className="text-emerald-400 text-xs font-semibold">

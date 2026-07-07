@@ -1,5 +1,5 @@
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { NextResponse } from 'next/server';
-import { withAuth } from '@workos-inc/authkit-nextjs';
 import { z } from 'zod';
 import { createServerClient } from '@/lib/supabase/server';
 import { computeEmployerCost } from '@/lib/payroll/employer-cost';
@@ -12,7 +12,7 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const supabase  = createServerClient();
 
   const body   = await req.json() as unknown;
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
   const { data: profile } = await supabase
-    .from('profiles').select('id').eq('workos_user_id', user.id).maybeSingle();
+    .from('profiles').select('id').eq('user_id', user.id).maybeSingle();
   if (!profile) return NextResponse.json({ error: 'Profil introuvable' }, { status: 404 });
 
   const { data: founder } = await supabase

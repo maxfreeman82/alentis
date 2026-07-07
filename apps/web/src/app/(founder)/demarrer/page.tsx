@@ -1,15 +1,15 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { ArrowRight, Clock, Sparkles, ShieldCheck } from 'lucide-react';
 import { createServerClient } from '@/lib/supabase/server';
 
 export default async function DemarrerPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const supabase  = createServerClient();
 
   // Vérifier si la boussole a déjà été complétée
   const { data: profile } = await supabase
-    .from('profiles').select('id').eq('workos_user_id', user.id).maybeSingle();
+    .from('profiles').select('id').eq('user_id', user.id).maybeSingle();
 
   const { data: founder } = profile
     ? await supabase.from('founders').select('archetype, boussole_done').eq('profile_id', profile.id).maybeSingle()
@@ -22,7 +22,7 @@ export default async function DemarrerPage() {
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold">
           <Sparkles className="w-3 h-3" /> 100% GRATUIT · AUCUNE CARTE BANCAIRE
         </div>
-        <h1 className="font-display text-white text-3xl leading-tight">
+        <h1 className="font-display text-slate-900 text-3xl leading-tight">
           Découvrez votre<br />
           <span className="text-amber-400">Archétype Fondateur</span>
         </h1>
@@ -55,7 +55,7 @@ export default async function DemarrerPage() {
           return (
             <div key={p.title} className="card text-center space-y-2">
               <Icon className="w-5 h-5 mx-auto" style={{ color: p.color }} />
-              <p className="text-white text-sm font-semibold">{p.title}</p>
+              <p className="text-slate-900 text-sm font-semibold">{p.title}</p>
               <p className="text-slate-500 text-xs leading-relaxed">{p.desc}</p>
             </div>
           );
@@ -74,7 +74,7 @@ export default async function DemarrerPage() {
       </div>
 
       {/* Ce que vous obtenez */}
-      <div className="border border-white/[0.06] rounded-2xl p-6 space-y-4">
+      <div className="border border-slate-200 rounded-2xl p-6 space-y-4">
         <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest">Après la Boussole</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[

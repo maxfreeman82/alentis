@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { SectionHeader, ScoreCircle } from '@/components/shared';
 import { scoreColor } from '@teranga/scoring';
@@ -14,7 +14,7 @@ const ENERGY_COLORS: Record<string, string> = {
 };
 
 export default async function TalentsPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
 
   if (!ctx) {
@@ -90,7 +90,7 @@ export default async function TalentsPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {STATS.map(s => (
           <div key={s.label} className="card text-center">
-            <p className="text-2xl font-bold text-white font-mono">{s.value}</p>
+            <p className="text-2xl font-bold text-slate-900 font-mono">{s.value}</p>
             <p className="text-emerald text-xs font-semibold mt-0.5">{s.label}</p>
             <p className="text-slate-500 text-[10px] mt-0.5">{s.sub}</p>
           </div>
@@ -99,8 +99,8 @@ export default async function TalentsPage() {
 
       {/* Table Passports */}
       <div className="card !p-0 overflow-hidden">
-        <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
-          <p className="text-white font-semibold text-sm">Passports actifs</p>
+        <div className="px-5 py-3 border-b border-slate-200 flex items-center justify-between">
+          <p className="text-slate-900 font-semibold text-sm">Passports actifs</p>
           <p className="text-slate-500 text-xs">{passports.length} collaborateurs</p>
         </div>
 
@@ -109,7 +109,7 @@ export default async function TalentsPage() {
             <p className="text-slate-500">Aucun Talent Passport — invitez vos collaborateurs à remplir le questionnaire.</p>
           </div>
         ) : (
-          <div className="divide-y divide-white/[0.04]">
+          <div className="divide-y divide-slate-200">
             {passports.map(p => {
               const color    = scoreColor(p.score);
               const hex      = scoreHex(color);
@@ -119,7 +119,7 @@ export default async function TalentsPage() {
                 <Link
                   key={p.id}
                   href={`/talents/passport/${p.profileId}`}
-                  className="flex items-center gap-4 px-5 py-3 hover:bg-white/[0.02] transition-colors"
+                  className="flex items-center gap-4 px-5 py-3 hover:bg-slate-50 transition-colors"
                 >
                   <div
                     className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0"
@@ -129,7 +129,7 @@ export default async function TalentsPage() {
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-medium truncate">{p.name}</p>
+                    <p className="text-slate-900 text-sm font-medium truncate">{p.name}</p>
                     <p className="text-slate-500 text-xs truncate">{p.role}</p>
                   </div>
 

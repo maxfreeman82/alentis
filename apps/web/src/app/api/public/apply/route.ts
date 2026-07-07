@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { z } from 'zod';
 
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
   const { data: existingProfile } = await admin
     .from('profiles')
     .select('id')
-    .eq('workos_user_id', workosId)
+    .eq('user_id', workosId)
     .maybeSingle();
 
   let profileId: string;
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     const { data: newProfile, error: profileErr } = await admin
       .from('profiles')
       .insert({
-        workos_user_id: workosId,
+        user_id: workosId,
         organization_id: job.organization_id,
         role:            'talent_free',
         first_name:      firstName,

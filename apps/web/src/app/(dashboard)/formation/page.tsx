@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { BookOpen, Clock, Users, TrendingUp, Plus } from 'lucide-react';
 import { SectionHeader } from '@/components/shared';
@@ -7,7 +7,7 @@ import { CATEGORY_LABELS, FORMAT_LABELS, STATUS_LABELS, computeTrainingStats } f
 import type { TrainingCategory, TrainingFormat, EnrollmentStatus } from '@/lib/formation/training';
 
 export default async function FormationPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
 
   if (!ctx) {
@@ -81,7 +81,7 @@ export default async function FormationPage() {
                 <Icon className="w-5 h-5" style={{ color: k.color }} />
               </div>
               <div>
-                <p className="text-white font-bold text-xl font-mono">{k.value}</p>
+                <p className="text-slate-900 font-bold text-xl font-mono">{k.value}</p>
                 <p className="text-slate-500 text-[10px]">{k.label}</p>
               </div>
             </div>
@@ -101,7 +101,7 @@ export default async function FormationPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          <h3 className="font-display text-white text-sm">Catalogue ({trainings.length})</h3>
+          <h3 className="font-display text-slate-900 text-sm">Catalogue ({trainings.length})</h3>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {trainings.map(t => {
               const cat        = CATEGORY_LABELS[t.category as TrainingCategory];
@@ -111,10 +111,10 @@ export default async function FormationPage() {
 
               return (
                 <Link key={t.id} href={`/formation/${t.id}`}
-                  className="card hover:border-white/10 transition-colors border border-transparent space-y-3">
+                  className="card hover:border-slate-200 transition-colors border border-transparent space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="text-white font-semibold text-sm truncate">{t.title}</p>
+                      <p className="text-slate-900 font-semibold text-sm truncate">{t.title}</p>
                       {t.description && (
                         <p className="text-slate-500 text-xs mt-0.5 line-clamp-2">{t.description}</p>
                       )}
@@ -161,15 +161,15 @@ export default async function FormationPage() {
       {/* Mes inscriptions */}
       {enrollments.length > 0 && (
         <div className="card space-y-3">
-          <h3 className="font-display text-white text-sm">Mes inscriptions</h3>
-          <div className="divide-y divide-white/[0.04]">
+          <h3 className="font-display text-slate-900 text-sm">Mes inscriptions</h3>
+          <div className="divide-y divide-slate-200">
             {enrollments.slice(0, 5).map(e => {
               const training = trainings.find(t => t.id === e.training_id);
               const s = STATUS_LABELS[e.status as EnrollmentStatus];
               return (
                 <div key={e.training_id} className="flex items-center justify-between py-3">
                   <div>
-                    <p className="text-white text-sm">{training?.title ?? '—'}</p>
+                    <p className="text-slate-900 text-sm">{training?.title ?? '—'}</p>
                     <div className="w-32 h-1 bg-bg rounded-full mt-1.5">
                       <div className="h-full bg-violet-500 rounded-full" style={{ width: `${e.progress}%` }} />
                     </div>

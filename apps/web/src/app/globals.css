@@ -8,88 +8,110 @@
   --font-display: 'DM Serif Display';
   --font-body:    'Outfit';
   --font-mono:    'JetBrains Mono';
+
+  /* Design tokens */
+  --color-primary:    #6336F1;
+  --color-primary-dk: #5B21B6;
+  --color-bg:         #F0F4FC;
+  --color-surface:    #FFFFFF;
+  --color-border:     #E2E8F0;
+  --color-text:       #111827;
+  --color-text-muted: #6B7280;
 }
 
 @layer base {
-  * {
-    box-sizing: border-box;
-  }
+  * { box-sizing: border-box; }
 
-  html {
-    scroll-behavior: smooth;
-  }
+  html { scroll-behavior: smooth; }
 
   body {
-    background-color: #060B18;
-    color: #F1F5F9;
+    background-color: var(--color-bg);
+    color: var(--color-text);
     font-family: var(--font-body), system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Scrollbar custom Deep Emerald */
-  ::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: #060B18;
-  }
-
+  /* Scrollbar — violet */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: #F0F4FC; }
   ::-webkit-scrollbar-thumb {
-    background: rgba(16, 185, 129, 0.3);
+    background: rgba(99, 54, 241, 0.25);
     border-radius: 2px;
   }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(16, 185, 129, 0.5);
-  }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(99, 54, 241, 0.45); }
 }
 
 @layer components {
-  /* Card standard */
+  /* ── Card ─────────────────────────────────────────────────────── */
   .card {
-    @apply bg-bg-card border border-white/5 rounded-xl p-4 transition-all duration-200;
+    @apply bg-white border border-slate-200 rounded-xl p-4 transition-all duration-200;
+    box-shadow: 0 1px 3px rgba(99,54,241,0.04), 0 1px 2px rgba(0,0,0,0.03);
   }
-
   .card:hover {
-    @apply border-white/[0.08] -translate-y-0.5;
+    @apply border-slate-300;
+    box-shadow: 0 4px 16px rgba(99,54,241,0.08), 0 1px 4px rgba(0,0,0,0.05);
+    transform: translateY(-1px);
   }
 
-  /* Card avec catégorie */
-  .card-emerald { @apply card border-l-4 border-l-emerald; }
-  .card-rose    { @apply card border-l-4 border-l-rose; }
-  .card-violet  { @apply card border-l-4 border-l-violet; }
-  .card-amber   { @apply card border-l-4 border-l-amber; }
-  .card-orange  { @apply card border-l-4 border-l-orange; }
+  /* Cards accentuées */
+  .card-violet { @apply card; border-left: 4px solid #6336F1; }
+  .card-emerald { @apply card; border-left: 4px solid #6336F1; }
+  .card-rose    { @apply card; border-left: 4px solid #F43F5E; }
+  .card-amber   { @apply card; border-left: 4px solid #F59E0B; }
+  .card-orange  { @apply card; border-left: 4px solid #F97316; }
 
-  /* Score colors (règle des scores) */
-  .score-emerald { @apply text-emerald; }
+  /* ── Score colors ─────────────────────────────────────────────── */
+  .score-emerald { color: #6336F1; }
   .score-sky     { @apply text-sky; }
   .score-amber   { @apply text-amber; }
   .score-rose    { @apply text-rose; }
 
-  /* Bouton primaire */
+  /* ── Boutons ──────────────────────────────────────────────────── */
   .btn-primary {
-    @apply bg-emerald hover:bg-emerald-dark text-white font-semibold px-4 py-2 rounded-lg transition-colors duration-200;
+    @apply font-semibold px-4 py-2 rounded-lg transition-all duration-200;
+    background: linear-gradient(135deg, #6336F1 0%, #8B5CF6 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(99,54,241,0.25);
   }
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #5B21B6 0%, #7C3AED 100%);
+    box-shadow: 0 4px 16px rgba(99,54,241,0.35);
+    transform: translateY(-1px);
+  }
+  .btn-primary:active { transform: translateY(0); }
 
-  /* Bouton secondaire */
   .btn-secondary {
-    @apply bg-bg-surface hover:bg-bg-raised text-slate-200 font-medium px-4 py-2 rounded-lg border border-white/10 transition-colors duration-200;
+    @apply bg-white text-slate-700 font-medium px-4 py-2 rounded-lg border border-slate-200 transition-all duration-200;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+  .btn-secondary:hover {
+    @apply border-slate-300 bg-slate-50 text-slate-900;
   }
 
-  /* Label section */
+  /* ── Label section ────────────────────────────────────────────── */
   .section-tag {
     @apply text-[0.6rem] tracking-widest font-semibold uppercase;
+    color: #6336F1;
   }
 
-  /* AI Insight card */
+  /* ── AI Insight card ──────────────────────────────────────────── */
   .ai-insight {
-    background: rgba(139, 92, 246, 0.05);
-    border: 1px solid rgba(139, 92, 246, 0.15);
-    border-left: 3px solid #8B5CF6;
+    background: rgba(99, 54, 241, 0.04);
+    border: 1px solid rgba(99, 54, 241, 0.15);
+    border-left: 3px solid #6336F1;
     @apply rounded-xl p-4;
   }
+
+  /* ── Inputs (base) ────────────────────────────────────────────── */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  textarea,
+  select {
+    color: #111827;
+  }
+  input::placeholder,
+  textarea::placeholder { color: #9CA3AF; }
 }

@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Printer, ArrowLeft } from 'lucide-react';
@@ -19,7 +19,7 @@ interface PageProps {
 }
 
 export default async function BulletinPage({ params }: PageProps) {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return null;
 
@@ -65,7 +65,7 @@ export default async function BulletinPage({ params }: PageProps) {
   return (
     <div className="animate-fade-in space-y-6">
       <div className="flex items-center gap-3 mb-2">
-        <Link href="/remuneration" className="p-1.5 rounded-lg hover:bg-white/5 text-slate-500 hover:text-white transition-colors">
+        <Link href="/remuneration" className="p-1.5 rounded-lg hover:bg-white/5 text-slate-500 hover:text-slate-800 transition-colors">
           <ArrowLeft size={16} />
         </Link>
         <p className="text-slate-500 text-sm">Rémunération</p>
@@ -76,7 +76,7 @@ export default async function BulletinPage({ params }: PageProps) {
         <div className="flex items-start justify-between mb-4">
           <div>
             <p className="section-tag text-emerald mb-1">BULLETIN DE PAIE · {monthName.toUpperCase()} {year}</p>
-            <h1 className="text-white font-bold text-xl">{fullName}</h1>
+            <h1 className="text-slate-900 font-bold text-xl">{fullName}</h1>
             <p className="text-slate-400 text-sm">{profile?.role ?? '—'}</p>
             <p className="text-slate-500 text-xs mt-1">{SITUATION_LABELS[setting.situation as FamilySituation]}</p>
             {setting.est_cadre && (
@@ -89,7 +89,7 @@ export default async function BulletinPage({ params }: PageProps) {
             <Link
               href={`/api/remuneration/bulletin/${profileId}/print`}
               target="_blank"
-              className="mt-2 inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white border border-white/[0.06] hover:border-white/20 px-3 py-1.5 rounded-lg transition-colors"
+              className="mt-2 inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-800 border border-slate-200 hover:border-slate-200 px-3 py-1.5 rounded-lg transition-colors"
             >
               <Printer className="w-3.5 h-3.5" /> Télécharger PDF
             </Link>
@@ -97,9 +97,9 @@ export default async function BulletinPage({ params }: PageProps) {
         </div>
 
         {/* Résumé rapide */}
-        <div className="grid grid-cols-3 gap-3 pt-3 border-t border-white/[0.06]">
+        <div className="grid grid-cols-3 gap-3 pt-3 border-t border-slate-200">
           <div className="text-center">
-            <p className="font-mono text-sm font-bold text-slate-300">{formatFCFA(result.totalBrut)}</p>
+            <p className="font-mono text-sm font-bold text-slate-600">{formatFCFA(result.totalBrut)}</p>
             <p className="text-[10px] text-slate-500">Salaire brut</p>
           </div>
           <div className="text-center">
@@ -115,8 +115,8 @@ export default async function BulletinPage({ params }: PageProps) {
 
       {/* Tableau détaillé */}
       <div className="card !p-0 overflow-hidden">
-        <div className="px-5 py-3 border-b border-white/[0.06]">
-          <p className="text-white font-semibold text-sm">Détail du bulletin</p>
+        <div className="px-5 py-3 border-b border-slate-200">
+          <p className="text-slate-900 font-semibold text-sm">Détail du bulletin</p>
         </div>
         <div className="divide-y divide-white/[0.04]">
           {rows.map((row, i) => (
@@ -125,7 +125,7 @@ export default async function BulletinPage({ params }: PageProps) {
                 {row.group && (
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">{row.group}</p>
                 )}
-                <p className={`text-sm ${row.isBold ? 'font-bold text-white' : 'text-slate-300'}`}>{row.label}</p>
+                <p className={`text-sm ${row.isBold ? 'font-bold text-slate-900' : 'text-slate-600'}`}>{row.label}</p>
               </div>
               <div className="flex gap-12 text-right">
                 <span className={`font-mono text-sm w-28 ${row.credit ? 'text-emerald' : 'text-slate-700'}`}>
@@ -159,8 +159,8 @@ export default async function BulletinPage({ params }: PageProps) {
               <span className="font-mono text-sm font-medium text-violet">{formatFCFA(c.montant)}</span>
             </div>
           ))}
-          <div className="flex items-center justify-between pt-2 border-t border-white/[0.06]">
-            <span className="text-white text-sm font-bold">Total charges patronales</span>
+          <div className="flex items-center justify-between pt-2 border-t border-slate-200">
+            <span className="text-slate-900 text-sm font-bold">Total charges patronales</span>
             <span className="font-mono text-sm font-bold text-violet">{formatFCFA(result.totalChargesPatronal)}</span>
           </div>
         </div>

@@ -1,5 +1,5 @@
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { NextResponse } from 'next/server';
-import { withAuth } from '@workos-inc/authkit-nextjs';
 import { z } from 'zod';
 import { getUserOrg } from '@/lib/supabase/auth';
 
@@ -11,7 +11,7 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   if (!['org_admin', 'org_hr', 'org_manager'].includes(ctx.role)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });

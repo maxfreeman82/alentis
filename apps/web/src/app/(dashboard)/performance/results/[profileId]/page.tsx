@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { ScoreCircle, AIInsightCard, AlertCard } from '@/components/shared';
 import { DIMENSIONS, type EvalDimension } from '@/lib/performance/evaluation';
@@ -34,7 +34,7 @@ interface PageProps {
 }
 
 export default async function ResultsPage({ params, searchParams }: PageProps) {
-  await withAuth({ ensureSignedIn: true });
+  await requireAuth();
   const { profileId } = await params;
   const { q, y } = await searchParams;
 
@@ -75,7 +75,7 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
             {data.name.charAt(0)}
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-white font-bold text-xl">{data.name}</h1>
+            <h1 className="text-slate-900 font-bold text-xl">{data.name}</h1>
             <p className="text-slate-400 text-sm">{data.role} · Q{quarter} {year}</p>
             <div className="flex items-center gap-3 mt-2">
               <span className="font-mono text-xs text-slate-500">
@@ -112,7 +112,7 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
             return (
               <div key={dim}>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-slate-300 text-sm font-medium">{meta?.label}</span>
+                  <span className="text-slate-600 text-sm font-medium">{meta?.label}</span>
                   <span
                     className="font-mono text-sm font-bold"
                     style={{ color: aggScore >= 80 ? '#10B981' : aggScore >= 65 ? '#F59E0B' : '#F43F5E' }}

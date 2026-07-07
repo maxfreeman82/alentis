@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+﻿import { cn } from '@/lib/utils';
 
 interface SectionHeaderProps {
   tag?: string;
@@ -16,7 +16,7 @@ export function SectionHeader({ tag, tagColor = 'text-emerald', title, subtitle,
         {tag && (
           <p className={cn('section-tag mb-1', tagColor)}>{tag}</p>
         )}
-        <h1 className="font-display text-2xl text-white">{title}</h1>
+        <h1 className="font-display text-2xl text-slate-900">{title}</h1>
         {subtitle && (
           <p className="text-slate-400 text-sm mt-1">{subtitle}</p>
         )}

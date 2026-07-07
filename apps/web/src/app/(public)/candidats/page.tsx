@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/admin';
+﻿import { createAdminClient } from '@/lib/supabase/admin';
 import Link from 'next/link';
 import { Briefcase, MapPin, Building2, ArrowRight, TrendingUp } from 'lucide-react';
 
@@ -36,7 +36,7 @@ export default async function CandidatsPage() {
       {/* Hero */}
       <div className="text-center space-y-3 pb-4">
         <p className="text-xs uppercase tracking-widest text-emerald font-semibold">Offres d'emploi</p>
-        <h1 className="font-display text-3xl text-white font-bold">
+        <h1 className="font-display text-3xl text-slate-900 font-bold">
           Trouvez votre prochain défi
         </h1>
         <p className="text-slate-400 max-w-lg mx-auto">
@@ -56,7 +56,7 @@ export default async function CandidatsPage() {
               <Link
                 key={job.id}
                 href={`/candidats/${job.id}`}
-                className="group flex items-center gap-4 p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12] transition-all"
+                className="group flex items-center gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-50 hover:border-slate-200 transition-all"
               >
                 {/* Logo org */}
                 <div
@@ -68,7 +68,7 @@ export default async function CandidatsPage() {
 
                 {/* Contenu */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-white font-semibold text-sm group-hover:text-emerald transition-colors">
+                  <p className="text-slate-900 font-semibold text-sm group-hover:text-emerald transition-colors">
                     {job.title}
                   </p>
                   <div className="flex items-center gap-3 mt-1 flex-wrap">

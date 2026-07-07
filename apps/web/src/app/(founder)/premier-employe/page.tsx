@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { ArrowRight, Scale, Clock, Shield, Calculator } from 'lucide-react';
 import { createServerClient } from '@/lib/supabase/server';
@@ -43,11 +43,11 @@ const CDI_VS_FREELANCE = [
 ];
 
 export default async function PremierEmployePage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const supabase  = createServerClient();
 
   const { data: profile } = await supabase
-    .from('profiles').select('id').eq('workos_user_id', user.id).maybeSingle();
+    .from('profiles').select('id').eq('user_id', user.id).maybeSingle();
 
   const { data: contracts } = profile
     ? await supabase.from('founder_contracts')
@@ -58,7 +58,7 @@ export default async function PremierEmployePage() {
     <div className="space-y-8">
       <div>
         <p className="text-amber-400 text-xs font-semibold uppercase tracking-widest mb-2">ÉTAPE 4</p>
-        <h1 className="font-display text-white text-2xl">Recruter votre premier employé</h1>
+        <h1 className="font-display text-slate-900 text-2xl">Recruter votre premier employé</h1>
         <p className="text-slate-400 text-sm mt-1">
           CDI ou freelance ? Simulez le coût réel, générez le contrat.
         </p>
@@ -66,17 +66,17 @@ export default async function PremierEmployePage() {
 
       {/* Comparatif CDI vs Freelance */}
       <div className="space-y-3">
-        <h2 className="font-display text-white text-sm flex items-center gap-2">
+        <h2 className="font-display text-slate-900 text-sm flex items-center gap-2">
           <Scale className="w-4 h-4 text-amber-400" /> CDI vs Freelance
         </h2>
         <div className="card overflow-hidden p-0">
-          <div className="grid grid-cols-3 bg-bg-card px-4 py-2.5 border-b border-white/[0.04]">
+          <div className="grid grid-cols-3 bg-bg-card px-4 py-2.5 border-b border-slate-200">
             <span className="text-slate-500 text-[10px] font-semibold uppercase tracking-wider">Critère</span>
             <span className="text-sky-400 text-[10px] font-semibold uppercase tracking-wider">CDI</span>
             <span className="text-emerald-400 text-[10px] font-semibold uppercase tracking-wider">Freelance</span>
           </div>
           {CDI_VS_FREELANCE.map(row => (
-            <div key={row.aspect} className="grid grid-cols-3 px-4 py-3 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.01] transition-colors">
+            <div key={row.aspect} className="grid grid-cols-3 px-4 py-3 border-b border-slate-200 last:border-0 hover:bg-slate-50 transition-colors">
               <span className="text-slate-400 text-xs font-medium">{row.aspect}</span>
               <div className="flex items-start gap-1.5 pr-3">
                 {row.winner === 'cdi' && <span className="text-sky-400 mt-0.5 flex-shrink-0 text-[10px]">✦</span>}
@@ -96,7 +96,7 @@ export default async function PremierEmployePage() {
 
       {/* Étapes recrutement */}
       <div className="space-y-3">
-        <h2 className="font-display text-white text-sm flex items-center gap-2">
+        <h2 className="font-display text-slate-900 text-sm flex items-center gap-2">
           <Clock className="w-4 h-4 text-amber-400" /> Processus légal de recrutement
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -113,7 +113,7 @@ export default async function PremierEmployePage() {
                 {item.step}
               </span>
               <div>
-                <p className="text-white text-xs font-semibold">{item.label}</p>
+                <p className="text-slate-900 text-xs font-semibold">{item.label}</p>
                 <p className="text-slate-500 text-[11px] mt-0.5">{item.desc}</p>
               </div>
             </div>
@@ -129,7 +129,7 @@ export default async function PremierEmployePage() {
             <Calculator className="w-5 h-5 text-amber-400" />
           </div>
           <div>
-            <p className="text-white text-sm font-semibold">Simulateur de coût</p>
+            <p className="text-slate-900 text-sm font-semibold">Simulateur de coût</p>
             <p className="text-slate-500 text-xs">Calcul IPRES + CSS + IR en temps réel</p>
           </div>
           <ArrowRight className="w-4 h-4 text-slate-600 ml-auto group-hover:text-amber-400 transition-all" />
@@ -141,7 +141,7 @@ export default async function PremierEmployePage() {
             <Shield className="w-5 h-5 text-emerald-400" />
           </div>
           <div>
-            <p className="text-white text-sm font-semibold">Mon équipe</p>
+            <p className="text-slate-900 text-sm font-semibold">Mon équipe</p>
             <p className="text-slate-500 text-xs">Dashboard 2-10 collaborateurs</p>
           </div>
           <ArrowRight className="w-4 h-4 text-slate-600 ml-auto group-hover:text-emerald-400 transition-all" />
@@ -151,12 +151,12 @@ export default async function PremierEmployePage() {
       {/* Contrats existants */}
       {contracts && contracts.length > 0 && (
         <div className="space-y-3">
-          <h2 className="font-display text-white text-sm">Contrats générés</h2>
+          <h2 className="font-display text-slate-900 text-sm">Contrats générés</h2>
           <div className="space-y-2">
             {contracts.map(c => (
               <div key={c.id} className="card flex items-center justify-between">
                 <div>
-                  <p className="text-white text-sm font-medium">{c.employee_name ?? '—'}</p>
+                  <p className="text-slate-900 text-sm font-medium">{c.employee_name ?? '—'}</p>
                   <p className="text-slate-500 text-xs">{c.employee_role} · {c.contract_type}</p>
                 </div>
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${

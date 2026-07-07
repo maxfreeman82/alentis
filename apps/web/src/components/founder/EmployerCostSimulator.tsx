@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { CSS_RATES, computeEmployerCost, formatFCFA } from '@/lib/payroll/employer-cost';
@@ -47,7 +47,7 @@ export default function EmployerCostSimulator() {
       <div className="card space-y-5">
         <div className="flex items-center gap-2">
           <Calculator className="w-4 h-4 text-amber-400" />
-          <h2 className="font-display text-white text-sm">Paramètres</h2>
+          <h2 className="font-display text-slate-900 text-sm">Paramètres</h2>
         </div>
 
         {/* Salaire brut */}
@@ -83,7 +83,7 @@ export default function EmployerCostSimulator() {
           <label className="text-slate-400 text-xs">Secteur d&apos;activité (taux accident)</label>
           <div className="relative">
             <select value={accidentIdx} onChange={e => setAccidentIdx(Number(e.target.value))}
-              className="w-full appearance-none bg-bg border border-white/[0.06] rounded-xl px-3 py-2 text-slate-300 text-xs focus:outline-none focus:border-amber-500/50">
+              className="w-full appearance-none bg-bg border border-slate-200 rounded-xl px-3 py-2 text-slate-600 text-xs focus:outline-none focus:border-amber-500/50">
               {CSS_RATES.map((r, i) => (
                 <option key={i} value={i}>{r.label} — {(r.rate * 100).toFixed(1)}%</option>
               ))}
@@ -99,29 +99,29 @@ export default function EmployerCostSimulator() {
         <div className="card space-y-4">
           <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Coût total employeur/mois</p>
           <p className="font-display text-3xl text-amber-400 font-bold">{formatFCFA(result.totalCost)}</p>
-          <p className="text-slate-500 text-xs">Annuel : <span className="text-slate-300">{formatFCFA(result.totalCostAnnual)}</span></p>
+          <p className="text-slate-500 text-xs">Annuel : <span className="text-slate-600">{formatFCFA(result.totalCostAnnual)}</span></p>
           <div className="space-y-1">
             <div className="flex justify-between text-xs">
               <span className="text-slate-500">Salaire brut</span>
-              <span className="text-slate-300 font-mono">{formatFCFA(gross)}</span>
+              <span className="text-slate-600 font-mono">{formatFCFA(gross)}</span>
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-slate-500">IPRES RG patron</span>
-              <span className="text-slate-300 font-mono">{formatFCFA(result.ipresRgEmployer)}</span>
+              <span className="text-slate-600 font-mono">{formatFCFA(result.ipresRgEmployer)}</span>
             </div>
             {result.ipresRcEmployer > 0 && (
               <div className="flex justify-between text-xs">
                 <span className="text-slate-500">IPRES RC patron</span>
-                <span className="text-slate-300 font-mono">{formatFCFA(result.ipresRcEmployer)}</span>
+                <span className="text-slate-600 font-mono">{formatFCFA(result.ipresRcEmployer)}</span>
               </div>
             )}
             <div className="flex justify-between text-xs">
               <span className="text-slate-500">CSS accidents</span>
-              <span className="text-slate-300 font-mono">{formatFCFA(result.cssEmployer)}</span>
+              <span className="text-slate-600 font-mono">{formatFCFA(result.cssEmployer)}</span>
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-slate-500">FDFP formation</span>
-              <span className="text-slate-300 font-mono">{formatFCFA(result.fdfpEmployer)}</span>
+              <span className="text-slate-600 font-mono">{formatFCFA(result.fdfpEmployer)}</span>
             </div>
           </div>
         </div>
@@ -140,7 +140,7 @@ export default function EmployerCostSimulator() {
             </div>
             <p className="text-slate-600 text-[10px]">% du salaire net vs coût total</p>
           </div>
-          <div className="space-y-1 pt-1 border-t border-white/[0.04]">
+          <div className="space-y-1 pt-1 border-t border-slate-200">
             <div className="flex justify-between text-xs">
               <span className="text-slate-500">IPRES RG salarié</span>
               <span className="text-rose-400 font-mono">−{formatFCFA(result.ipresRgEmployee)}</span>

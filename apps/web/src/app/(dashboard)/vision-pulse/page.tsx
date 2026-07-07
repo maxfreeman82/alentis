@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { Users, TrendingUp, AlertTriangle, QrCode } from 'lucide-react';
 import { SectionHeader, ScoreCircle, AlertCard } from '@/components/shared';
@@ -12,7 +12,7 @@ const adhesionLabel = (s: number) =>
   s >= 85 ? 'Ambassadeur' : s >= 70 ? 'Engagé' : s >= 55 ? 'Neutre' : s >= 40 ? 'Désengagé' : 'En rupture';
 
 export default async function VisionPulsePage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
 
   if (!ctx) {
@@ -91,7 +91,7 @@ export default async function VisionPulsePage() {
           <ScoreCircle value={adhesion} size="lg" />
           <div>
             <p className="section-tag text-slate-500 mb-1">Score Adhésion</p>
-            <p className="font-display text-white text-lg">{adhesion > 0 ? adhesionLabel(adhesion) : '—'}</p>
+            <p className="font-display text-slate-900 text-lg">{adhesion > 0 ? adhesionLabel(adhesion) : '—'}</p>
             <p className="text-slate-400 text-xs mt-1">
               {current ? `Q${current.quarter} ${current.year}` : 'Aucune donnée'}
             </p>
@@ -104,7 +104,7 @@ export default async function VisionPulsePage() {
           </div>
           <div>
             <p className="section-tag text-slate-500 mb-1">Participation</p>
-            <p className="font-display text-white text-2xl">{taux > 0 ? `${taux}%` : '—'}</p>
+            <p className="font-display text-slate-900 text-2xl">{taux > 0 ? `${taux}%` : '—'}</p>
             <p className="text-slate-400 text-xs mt-1">{current?.participation ?? 0} répondants</p>
           </div>
         </div>
@@ -115,7 +115,7 @@ export default async function VisionPulsePage() {
           </div>
           <div>
             <p className="section-tag text-slate-500 mb-1">Évolution</p>
-            <p className="font-display text-white text-2xl">
+            <p className="font-display text-slate-900 text-2xl">
               {evolution !== null ? (parseFloat(evolution) >= 0 ? `+${evolution}` : evolution) : '—'}
             </p>
             <p className="text-slate-400 text-xs mt-1">
@@ -128,7 +128,7 @@ export default async function VisionPulsePage() {
       {/* Radar dimensions */}
       {current && (
         <div className="card space-y-5">
-          <h3 className="font-display text-white">Détail par dimension</h3>
+          <h3 className="font-display text-slate-900">Détail par dimension</h3>
           <div className="space-y-4">
             {DIM_ORDER.map(d => {
               const score = dimScores[d] ?? 0;
@@ -136,7 +136,7 @@ export default async function VisionPulsePage() {
               return (
                 <div key={d} className="space-y-1.5">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="flex items-center gap-2 text-white">
+                    <span className="flex items-center gap-2 text-slate-900">
                       <span>{cfg?.icon}</span>
                       {cfg?.label}
                     </span>
@@ -162,7 +162,7 @@ export default async function VisionPulsePage() {
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-amber-400" />
-            <h3 className="font-display text-white text-sm">Signaux à surveiller</h3>
+            <h3 className="font-display text-slate-900 text-sm">Signaux à surveiller</h3>
           </div>
           {riskAlerts.map(a => (
             <AlertCard key={a.id} title={a.title} description={a.description} severity={a.severity} />
@@ -172,7 +172,7 @@ export default async function VisionPulsePage() {
 
       {/* Historique */}
       <div className="card space-y-4">
-        <h3 className="font-display text-white">Historique des Pulses</h3>
+        <h3 className="font-display text-slate-900">Historique des Pulses</h3>
         {pulses.length === 0 ? (
           <p className="text-slate-500 text-sm">Aucun sondage enregistré. Lancez le premier pulse pour commencer.</p>
         ) : (
@@ -188,7 +188,7 @@ export default async function VisionPulsePage() {
               </thead>
               <tbody className="divide-y divide-slate-800">
                 {pulses.map(h => (
-                  <tr key={`${h.quarter}-${h.year}`} className="text-slate-300">
+                  <tr key={`${h.quarter}-${h.year}`} className="text-slate-600">
                     <td className="py-3">Q{h.quarter} {h.year}</td>
                     <td className="py-3 text-right">{h.participation ?? '—'}</td>
                     <td className="py-3 text-right font-mono">{h.adhesion_score ?? '—'}</td>

@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -11,7 +11,7 @@ export default async function ChatThreadPage({
   params: Promise<{ profileId: string }>;
 }) {
   const { profileId: contactId } = await params;
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return <div className="flex items-center justify-center h-64"><p className="text-slate-400">Profil en cours de configuration…</p></div>;
 
@@ -47,14 +47,14 @@ export default async function ChatThreadPage({
     <div className="animate-fade-in h-[calc(100vh-5rem)] flex flex-col space-y-0">
       {/* Header */}
       <div className="card flex items-center gap-3 mb-4 py-3">
-        <Link href="/chat" className="p-1.5 rounded-lg hover:bg-white/[0.04] text-slate-500 hover:text-white transition-colors">
+        <Link href="/chat" className="p-1.5 rounded-lg hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition-colors">
           <ArrowLeft className="w-4 h-4" />
         </Link>
         <div className="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center text-sm font-bold text-emerald-400">
           {[contact.first_name?.[0], contact.last_name?.[0]].filter(Boolean).join('').toUpperCase() || '?'}
         </div>
         <div>
-          <p className="text-white font-medium text-sm">{name}</p>
+          <p className="text-slate-900 font-medium text-sm">{name}</p>
           <p className="text-slate-500 text-xs">{contact.email}</p>
         </div>
       </div>

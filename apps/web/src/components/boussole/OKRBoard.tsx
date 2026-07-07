@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, TrendingUp, TrendingDown, Circle } from 'lucide-react';
@@ -72,7 +72,7 @@ export function OKRBoard({ okrs }: OKRBoardProps) {
                   ? <TrendingUp size={14} className="text-emerald flex-shrink-0" />
                   : <TrendingDown size={14} className="text-rose flex-shrink-0" />
                 }
-                <span className="text-white font-medium text-sm truncate">{okr.title}</span>
+                <span className="text-slate-900 font-medium text-sm truncate">{okr.title}</span>
               </div>
               <div className="flex items-center gap-4 flex-shrink-0 ml-3">
                 <span
@@ -98,14 +98,14 @@ export function OKRBoard({ okrs }: OKRBoardProps) {
 
             {/* Key Results */}
             {isExpanded && okr.key_results && (
-              <div className="mt-4 space-y-3 border-t border-white/[0.04] pt-4">
+              <div className="mt-4 space-y-3 border-t border-slate-200 pt-4">
                 <p className="section-tag text-slate-500 mb-2">KEY RESULTS</p>
                 {okr.key_results.map((kr, i) => {
                   const krColor = kr.progress >= 70 ? '#10B981' : kr.progress >= 50 ? '#F59E0B' : '#F43F5E';
                   return (
                     <div key={i} className="flex items-center gap-3">
                       <Circle size={6} className="flex-shrink-0" style={{ color: krColor, fill: krColor }} />
-                      <p className="text-slate-300 text-xs flex-1 truncate">{kr.title}</p>
+                      <p className="text-slate-600 text-xs flex-1 truncate">{kr.title}</p>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <div className="w-20 h-1 bg-bg rounded-full overflow-hidden">
                           <div

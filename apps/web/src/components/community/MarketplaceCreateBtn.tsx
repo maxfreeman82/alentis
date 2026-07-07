@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -44,10 +44,10 @@ export default function MarketplaceCreateBtn({ profileId }: { profileId: string 
 
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => setOpen(false)}>
-      <div className="bg-bg-card rounded-2xl border border-white/[0.08] w-full max-w-md space-y-4 p-6"
+      <div className="bg-bg-card rounded-2xl border border-slate-200 w-full max-w-md space-y-4 p-6"
         onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between">
-          <h3 className="font-display text-white">Nouveau service</h3>
+          <h3 className="font-display text-slate-900">Nouveau service</h3>
           <button onClick={() => setOpen(false)}><X className="w-4 h-4 text-slate-500" /></button>
         </div>
 
@@ -63,11 +63,11 @@ export default function MarketplaceCreateBtn({ profileId }: { profileId: string 
             {f.type === 'textarea' ? (
               <textarea value={form[f.k as keyof typeof form]} onChange={e => set(f.k, e.target.value)}
                 placeholder={f.ph} rows={2}
-                className="w-full bg-bg rounded-lg px-3 py-2 text-slate-300 text-xs border border-white/[0.04] focus:outline-none resize-none" />
+                className="w-full bg-bg rounded-lg px-3 py-2 text-slate-600 text-xs border border-slate-200 focus:outline-none resize-none" />
             ) : (
               <input type={f.type} value={form[f.k as keyof typeof form]} onChange={e => set(f.k, e.target.value)}
                 placeholder={f.ph}
-                className="w-full bg-bg rounded-lg px-3 py-2 text-slate-300 text-xs border border-white/[0.04] focus:outline-none" />
+                className="w-full bg-bg rounded-lg px-3 py-2 text-slate-600 text-xs border border-slate-200 focus:outline-none" />
             )}
           </div>
         ))}
@@ -76,14 +76,14 @@ export default function MarketplaceCreateBtn({ profileId }: { profileId: string 
           <div className="space-y-1">
             <label className="text-slate-400 text-xs">Catégorie</label>
             <select value={form.category} onChange={e => set('category', e.target.value)}
-              className="w-full bg-bg rounded-lg px-2 py-2 text-slate-300 text-xs border border-white/[0.04] focus:outline-none">
+              className="w-full bg-bg rounded-lg px-2 py-2 text-slate-600 text-xs border border-slate-200 focus:outline-none">
               {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
           <div className="space-y-1">
             <label className="text-slate-400 text-xs">Type de prix</label>
             <select value={form.price_type} onChange={e => set('price_type', e.target.value)}
-              className="w-full bg-bg rounded-lg px-2 py-2 text-slate-300 text-xs border border-white/[0.04] focus:outline-none">
+              className="w-full bg-bg rounded-lg px-2 py-2 text-slate-600 text-xs border border-slate-200 focus:outline-none">
               <option value="fixed">Prix fixe</option>
               <option value="hourly">Par heure</option>
               <option value="negotiable">Négociable</option>
@@ -92,7 +92,7 @@ export default function MarketplaceCreateBtn({ profileId }: { profileId: string 
         </div>
 
         <button onClick={submit} disabled={!form.title.trim() || loading}
-          className="w-full py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-semibold hover:bg-emerald-600 disabled:opacity-40 transition-all">
+          className="w-full py-2.5 bg-emerald-500 text-slate-900 rounded-xl text-sm font-semibold hover:bg-emerald-600 disabled:opacity-40 transition-all">
           {loading ? 'Publication…' : 'Publier le service'}
         </button>
       </div>

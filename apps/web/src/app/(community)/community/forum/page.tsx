@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { getUserOrg } from '@/lib/supabase/auth';
 import { MessageSquare, Pin, CheckCircle, Eye, Clock } from 'lucide-react';
@@ -13,7 +13,7 @@ function timeAgo(d: string | null) {
 }
 
 export default async function ForumPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return null;
 
@@ -44,7 +44,7 @@ export default async function ForumPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-white text-xl">Forum RH Afrique</h1>
+          <h1 className="font-display text-slate-900 text-xl">Forum RH Afrique</h1>
           <p className="text-slate-400 text-xs mt-0.5">{totalPosts} discussions · 6 catégories</p>
         </div>
         <ForumPostBtn categories={categories} profileId={profileId} />
@@ -54,10 +54,10 @@ export default async function ForumPage() {
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {categories.map(cat => (
           <Link key={cat.id} href={`/community/forum/${cat.slug}`}
-            className="card hover:border-white/10 transition-all flex items-start gap-3 group">
+            className="card hover:border-slate-200 transition-all flex items-start gap-3 group">
             <span className="text-2xl flex-shrink-0">{cat.icon}</span>
             <div className="min-w-0">
-              <p className="text-white text-xs font-semibold group-hover:text-emerald-400 transition-colors">{cat.name}</p>
+              <p className="text-slate-900 text-xs font-semibold group-hover:text-emerald-400 transition-colors">{cat.name}</p>
               <p className="text-slate-600 text-[10px] mt-0.5 leading-snug line-clamp-2">{cat.description}</p>
               <p className="text-slate-700 text-[10px] mt-1">{cat.posts_count} sujet{cat.posts_count !== 1 ? 's' : ''}</p>
             </div>
@@ -83,7 +83,7 @@ export default async function ForumPage() {
 
               return (
                 <Link key={post.id} href={`/community/forum/post/${post.id}`}
-                  className="flex items-start gap-3 py-3 px-4 rounded-xl hover:bg-white/[0.02] transition-colors group border border-transparent hover:border-white/[0.04]">
+                  className="flex items-start gap-3 py-3 px-4 rounded-xl hover:bg-slate-50 transition-colors group border border-transparent hover:border-slate-200">
                   <div className="flex flex-col items-center gap-1 flex-shrink-0 w-8 pt-0.5">
                     {post.is_pinned  && <Pin         className="w-3 h-3 text-emerald-400" />}
                     {post.is_solved  && <CheckCircle className="w-3 h-3 text-sky-400"     />}
@@ -92,7 +92,7 @@ export default async function ForumPage() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-slate-200 text-sm group-hover:text-white transition-colors leading-snug">{post.title}</p>
+                    <p className="text-slate-700 text-sm group-hover:text-slate-800 transition-colors leading-snug">{post.title}</p>
                     <div className="flex items-center gap-3 mt-1 flex-wrap">
                       {cat && (
                         <span className="text-[10px] font-medium" style={{ color: cat.color ?? '#10B981' }}>{cat.name}</span>

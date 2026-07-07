@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { ArrowRight, Compass, Zap, Target } from 'lucide-react';
 import { AIInsightCard, SectionHeader } from '@/components/shared';
@@ -46,7 +46,7 @@ interface PageProps {
 }
 
 export default async function ArchetypePage({ searchParams }: PageProps) {
-  await withAuth({ ensureSignedIn: true });
+  await requireAuth();
 
   const params = await searchParams;
   const archetype = (params.archetype ?? 'INNOVATRICE') as Archetype;
@@ -79,11 +79,11 @@ export default async function ArchetypePage({ searchParams }: PageProps) {
           </div>
           <div>
             <p className="section-tag mb-1" style={{ color }}>ARCHÉTYPE IDENTIFIÉ</p>
-            <h2 className="font-display text-3xl text-white mb-1">{label}</h2>
+            <h2 className="font-display text-3xl text-slate-900 mb-1">{label}</h2>
             <p className="text-slate-400 text-sm">{desc.tagline}</p>
           </div>
         </div>
-        <p className="text-slate-300 text-sm mt-4 leading-relaxed">{desc.description}</p>
+        <p className="text-slate-600 text-sm mt-4 leading-relaxed">{desc.description}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -94,7 +94,7 @@ export default async function ArchetypePage({ searchParams }: PageProps) {
           </div>
           <ul className="space-y-2">
             {desc.strengths.map((s, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
+              <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
                 <span className="text-emerald mt-0.5">→</span>
                 {s}
               </li>
@@ -109,7 +109,7 @@ export default async function ArchetypePage({ searchParams }: PageProps) {
           </div>
           <ul className="space-y-2">
             {desc.challenges.map((c, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
+              <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
                 <span className="text-amber mt-0.5">⚠</span>
                 {c}
               </li>
@@ -156,7 +156,7 @@ export default async function ArchetypePage({ searchParams }: PageProps) {
               <Target size={14} className="text-violet" />
               <span className="section-tag text-violet">ÉTAPE SUIVANTE</span>
             </div>
-            <p className="text-white font-medium text-sm">Définir vos OKR 2026</p>
+            <p className="text-slate-900 font-medium text-sm">Définir vos OKR 2026</p>
             <p className="text-slate-400 text-xs mt-0.5">Cascade des objectifs alignés sur l&apos;archétype</p>
           </div>
           <ArrowRight size={16} className="text-slate-500 group-hover:text-violet transition-colors" />
@@ -171,7 +171,7 @@ export default async function ArchetypePage({ searchParams }: PageProps) {
               <Zap size={14} className="text-sky" />
               <span className="section-tag text-sky">ANALYSE AVANCÉE</span>
             </div>
-            <p className="text-white font-medium text-sm">Voir les gaps énergétiques</p>
+            <p className="text-slate-900 font-medium text-sm">Voir les gaps énergétiques</p>
             <p className="text-slate-400 text-xs mt-0.5">Comparer le mix actuel vs requis</p>
           </div>
           <ArrowRight size={16} className="text-slate-500 group-hover:text-sky transition-colors" />

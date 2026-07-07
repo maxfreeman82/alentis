@@ -1,9 +1,9 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { SectionHeader } from '@/components/shared';
 import { VisionQuestionnaire } from '@/components/boussole/VisionQuestionnaire';
 
 export default async function VisionPage() {
-  await withAuth({ ensureSignedIn: true });
+  await requireAuth();
 
   return (
     <div className="max-w-3xl mx-auto animate-fade-in">

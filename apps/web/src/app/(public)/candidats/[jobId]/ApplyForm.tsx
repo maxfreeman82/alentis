@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
@@ -48,9 +48,9 @@ export function ApplyForm({ jobId, jobTitle, orgName }: ApplyFormProps) {
     return (
       <div className="flex flex-col items-center gap-4 py-8 text-center">
         <CheckCircle size={48} className="text-emerald" />
-        <h3 className="text-white font-display text-xl font-bold">Candidature envoyée !</h3>
+        <h3 className="text-slate-900 font-display text-xl font-bold">Candidature envoyée !</h3>
         <p className="text-slate-400 max-w-md">
-          L&apos;équipe RH de <strong className="text-white">{orgName}</strong> a bien reçu votre dossier pour le poste de <strong className="text-white">{jobTitle}</strong>. Vous serez contacté par email sous 72h.
+          L&apos;équipe RH de <strong className="text-slate-900">{orgName}</strong> a bien reçu votre dossier pour le poste de <strong className="text-slate-900">{jobTitle}</strong>. Vous serez contacté par email sous 72h.
         </p>
       </div>
     );
@@ -64,7 +64,7 @@ export function ApplyForm({ jobId, jobTitle, orgName }: ApplyFormProps) {
           <input
             name="firstName" required
             placeholder="Moussa"
-            className="w-full bg-bg border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald/40 transition-colors"
+            className="w-full bg-bg border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald/40 transition-colors"
           />
         </div>
         <div>
@@ -72,7 +72,7 @@ export function ApplyForm({ jobId, jobTitle, orgName }: ApplyFormProps) {
           <input
             name="lastName" required
             placeholder="Diallo"
-            className="w-full bg-bg border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald/40 transition-colors"
+            className="w-full bg-bg border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald/40 transition-colors"
           />
         </div>
       </div>
@@ -82,7 +82,7 @@ export function ApplyForm({ jobId, jobTitle, orgName }: ApplyFormProps) {
         <input
           name="email" type="email" required
           placeholder="m.diallo@email.com"
-          className="w-full bg-bg border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald/40 transition-colors"
+          className="w-full bg-bg border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald/40 transition-colors"
         />
       </div>
 
@@ -92,7 +92,7 @@ export function ApplyForm({ jobId, jobTitle, orgName }: ApplyFormProps) {
           <input
             name="phone"
             placeholder="+221 77 000 00 00"
-            className="w-full bg-bg border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald/40 transition-colors"
+            className="w-full bg-bg border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald/40 transition-colors"
           />
         </div>
         <div>
@@ -100,7 +100,7 @@ export function ApplyForm({ jobId, jobTitle, orgName }: ApplyFormProps) {
           <input
             name="linkedin"
             placeholder="linkedin.com/in/..."
-            className="w-full bg-bg border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald/40 transition-colors"
+            className="w-full bg-bg border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald/40 transition-colors"
           />
         </div>
       </div>
@@ -111,7 +111,7 @@ export function ApplyForm({ jobId, jobTitle, orgName }: ApplyFormProps) {
           name="motivation" required
           rows={5}
           placeholder="Décrivez votre parcours, vos motivations et ce que vous apporteriez à cette équipe..."
-          className="w-full bg-bg border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald/40 transition-colors resize-none"
+          className="w-full bg-bg border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald/40 transition-colors resize-none"
         />
       </div>
 

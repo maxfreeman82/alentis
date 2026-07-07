@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { BookUser, Search, Award, Star } from 'lucide-react';
 import { SectionHeader } from '@/components/shared';
@@ -12,7 +12,7 @@ const ROLE_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 export default async function DirectoryPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return <div className="flex items-center justify-center h-64"><p className="text-slate-400">Profil en cours de configuration…</p></div>;
 
@@ -70,7 +70,7 @@ export default async function DirectoryPage() {
           const isAdmin   = ['org_admin', 'org_hr'].includes(ctx.role);
 
           return (
-            <div key={profile.id} className="card hover:border-white/10 border border-transparent transition-all space-y-3">
+            <div key={profile.id} className="card hover:border-slate-200 border border-transparent transition-all space-y-3">
               {/* En-tête */}
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-sm font-bold"
@@ -78,7 +78,7 @@ export default async function DirectoryPage() {
                   {initials}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-white font-medium text-sm truncate">{name}</p>
+                  <p className="text-slate-900 font-medium text-sm truncate">{name}</p>
                   <p className="text-slate-500 text-xs truncate">{profile.email}</p>
                 </div>
                 <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0"
@@ -114,13 +114,13 @@ export default async function DirectoryPage() {
               )}
 
               {/* Actions */}
-              <div className="flex gap-2 pt-1 border-t border-white/[0.04]">
+              <div className="flex gap-2 pt-1 border-t border-slate-200">
                 <Link href={`/chat/${profile.id}`} className="flex-1 text-center py-1.5 rounded-lg bg-sky-500/10 text-sky-400 text-xs hover:bg-sky-500/20 transition-colors">
                   Message
                 </Link>
                 {isAdmin && (
                   <Link href={`/admin-rh/collaborateur/${profile.id}`}
-                    className="flex-1 text-center py-1.5 rounded-lg bg-white/[0.04] text-slate-400 text-xs hover:bg-white/[0.08] transition-colors flex items-center justify-center gap-1">
+                    className="flex-1 text-center py-1.5 rounded-lg bg-slate-50 text-slate-400 text-xs hover:bg-slate-50 transition-colors flex items-center justify-center gap-1">
                     <Award className="w-3 h-3" /> Profil RH
                   </Link>
                 )}

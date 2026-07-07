@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { Users, Plus, Clock, CheckCircle, BarChart3, AlertTriangle, ChevronRight } from 'lucide-react';
 import { getUserOrg } from '@/lib/supabase/auth';
@@ -12,7 +12,7 @@ const STATUS_META = {
 };
 
 export default async function TourDeTablePage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
 
   const ctx = await getUserOrg(user.id);
   if (!ctx) return <p className="text-slate-500 p-8">Organisation introuvable.</p>;
@@ -39,7 +39,7 @@ export default async function TourDeTablePage() {
       <div className="flex items-start justify-between">
         <div>
           <p className="text-violet-400 text-xs font-semibold uppercase tracking-widest mb-1">MODULE 17</p>
-          <h1 className="font-display text-white text-2xl">Tour de Table</h1>
+          <h1 className="font-display text-slate-900 text-2xl">Tour de Table</h1>
           <p className="text-slate-400 text-sm mt-1">
             Observations comportementales trimestrielles entre pairs. Anonymes, sécurisées, consolidées dans les Passports.
           </p>
@@ -58,7 +58,7 @@ export default async function TourDeTablePage() {
                 <Clock className="w-4 h-4 text-amber-400" />
               </div>
               <div>
-                <p className="text-white font-semibold text-sm">
+                <p className="text-slate-900 font-semibold text-sm">
                   Session Q{activeSession.quarter} {activeSession.year} — En cours
                 </p>
                 <p className="text-slate-500 text-xs">
@@ -97,7 +97,7 @@ export default async function TourDeTablePage() {
 
       {/* Explication des 7 gardes */}
       <div className="card space-y-4">
-        <h2 className="font-display text-white text-sm">Les 7 gardes de sécurité</h2>
+        <h2 className="font-display text-slate-900 text-sm">Les 7 gardes de sécurité</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {[
             { n: 1, label: 'Minimum 3 observateurs',       desc: 'Les résultats ne s\'affichent que si ≥3 pairs ont répondu.' },
@@ -108,12 +108,12 @@ export default async function TourDeTablePage() {
             { n: 6, label: 'Cohérence temporelle',        desc: 'Chute > 25 pts vs trimestre précédent → alerte RH.' },
             { n: 7, label: 'Seuil de participation 70%',  desc: 'Session non publiée si < 70% des participants ont répondu.' },
           ].map(g => (
-            <div key={g.n} className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-white/[0.02] transition-all">
+            <div key={g.n} className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all">
               <span className="w-6 h-6 rounded-full bg-violet-500/15 text-violet-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                 {g.n}
               </span>
               <div>
-                <p className="text-white text-xs font-semibold">{g.label}</p>
+                <p className="text-slate-900 text-xs font-semibold">{g.label}</p>
                 <p className="text-slate-500 text-[11px] mt-0.5">{g.desc}</p>
               </div>
             </div>
@@ -124,19 +124,19 @@ export default async function TourDeTablePage() {
       {/* Historique */}
       {sessions && sessions.length > 0 && (
         <div className="space-y-3">
-          <h2 className="font-display text-white text-sm">Historique des sessions</h2>
+          <h2 className="font-display text-slate-900 text-sm">Historique des sessions</h2>
           <div className="space-y-2">
             {sessions.map(s => {
               const meta = STATUS_META[s.status as keyof typeof STATUS_META];
               return (
                 <Link key={s.id} href={`/performance/tour-de-table/${s.id}`}
-                  className="card flex items-center justify-between hover:border-white/10 transition-all group">
+                  className="card flex items-center justify-between hover:border-slate-200 transition-all group">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center flex-shrink-0">
                       <span className="text-violet-400 text-xs font-bold font-mono">Q{s.quarter}</span>
                     </div>
                     <div>
-                      <p className="text-white text-sm font-medium">Session Q{s.quarter} {s.year}</p>
+                      <p className="text-slate-900 text-sm font-medium">Session Q{s.quarter} {s.year}</p>
                       <p className="text-slate-500 text-xs">
                         {Array.isArray(s.participant_ids) ? s.participant_ids.length : 0} participants
                         {s.launched_at ? ` · Lancée le ${new Date(s.launched_at).toLocaleDateString('fr-SN')}` : ''}

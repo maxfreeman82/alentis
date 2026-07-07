@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -52,7 +52,7 @@ export default function WellbeingSurvey() {
       <div className="card flex flex-col items-center justify-center py-16 gap-6 text-center max-w-md mx-auto">
         <CheckCircle className="w-14 h-14 text-emerald-400" />
         <div>
-          <h2 className="font-display text-2xl text-white mb-1">Merci !</h2>
+          <h2 className="font-display text-2xl text-slate-900 mb-1">Merci !</h2>
           <p className="text-slate-400 text-sm">Votre bilan bien-être a été enregistré.</p>
         </div>
         <div className="flex items-center gap-6">
@@ -65,7 +65,7 @@ export default function WellbeingSurvey() {
             <p className="text-slate-400 text-xs mt-1">Risque burnout</p>
           </div>
         </div>
-        <p className="text-white font-semibold">{result.label}</p>
+        <p className="text-slate-900 font-semibold">{result.label}</p>
         <button onClick={() => router.push('/bien-etre')} className="btn-primary">
           Voir le tableau de bord
         </button>
@@ -102,7 +102,7 @@ export default function WellbeingSurvey() {
         <div className="space-y-7">
           {dimQs.map((q, qi) => (
             <div key={q.id} className="space-y-3">
-              <p className="text-white text-sm leading-relaxed">
+              <p className="text-slate-900 text-sm leading-relaxed">
                 <span className="text-slate-500 mr-2">{qi + 1}.</span>{q.text}
               </p>
               <div className="grid grid-cols-5 gap-1.5">

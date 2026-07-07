@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useTransition } from 'react';
 import { Sparkles, Check, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
@@ -52,13 +52,13 @@ export default function BusinessPlanForm({ sections, archetype }: Props) {
         const isOpen = expanded === s.id;
         const v      = values[s.id] ?? '';
         return (
-          <div key={s.id} className="border border-white/[0.06] rounded-xl overflow-hidden">
+          <div key={s.id} className="border border-slate-200 rounded-xl overflow-hidden">
             <button onClick={() => setExpanded(isOpen ? null : s.id)}
-              className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/[0.02] transition-all">
+              className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-all">
               <div className="flex items-center gap-3">
                 <div className={`w-2 h-2 rounded-full flex-shrink-0 ${v.length > 20 ? 'bg-emerald-500' : 'bg-white/10'}`} />
                 <div className="text-left">
-                  <p className="text-white text-sm font-medium">{s.label}</p>
+                  <p className="text-slate-900 text-sm font-medium">{s.label}</p>
                   <p className="text-slate-500 text-xs">{s.desc}</p>
                 </div>
               </div>
@@ -66,13 +66,13 @@ export default function BusinessPlanForm({ sections, archetype }: Props) {
             </button>
 
             {isOpen && (
-              <div className="px-4 pb-4 space-y-3 border-t border-white/[0.04]">
+              <div className="px-4 pb-4 space-y-3 border-t border-slate-200">
                 <textarea
                   value={v}
                   onChange={e => setValues(prev => ({ ...prev, [s.id]: e.target.value }))}
                   placeholder={`Décrivez ${s.label.toLowerCase()}…`}
                   rows={5}
-                  className="w-full bg-bg border border-white/[0.06] rounded-xl px-3 py-2.5 text-slate-300 text-sm placeholder-slate-600 focus:outline-none focus:border-amber-500/50 resize-none transition-all mt-3"
+                  className="w-full bg-bg border border-slate-200 rounded-xl px-3 py-2.5 text-slate-600 text-sm placeholder-slate-400 focus:outline-none focus:border-amber-500/50 resize-none transition-all mt-3"
                 />
                 <div className="flex gap-2 justify-end">
                   <button onClick={() => generateWithAI(s.id)} disabled={!!generating}

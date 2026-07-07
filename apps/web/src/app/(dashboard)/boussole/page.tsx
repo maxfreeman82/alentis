@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { Compass, Target, Radio, ArrowRight, Zap, BarChart2, Wand2 } from 'lucide-react';
 import { SectionHeader, ScoreCircle, CertBadge } from '@/components/shared';
@@ -16,7 +16,7 @@ const MODULES = [
 ];
 
 export default async function BousssolePage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
 
   if (!ctx) {
@@ -62,14 +62,14 @@ export default async function BousssolePage() {
           <ScoreCircle value={orgIasScore} size="lg" />
           <div>
             <p className="section-tag text-slate-500 mb-1">IAS Global</p>
-            <p className="font-display text-white text-lg">{ias.label}</p>
+            <p className="font-display text-slate-900 text-lg">{ias.label}</p>
             <p className="text-slate-400 text-xs mt-1">Index d&apos;Alignement Stratégique</p>
           </div>
         </div>
 
         <div className="card" style={{ borderLeft: `3px solid ${archetypeColor}` }}>
           <p className="section-tag text-slate-500 mb-2">ARCHÉTYPE</p>
-          <p className="font-display text-xl text-white" style={{ color: archetypeColor }}>{archetypeLabel}</p>
+          <p className="font-display text-xl text-slate-900" style={{ color: archetypeColor }}>{archetypeLabel}</p>
           {latestAssessment ? (
             <p className="text-slate-500 text-xs mt-1">
               Évalué le {new Date(latestAssessment.created_at).toLocaleDateString('fr-FR')}
@@ -110,14 +110,14 @@ export default async function BousssolePage() {
           const Icon = m.icon;
           return (
             <Link key={m.href} href={m.href}
-              className="card hover:border-white/10 border border-transparent group flex items-center gap-4 transition-all">
+              className="card hover:border-slate-200 border border-transparent group flex items-center gap-4 transition-all">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{ backgroundColor: `${m.color}15` }}>
                 <Icon className="w-6 h-6" style={{ color: m.color }} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="section-tag text-slate-500 mb-0.5">{m.tag}</p>
-                <p className="text-white font-semibold text-sm">{m.label}</p>
+                <p className="text-slate-900 font-semibold text-sm">{m.label}</p>
                 <p className="text-slate-500 text-xs mt-0.5">{m.desc}</p>
               </div>
               <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-slate-400 transition-colors flex-shrink-0" />
@@ -132,9 +132,9 @@ export default async function BousssolePage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Target className="w-4 h-4 text-emerald-400" />
-              <h3 className="font-display text-white text-sm">OKR {new Date().getFullYear()}</h3>
+              <h3 className="font-display text-slate-900 text-sm">OKR {new Date().getFullYear()}</h3>
             </div>
-            <Link href="/boussole/objectifs" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
+            <Link href="/boussole/objectifs" className="text-xs text-slate-500 hover:text-slate-600 transition-colors">
               Voir tout →
             </Link>
           </div>

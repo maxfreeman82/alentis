@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { ShieldCheck, AlertTriangle, CheckCircle, Clock, Plus } from 'lucide-react';
 import { SectionHeader } from '@/components/shared';
@@ -27,7 +27,7 @@ function statusStyle(status: string) {
 }
 
 export default async function ConformitePage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return <div className="flex items-center justify-center h-64"><p className="text-slate-400">Profil en cours de configuration…</p></div>;
 
@@ -101,7 +101,7 @@ export default async function ConformitePage() {
       <div className="card space-y-2">
         <div className="flex justify-between text-sm">
           <span className="text-slate-400">Progression globale</span>
-          <span className="font-mono text-white">{completed}/{total} obligations</span>
+          <span className="font-mono text-slate-900">{completed}/{total} obligations</span>
         </div>
         <div className="h-3 bg-bg rounded-full overflow-hidden">
           <div className="h-full rounded-full transition-all" style={{ width: `${complianceRate}%`, backgroundColor: complianceRate >= 70 ? '#10B981' : complianceRate >= 40 ? '#F59E0B' : '#F43F5E' }} />
@@ -113,7 +113,7 @@ export default async function ConformitePage() {
         const cfg = CATEGORY_LABELS[cat] ?? { label: cat, color: '#64748B' };
         return (
           <div key={cat} className="space-y-2">
-            <h3 className="font-display text-white text-sm flex items-center gap-2">
+            <h3 className="font-display text-slate-900 text-sm flex items-center gap-2">
               <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: cfg.color }} />
               {cfg.label}
               <span className="text-slate-600 text-xs">({catItems.length})</span>
@@ -130,7 +130,7 @@ export default async function ConformitePage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <p className="text-white text-sm font-medium">{item.title}</p>
+                          <p className="text-slate-900 text-sm font-medium">{item.title}</p>
                           {item.description && <p className="text-slate-500 text-xs mt-0.5">{item.description}</p>}
                         </div>
                         <div className="text-right flex-shrink-0">

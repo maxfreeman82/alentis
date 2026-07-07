@@ -1,4 +1,4 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import {
   Star, Briefcase, Rocket, ArrowRight, Shield,
   Globe, Zap, TrendingUp, Users, CheckCircle,
@@ -95,17 +95,17 @@ export function LandingPage() {
   return (
     <div className="min-h-screen bg-bg">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-white/[0.04] bg-bg/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-bg/95 backdrop-blur-sm">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-emerald rounded-lg flex items-center justify-center">
-              <span className="font-display text-white font-bold text-sm">TA</span>
+              <span className="font-display text-slate-900 font-bold text-sm">TA</span>
             </div>
-            <span className="font-display text-white font-semibold">Teranga Align</span>
+            <span className="font-display text-slate-900 font-semibold">Teranga Align</span>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/sign-in"
-              className="text-slate-400 hover:text-white text-sm transition-colors hidden sm:block">
+              className="text-slate-400 hover:text-slate-800 text-sm transition-colors hidden sm:block">
               Se connecter
             </Link>
             <Link href="/sign-in"
@@ -125,7 +125,7 @@ export function LandingPage() {
             <span className="w-1.5 h-1.5 bg-emerald rounded-full animate-pulse" />
             Le moteur d&apos;alignement stratégique du travail en Afrique
           </div>
-          <h1 className="font-display text-white text-4xl sm:text-6xl leading-tight mb-5">
+          <h1 className="font-display text-slate-900 text-4xl sm:text-6xl leading-tight mb-5">
             Votre carrière.<br />
             <span className="text-emerald">Votre impact.</span>
           </h1>
@@ -140,7 +140,7 @@ export function LandingPage() {
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link href="/sign-in"
-              className="flex items-center gap-2 border border-white/[0.10] text-slate-300 px-7 py-3.5 rounded-xl text-sm hover:border-white/20 hover:text-white transition-colors w-full sm:w-auto justify-center">
+              className="flex items-center gap-2 border border-slate-200 text-slate-600 px-7 py-3.5 rounded-xl text-sm hover:border-slate-200 hover:text-slate-800 transition-colors w-full sm:w-auto justify-center">
               J&apos;ai déjà un compte
             </Link>
           </div>
@@ -149,8 +149,8 @@ export function LandingPage() {
         {/* Stats */}
         <section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {STATS.map(s => (
-            <div key={s.label} className="bg-card border border-white/[0.06] rounded-2xl p-5 text-center">
-              <p className="font-display text-white text-3xl font-bold">
+            <div key={s.label} className="bg-card border border-slate-200 rounded-2xl p-5 text-center">
+              <p className="font-display text-slate-900 text-3xl font-bold">
                 {s.value}
                 <span className="text-emerald text-lg">{s.unit}</span>
               </p>
@@ -163,7 +163,7 @@ export function LandingPage() {
         <section>
           <div className="text-center mb-10">
             <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest mb-2">Choisissez votre espace</p>
-            <h2 className="font-display text-white text-2xl sm:text-3xl">Pour qui est Teranga Align ?</h2>
+            <h2 className="font-display text-slate-900 text-2xl sm:text-3xl">Pour qui est Teranga Align ?</h2>
           </div>
           <div className="grid sm:grid-cols-3 gap-5">
             {PROFILES.map(p => {
@@ -174,7 +174,7 @@ export function LandingPage() {
                   <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-4 ${p.iconBg}`}>
                     <Icon className="w-5 h-5" />
                   </div>
-                  <p className="font-display text-white font-semibold text-lg mb-0.5">{p.label}</p>
+                  <p className="font-display text-slate-900 font-semibold text-lg mb-0.5">{p.label}</p>
                   <p className="text-slate-500 text-xs mb-3">{p.subtitle}</p>
                   <p className="text-slate-400 text-sm mb-5 flex-1 leading-relaxed">{p.description}</p>
                   <ul className="space-y-2 mb-6">
@@ -200,7 +200,7 @@ export function LandingPage() {
         <section>
           <div className="text-center mb-10">
             <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest mb-2">Pourquoi Teranga Align</p>
-            <h2 className="font-display text-white text-2xl sm:text-3xl">
+            <h2 className="font-display text-slate-900 text-2xl sm:text-3xl">
               Le recrutement africain,{' '}
               <span className="text-emerald">réinventé</span>
             </h2>
@@ -209,12 +209,12 @@ export function LandingPage() {
             {DIFFERENCIATEURS.map(d => {
               const Icon = d.icon;
               return (
-                <div key={d.title} className="bg-card border border-white/[0.06] rounded-2xl p-6 flex gap-4">
+                <div key={d.title} className="bg-card border border-slate-200 rounded-2xl p-6 flex gap-4">
                   <div className="w-10 h-10 rounded-xl bg-emerald/10 flex items-center justify-center flex-shrink-0">
                     <Icon className="w-5 h-5 text-emerald" />
                   </div>
                   <div>
-                    <p className="text-white font-semibold text-sm mb-1">{d.title}</p>
+                    <p className="text-slate-900 font-semibold text-sm mb-1">{d.title}</p>
                     <p className="text-slate-400 text-xs leading-relaxed">{d.text}</p>
                   </div>
                 </div>
@@ -228,7 +228,7 @@ export function LandingPage() {
           <div className="w-12 h-12 bg-emerald/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Users className="w-6 h-6 text-emerald" />
           </div>
-          <h2 className="font-display text-white text-2xl sm:text-3xl mb-3">
+          <h2 className="font-display text-slate-900 text-2xl sm:text-3xl mb-3">
             Prêt à découvrir votre profil ?
           </h2>
           <p className="text-slate-400 text-sm max-w-md mx-auto mb-7 leading-relaxed">
@@ -245,11 +245,11 @@ export function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-white/[0.04] py-8">
+      <footer className="border-t border-slate-200 py-8">
         <div className="max-w-5xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-emerald rounded-md flex items-center justify-center">
-              <span className="font-display text-white font-bold text-xs">TA</span>
+              <span className="font-display text-slate-900 font-bold text-xs">TA</span>
             </div>
             <span className="text-slate-600 text-xs">Teranga Align © 2026</span>
           </div>

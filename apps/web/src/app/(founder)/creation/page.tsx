@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { CheckCircle, ArrowRight, Building2, FileText } from 'lucide-react';
 import { createServerClient } from '@/lib/supabase/server';
@@ -67,11 +67,11 @@ const CHECKLIST_STEPS = [
 ];
 
 export default async function CreationPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const supabase  = createServerClient();
 
   const { data: profile } = await supabase
-    .from('profiles').select('id').eq('workos_user_id', user.id).maybeSingle();
+    .from('profiles').select('id').eq('user_id', user.id).maybeSingle();
 
   const { data: founder } = profile
     ? await supabase.from('founders')
@@ -84,7 +84,7 @@ export default async function CreationPage() {
     <div className="space-y-8">
       <div>
         <p className="text-amber-400 text-xs font-semibold uppercase tracking-widest mb-2">ÉTAPE 2</p>
-        <h1 className="font-display text-white text-2xl">Créer votre entreprise au Sénégal</h1>
+        <h1 className="font-display text-slate-900 text-2xl">Créer votre entreprise au Sénégal</h1>
         <p className="text-slate-400 text-sm mt-1">
           Choisissez la structure adaptée à votre projet, puis suivez la checklist de création.
         </p>
@@ -92,16 +92,16 @@ export default async function CreationPage() {
 
       {/* Structures juridiques */}
       <div className="space-y-3">
-        <h2 className="font-display text-white text-sm">Quelle structure juridique ?</h2>
+        <h2 className="font-display text-slate-900 text-sm">Quelle structure juridique ?</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {LEGAL_STRUCTURES.map(s => {
             const isSelected = founder?.legal_structure === s.id;
             return (
-              <div key={s.id} className={`card space-y-3 hover:border-white/10 transition-all ${isSelected ? 'border-current' : ''}`}
+              <div key={s.id} className={`card space-y-3 hover:border-slate-200 transition-all ${isSelected ? 'border-current' : ''}`}
                 style={isSelected ? { borderColor: s.color, backgroundColor: `${s.color}05` } : {}}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="font-display text-white font-semibold">{s.label}</span>
+                    <span className="font-display text-slate-900 font-semibold">{s.label}</span>
                     {isSelected && <span className="ml-2 text-[10px] font-semibold" style={{ color: s.color }}>✓ Choisie</span>}
                   </div>
                   <span className="text-[10px] font-mono" style={{ color: s.color }}>{s.capital}</span>
@@ -119,7 +119,7 @@ export default async function CreationPage() {
                     </p>
                   ))}
                 </div>
-                <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
+                <div className="flex items-center justify-between pt-2 border-t border-slate-200">
                   <span className="text-slate-600 text-[10px]">Délai : {s.delay}</span>
                   <button className="text-[10px] px-2.5 py-1 rounded-lg font-semibold transition-colors"
                     style={{ backgroundColor: `${s.color}15`, color: s.color }}>
@@ -134,7 +134,7 @@ export default async function CreationPage() {
 
       {/* Checklist */}
       <div className="space-y-3">
-        <h2 className="font-display text-white text-sm">Checklist de création</h2>
+        <h2 className="font-display text-slate-900 text-sm">Checklist de création</h2>
         <CreationChecklist steps={CHECKLIST_STEPS} />
       </div>
 
@@ -144,13 +144,13 @@ export default async function CreationPage() {
           {founder.rccm_number && (
             <div>
               <p className="text-slate-500 text-[10px] uppercase tracking-wider">RCCM</p>
-              <p className="text-white text-sm font-mono">{founder.rccm_number}</p>
+              <p className="text-slate-900 text-sm font-mono">{founder.rccm_number}</p>
             </div>
           )}
           {founder.ninea_number && (
             <div>
               <p className="text-slate-500 text-[10px] uppercase tracking-wider">NINEA</p>
-              <p className="text-white text-sm font-mono">{founder.ninea_number}</p>
+              <p className="text-slate-900 text-sm font-mono">{founder.ninea_number}</p>
             </div>
           )}
         </div>

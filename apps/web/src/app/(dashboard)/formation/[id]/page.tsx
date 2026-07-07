@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { notFound } from 'next/navigation';
 import { Clock, Users, Calendar, BookOpen } from 'lucide-react';
 import { SectionHeader } from '@/components/shared';
@@ -11,7 +11,7 @@ interface PageProps { params: Promise<{ id: string }> }
 
 export default async function TrainingDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return notFound();
 
@@ -53,27 +53,27 @@ export default async function TrainingDetailPage({ params }: PageProps) {
         {cat && (
           <div className="card text-center py-3">
             <BookOpen className="w-4 h-4 mx-auto mb-1" style={{ color: cat.color }} />
-            <p className="text-white text-xs font-semibold">{cat.label}</p>
+            <p className="text-slate-900 text-xs font-semibold">{cat.label}</p>
             <p className="text-slate-500 text-[10px]">Catégorie</p>
           </div>
         )}
         {format && (
           <div className="card text-center py-3">
             <Calendar className="w-4 h-4 mx-auto mb-1 text-slate-400" />
-            <p className="text-white text-xs font-semibold">{format}</p>
+            <p className="text-slate-900 text-xs font-semibold">{format}</p>
             <p className="text-slate-500 text-[10px]">Format</p>
           </div>
         )}
         {training.duration_hours && (
           <div className="card text-center py-3">
             <Clock className="w-4 h-4 mx-auto mb-1 text-slate-400" />
-            <p className="text-white text-xs font-semibold">{training.duration_hours}h</p>
+            <p className="text-slate-900 text-xs font-semibold">{training.duration_hours}h</p>
             <p className="text-slate-500 text-[10px]">Durée</p>
           </div>
         )}
         <div className="card text-center py-3">
           <Users className="w-4 h-4 mx-auto mb-1 text-slate-400" />
-          <p className="text-white text-xs font-semibold">
+          <p className="text-slate-900 text-xs font-semibold">
             {enrollments.length}{training.max_participants ? `/${training.max_participants}` : ''}
           </p>
           <p className="text-slate-500 text-[10px]">Inscrits</p>
@@ -86,13 +86,13 @@ export default async function TrainingDetailPage({ params }: PageProps) {
           {training.instructor && (
             <div className="flex items-center justify-between text-sm">
               <span className="text-slate-400">Formateur</span>
-              <span className="text-white">{training.instructor}</span>
+              <span className="text-slate-900">{training.instructor}</span>
             </div>
           )}
           {training.start_date && (
             <div className="flex items-center justify-between text-sm">
               <span className="text-slate-400">Période</span>
-              <span className="text-white">
+              <span className="text-slate-900">
                 {new Date(training.start_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
                 {training.end_date && ` → ${new Date(training.end_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`}
               </span>
@@ -119,7 +119,7 @@ export default async function TrainingDetailPage({ params }: PageProps) {
       {enrollments.length > 0 && (
         <div className="card space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-display text-white text-sm">Complétion globale</h3>
+            <h3 className="font-display text-slate-900 text-sm">Complétion globale</h3>
             <span className="font-mono text-emerald-400 font-bold">{compRate}%</span>
           </div>
           <div className="h-2 bg-bg rounded-full overflow-hidden">
@@ -135,11 +135,11 @@ export default async function TrainingDetailPage({ params }: PageProps) {
               return (
                 <div key={e.id} className="flex items-center justify-between py-2.5">
                   <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center text-xs text-slate-300 font-bold">
+                    <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center text-xs text-slate-600 font-bold">
                       {name.charAt(0)}
                     </div>
                     <div>
-                      <p className="text-white text-xs font-medium">{name}</p>
+                      <p className="text-slate-900 text-xs font-medium">{name}</p>
                       <div className="w-20 h-1 bg-bg rounded-full mt-1">
                         <div className="h-full bg-violet-500 rounded-full" style={{ width: `${e.progress}%` }} />
                       </div>

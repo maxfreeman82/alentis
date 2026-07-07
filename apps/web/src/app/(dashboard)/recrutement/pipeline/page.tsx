@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { SectionHeader } from '@/components/shared';
@@ -10,7 +10,7 @@ export default async function PipelinePage({
 }: {
   searchParams: Promise<{ job?: string }>;
 }) {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return null;
 
@@ -39,7 +39,7 @@ export default async function PipelinePage({
           action={<Link href="/recrutement/jobs" className="btn-secondary flex items-center gap-2 text-sm"><ArrowLeft size={14} /> Postes</Link>}
         />
         <div className="card text-center py-16 space-y-2">
-          <p className="text-white font-display text-xl">Aucun candidat</p>
+          <p className="text-slate-900 font-display text-xl">Aucun candidat</p>
           <p className="text-slate-500 text-sm">Ajoutez des candidatures depuis le matching IA.</p>
         </div>
       </div>

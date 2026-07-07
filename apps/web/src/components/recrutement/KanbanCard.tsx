@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -43,8 +43,8 @@ export function KanbanCard({ candidate, isOverlay = false }: KanbanCardProps) {
       {...attributes}
       {...listeners}
       className={cn(
-        'bg-bg-card border border-white/[0.06] rounded-lg p-3 cursor-grab active:cursor-grabbing',
-        'hover:border-white/[0.10] hover:-translate-y-0.5 transition-all duration-150',
+        'bg-bg-card border border-slate-200 rounded-lg p-3 cursor-grab active:cursor-grabbing',
+        'hover:border-slate-200 hover:-translate-y-0.5 transition-all duration-150',
         isOverlay && 'shadow-xl shadow-black/50 rotate-1 scale-105 cursor-grabbing'
       )}
     >
@@ -57,7 +57,7 @@ export function KanbanCard({ candidate, isOverlay = false }: KanbanCardProps) {
           {candidate.avatar_letter}
         </div>
         <div className="min-w-0">
-          <p className="text-white text-xs font-semibold truncate">{candidate.name}</p>
+          <p className="text-slate-900 text-xs font-semibold truncate">{candidate.name}</p>
           <p className="text-slate-500 text-[10px] truncate">{candidate.role}</p>
         </div>
       </div>

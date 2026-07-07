@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { Heart, AlertTriangle, TrendingUp, Users } from 'lucide-react';
 import { SectionHeader, ScoreCircle, AlertCard } from '@/components/shared';
@@ -12,7 +12,7 @@ const wellbeingLabel = (s: number) =>
   s >= 80 ? 'Épanoui' : s >= 65 ? 'Satisfait' : s >= 50 ? 'Neutre' : s >= 35 ? 'En tension' : 'En détresse';
 
 export default async function BienEtrePage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return <div className="flex items-center justify-center h-64"><p className="text-slate-400">Profil en cours de configuration…</p></div>;
 
@@ -71,7 +71,7 @@ export default async function BienEtrePage() {
           <ScoreCircle value={avgScore} size="lg" />
           <div>
             <p className="section-tag text-slate-500 mb-1">Score moyen</p>
-            <p className="font-display text-white">{avgScore > 0 ? wellbeingLabel(avgScore) : '—'}</p>
+            <p className="font-display text-slate-900">{avgScore > 0 ? wellbeingLabel(avgScore) : '—'}</p>
           </div>
         </div>
         <div className="card flex items-center gap-3">
@@ -79,7 +79,7 @@ export default async function BienEtrePage() {
             <AlertTriangle className="w-5 h-5 text-rose-400" />
           </div>
           <div>
-            <p className="text-white font-bold text-xl font-mono">{avgBurnout}%</p>
+            <p className="text-slate-900 font-bold text-xl font-mono">{avgBurnout}%</p>
             <p className="text-slate-500 text-[10px]">Risque burnout moyen</p>
           </div>
         </div>
@@ -88,7 +88,7 @@ export default async function BienEtrePage() {
             <TrendingUp className="w-5 h-5 text-amber-400" />
           </div>
           <div>
-            <p className="text-white font-bold text-xl font-mono">{highBurnout.length}</p>
+            <p className="text-slate-900 font-bold text-xl font-mono">{highBurnout.length}</p>
             <p className="text-slate-500 text-[10px]">Profils à risque élevé</p>
           </div>
         </div>
@@ -97,7 +97,7 @@ export default async function BienEtrePage() {
             <Users className="w-5 h-5 text-sky-400" />
           </div>
           <div>
-            <p className="text-white font-bold text-xl font-mono">{count}</p>
+            <p className="text-slate-900 font-bold text-xl font-mono">{count}</p>
             <p className="text-slate-500 text-[10px]">Répondants ce mois</p>
           </div>
         </div>
@@ -122,7 +122,7 @@ export default async function BienEtrePage() {
       {/* Radar dimensions */}
       {count > 0 && (
         <div className="card space-y-5">
-          <h3 className="font-display text-white">Dimensions — moyennes organisationnelles</h3>
+          <h3 className="font-display text-slate-900">Dimensions — moyennes organisationnelles</h3>
           <div className="space-y-4">
             {DIM_KEYS.map(d => {
               const score = dimScores[d];
@@ -130,7 +130,7 @@ export default async function BienEtrePage() {
               return (
                 <div key={d} className="space-y-1.5">
                   <div className="flex justify-between text-sm">
-                    <span className="flex items-center gap-2 text-white">
+                    <span className="flex items-center gap-2 text-slate-900">
                       <span>{cfg?.icon}</span>{cfg?.label}
                     </span>
                     <span className={score >= 70 ? 'text-emerald-400' : score >= 50 ? 'text-amber-400' : 'text-rose-400'}>
@@ -151,21 +151,21 @@ export default async function BienEtrePage() {
       {/* Table collaborateurs */}
       {count > 0 && (
         <div className="card !p-0 overflow-hidden">
-          <div className="px-5 py-3 border-b border-white/[0.06]">
-            <p className="text-white font-semibold text-sm">Détail par collaborateur</p>
+          <div className="px-5 py-3 border-b border-slate-200">
+            <p className="text-slate-900 font-semibold text-sm">Détail par collaborateur</p>
           </div>
-          <div className="divide-y divide-white/[0.04]">
+          <div className="divide-y divide-slate-200">
             {rows.map(r => {
               const p = profileMap.get(r.profile_id);
               const name = p ? `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() : 'Anonyme';
               const burnoutColor = (r.burnout_risk ?? 0) > 65 ? '#F43F5E' : (r.burnout_risk ?? 0) > 40 ? '#F59E0B' : '#10B981';
               return (
                 <div key={r.id} className="flex items-center gap-4 px-5 py-3">
-                  <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-300 flex-shrink-0">
+                  <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0">
                     {name.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-medium">{name}</p>
+                    <p className="text-slate-900 text-sm font-medium">{name}</p>
                     <p className="text-slate-500 text-xs">{p?.role?.replace('org_', '') ?? ''}</p>
                   </div>
                   <div className="text-center">

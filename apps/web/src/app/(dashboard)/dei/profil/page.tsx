@@ -1,9 +1,9 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { SectionHeader } from '@/components/shared';
 import DeiProfileForm from '@/components/dei/DeiProfileForm';
 
 export default async function DeiProfilPage() {
-  await withAuth({ ensureSignedIn: true });
+  await requireAuth();
   return (
     <div className="max-w-xl mx-auto space-y-6 animate-fade-in">
       <SectionHeader

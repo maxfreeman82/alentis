@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { SectionHeader } from '@/components/shared';
 import { formatFCFA } from '@/lib/utils';
@@ -9,7 +9,7 @@ import { PayrollConfigButton } from '@/components/remuneration/PayrollConfigButt
 import { Users, AlertTriangle } from 'lucide-react';
 
 export default async function RemunerationPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return null;
 
@@ -97,7 +97,7 @@ export default async function RemunerationPage() {
       {bulletins.length === 0 ? (
         <div className="card text-center py-16 space-y-3">
           <Users className="w-10 h-10 text-slate-700 mx-auto" />
-          <p className="text-white font-display text-xl">Aucun bulletin configuré</p>
+          <p className="text-slate-900 font-display text-xl">Aucun bulletin configuré</p>
           <p className="text-slate-500 text-sm max-w-sm mx-auto">
             Configurez les paramètres de paie de vos collaborateurs pour générer la masse salariale.
           </p>
@@ -117,12 +117,12 @@ export default async function RemunerationPage() {
 
           {/* Table bulletins */}
           <div className="card !p-0 overflow-hidden">
-            <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
-              <p className="text-white font-semibold text-sm">Bulletins de paie — {monthName} {year}</p>
+            <div className="px-5 py-3 border-b border-slate-200 flex items-center justify-between">
+              <p className="text-slate-900 font-semibold text-sm">Bulletins de paie — {monthName} {year}</p>
               <p className="text-slate-500 text-xs">{bulletins.length} collaborateurs</p>
             </div>
 
-            <div className="hidden md:grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-4 px-5 py-2 border-b border-white/[0.04] text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+            <div className="hidden md:grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-4 px-5 py-2 border-b border-slate-200 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
               <span>Collaborateur</span>
               <span className="text-right">Brut</span>
               <span className="text-right text-amber">IPRES</span>
@@ -131,20 +131,20 @@ export default async function RemunerationPage() {
               <span className="text-right text-violet">Coût total</span>
             </div>
 
-            <div className="divide-y divide-white/[0.04]">
+            <div className="divide-y divide-slate-200">
               {bulletins.map((b) => {
                 const ipresTotal = b.result.ipresA_salarie.montant + b.result.ipresB_salarie.montant;
                 return (
                   <Link
                     key={b.profileId}
                     href={`/remuneration/bulletin/${b.profileId}`}
-                    className="grid grid-cols-2 md:grid-cols-[1fr_auto_auto_auto_auto_auto] gap-4 items-center px-5 py-3 hover:bg-white/[0.02] transition-colors"
+                    className="grid grid-cols-2 md:grid-cols-[1fr_auto_auto_auto_auto_auto] gap-4 items-center px-5 py-3 hover:bg-slate-50 transition-colors"
                   >
                     <div>
-                      <p className="text-white text-sm font-medium">{b.name}</p>
+                      <p className="text-slate-900 text-sm font-medium">{b.name}</p>
                       <p className="text-slate-500 text-xs">{b.role}</p>
                     </div>
-                    <span className="font-mono text-sm text-right text-slate-300">{formatFCFA(b.result.totalBrut)}</span>
+                    <span className="font-mono text-sm text-right text-slate-600">{formatFCFA(b.result.totalBrut)}</span>
                     <span className="font-mono text-sm text-right text-amber">-{formatFCFA(ipresTotal)}</span>
                     <span className="font-mono text-sm text-right text-rose">-{formatFCFA(b.result.irppMensuel)}</span>
                     <span className="font-mono text-sm text-right text-emerald font-bold">{formatFCFA(b.result.salaireNet)}</span>
@@ -155,9 +155,9 @@ export default async function RemunerationPage() {
             </div>
 
             {/* Total */}
-            <div className="grid grid-cols-2 md:grid-cols-[1fr_auto_auto_auto_auto_auto] gap-4 items-center px-5 py-3 border-t border-white/[0.08] bg-bg-card">
+            <div className="grid grid-cols-2 md:grid-cols-[1fr_auto_auto_auto_auto_auto] gap-4 items-center px-5 py-3 border-t border-slate-200 bg-bg-card">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">TOTAL ORG</span>
-              <span className="font-mono text-sm font-bold text-right text-slate-300">{formatFCFA(totalBrut)}</span>
+              <span className="font-mono text-sm font-bold text-right text-slate-600">{formatFCFA(totalBrut)}</span>
               <span /><span />
               <span className="font-mono text-sm font-bold text-right text-emerald">{formatFCFA(totalNet)}</span>
               <span className="font-mono text-xs font-bold text-right text-violet">{formatFCFA(coutTotal)}</span>

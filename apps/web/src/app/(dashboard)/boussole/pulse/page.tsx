@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { getUserOrg } from '@/lib/supabase/auth';
 import { PulseSurvey } from '@/components/pulse/PulseSurvey';
 import { DIMENSIONS } from '@/lib/vision-pulse/survey';
@@ -9,7 +9,7 @@ const ADHESION_COLORS: Record<string, string> = {
 };
 
 export default async function PulsePage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return null;
 
@@ -69,7 +69,7 @@ export default async function PulsePage() {
       {/* En-tête */}
       <div>
         <p className="text-violet section-tag mb-1">VISION PULSE · T{quarter} {year}</p>
-        <h1 className="font-display text-white text-2xl">Mesure d'adhésion à la vision</h1>
+        <h1 className="font-display text-slate-900 text-2xl">Mesure d'adhésion à la vision</h1>
         <p className="text-slate-400 text-sm mt-1">
           20 questions · 5 dimensions · Résultat anonymisé · Score mis à jour en temps réel
         </p>
@@ -98,7 +98,7 @@ export default async function PulsePage() {
               <Users size={14} className="text-sky" />
               <p className="text-sky font-semibold text-sm">Participation</p>
             </div>
-            <p className="font-display text-3xl text-white">
+            <p className="font-display text-3xl text-slate-900">
               {participation}<span className="text-slate-500 text-lg">/{totalEmployees}</span>
             </p>
             <div className="h-1.5 bg-bg rounded-full overflow-hidden">
@@ -125,7 +125,7 @@ export default async function PulsePage() {
                 return (
                   <div key={`${h.year}-${h.quarter}`} className="flex items-center justify-between">
                     <span className="text-slate-500 text-xs">T{h.quarter} {h.year}</span>
-                    <span className="font-mono text-xs font-bold text-white">{Math.round(h.adhesion_score ?? 0)}</span>
+                    <span className="font-mono text-xs font-bold text-slate-900">{Math.round(h.adhesion_score ?? 0)}</span>
                     {delta !== null && (
                       <span className={`font-mono text-[10px] ${delta >= 0 ? 'text-emerald' : 'text-rose-400'}`}>
                         {delta >= 0 ? '+' : ''}{delta}
@@ -142,7 +142,7 @@ export default async function PulsePage() {
       {/* 5 dimensions org */}
       {orgPulse && (
         <div className="space-y-3">
-          <h2 className="font-display text-white text-sm">Scores par dimension — Organisation</h2>
+          <h2 className="font-display text-slate-900 text-sm">Scores par dimension — Organisation</h2>
           <div className="grid gap-2">
             {(Object.entries(DIMENSIONS) as [string, { label: string; color: string; icon: string; weight: number }][]).map(([key, dim]) => {
               const score = (orgPulse as Record<string, unknown>)[`avg_${key}`] as number ?? 0;
@@ -152,10 +152,10 @@ export default async function PulsePage() {
                   <span className="text-lg w-6 flex-shrink-0">{dim.icon}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center mb-1.5">
-                      <span className="text-slate-300 text-sm">{dim.label}</span>
+                      <span className="text-slate-600 text-sm">{dim.label}</span>
                       <div className="flex items-center gap-2">
                         <span className="text-[10px]" style={{ color: dim.color }}>{label}</span>
-                        <span className="font-mono text-sm font-bold text-white">{Math.round(score)}</span>
+                        <span className="font-mono text-sm font-bold text-slate-900">{Math.round(score)}</span>
                       </div>
                     </div>
                     <div className="h-1.5 bg-bg rounded-full overflow-hidden">
@@ -171,7 +171,7 @@ export default async function PulsePage() {
       )}
 
       {/* Section réponse personnelle */}
-      <div className="border-t border-white/5 pt-8">
+      <div className="border-t border-slate-200 pt-8">
         {myResponse ? (
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-2">
@@ -196,7 +196,7 @@ export default async function PulsePage() {
                         <div className="flex-1 h-1 bg-bg rounded-full overflow-hidden">
                           <div className="h-full rounded-full" style={{ width: `${s}%`, backgroundColor: dim.color }} />
                         </div>
-                        <span className="font-mono text-[11px] text-white w-6 text-right">{Math.round(s)}</span>
+                        <span className="font-mono text-[11px] text-slate-900 w-6 text-right">{Math.round(s)}</span>
                       </div>
                     );
                   })}
@@ -210,7 +210,7 @@ export default async function PulsePage() {
         ) : (
           <div className="space-y-6">
             <div>
-              <h2 className="font-display text-white text-lg">Répondre au Pulse T{quarter} {year}</h2>
+              <h2 className="font-display text-slate-900 text-lg">Répondre au Pulse T{quarter} {year}</h2>
               <p className="text-slate-400 text-sm mt-1">
                 Vos réponses sont anonymes et agrégées avec celles de vos collègues.
                 Comptez ~5 minutes.

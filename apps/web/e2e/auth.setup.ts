@@ -1,25 +1,25 @@
-import { test as setup, expect } from '@playwright/test';
+import { test as setup } from '@playwright/test';
 import path from 'path';
 import fs from 'fs';
 
 const AUTH_FILE = path.join(__dirname, '.auth/user.json');
 
-setup('authentification WorkOS', async ({ page }) => {
+setup('authentification Supabase org_admin', async ({ page }) => {
   fs.mkdirSync(path.dirname(AUTH_FILE), { recursive: true });
 
-  const email    = encodeURIComponent(process.env.TEST_USER_EMAIL    ?? '');
-  const password = encodeURIComponent(process.env.TEST_USER_PASSWORD ?? '');
+  const email    = process.env['TEST_USER_EMAIL']    ?? '';
+  const password = process.env['TEST_USER_PASSWORD'] ?? '';
 
-  // Appel direct à la route E2E — pas d'UI WorkOS, pas de redirect OAuth
-  // 'commit' = dès que la réponse initiale est reçue (avant que la page suivante charge)
-  await page.goto(
-    `/api/e2e/login?email=${email}&password=${password}`,
-    { waitUntil: 'commit' },
+  // page.request partage le cookie jar avec le navigateur
+  const res = await page.request.get(
+    `/api/e2e/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
   );
 
-  // La route redirige vers /dashboard — attendre que l'URL change
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 20_000 });
+  if (!res.ok()) {
+    const body = await res.json().catch(() => ({})) as Record<string, unknown>;
+    throw new Error(`Login org_admin échoué (${res.status()}) : ${JSON.stringify(body)}`);
+  }
 
-  // Persister le cookie wos-session pour tous les tests suivants
+  // Persister les cookies de session Supabase pour tous les tests suivants
   await page.context().storageState({ path: AUTH_FILE });
 });

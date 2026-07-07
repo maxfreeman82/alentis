@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -38,9 +38,9 @@ export default function EventForm() {
 
       {open && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-card border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+          <div className="bg-card border border-slate-200 rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-display text-white">Nouvel événement</h3>
+              <h3 className="font-display text-slate-900">Nouvel événement</h3>
               <button onClick={() => setOpen(false)}><X className="w-4 h-4 text-slate-500" /></button>
             </div>
             <form onSubmit={submit} className="space-y-4">

@@ -1,5 +1,5 @@
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { NextResponse } from 'next/server';
-import { withAuth } from '@workos-inc/authkit-nextjs';
 import { z } from 'zod';
 import Anthropic from '@anthropic-ai/sdk';
 
@@ -19,7 +19,7 @@ const SECTION_PROMPTS: Record<string, string> = {
 };
 
 export async function POST(req: Request) {
-  await withAuth({ ensureSignedIn: true });
+  await requireAuth();
 
   const body   = await req.json() as unknown;
   const parsed = schema.safeParse(body);

@@ -1,7 +1,8 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { Briefcase } from 'lucide-react';
 import { SectionHeader, AIInsightCard, ScoreCircle, ScoreBreakdown } from '@/components/shared';
+import { GenerateInsightButton } from '@/components/recrutement/GenerateInsightButton';
 import { compute6DScore, scoreColor } from '@teranga/scoring';
 import type { Score6DResult } from '@teranga/scoring';
 import { getUserOrg } from '@/lib/supabase/auth';
@@ -32,8 +33,8 @@ function buildRisks(r: Score6DResult): string[] {
 export default async function MatchingPage({
   searchParams,
 }: { searchParams: Promise<{ job?: string }> }) {
-  const [{ user }, params] = await Promise.all([
-    withAuth({ ensureSignedIn: true }),
+  const [user, params] = await Promise.all([
+    requireAuth(),
     searchParams,
   ]);
 
@@ -60,7 +61,7 @@ export default async function MatchingPage({
           className={cn('px-3 py-1.5 rounded-lg text-xs border transition-colors',
             j.id === selectedJobId
               ? 'border-violet/40 bg-violet/10 text-violet font-semibold'
-              : 'border-white/[0.06] text-slate-400 hover:text-white hover:border-white/[0.12]')}>
+              : 'border-slate-200 text-slate-400 hover:text-slate-800 hover:border-slate-200')}>
           {j.title}
         </Link>
       ))}
@@ -182,7 +183,7 @@ export default async function MatchingPage({
                   {c.avatar}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white font-semibold">{c.name}</p>
+                  <p className="text-slate-900 font-semibold">{c.name}</p>
                   <p className="text-slate-400 text-xs capitalize">{selectedJob.title}</p>
                 </div>
                 <ScoreCircle value={c.result.composite} size="md" label="Score 6D" />
@@ -195,7 +196,7 @@ export default async function MatchingPage({
                   <p className="section-tag text-emerald mb-2">FORCES</p>
                   <ul className="space-y-1">
                     {c.strengths.map((s, i) => (
-                      <li key={i} className="text-slate-300 text-xs flex gap-1.5">
+                      <li key={i} className="text-slate-600 text-xs flex gap-1.5">
                         <span className="text-emerald">+</span>{s}
                       </li>
                     ))}
@@ -205,7 +206,7 @@ export default async function MatchingPage({
                   <p className="section-tag text-rose mb-2">RISQUES</p>
                   <ul className="space-y-1">
                     {c.risks.map((r, i) => (
-                      <li key={i} className="text-slate-300 text-xs flex gap-1.5">
+                      <li key={i} className="text-slate-600 text-xs flex gap-1.5">
                         <span className="text-rose">!</span>{r}
                       </li>
                     ))}
@@ -216,9 +217,7 @@ export default async function MatchingPage({
               {c.aiInsight ? (
                 <AIInsightCard content={c.aiInsight} />
               ) : (
-                <p className="text-slate-500 text-xs italic">
-                  Analyse IA non encore générée — déclenchez le scoring complet depuis le pipeline.
-                </p>
+                <GenerateInsightButton applicationId={c.id} />
               )}
             </div>
           );

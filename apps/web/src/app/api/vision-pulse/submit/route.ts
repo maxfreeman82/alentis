@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { computePulseResult } from '@/lib/vision-pulse/survey';
@@ -11,7 +11,7 @@ const SubmitSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
 
   const ctx = await getUserOrg(user.id);
   if (!ctx) return NextResponse.json({ error: 'Organisation introuvable' }, { status: 403 });

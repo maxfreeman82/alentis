@@ -1,10 +1,10 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { SectionHeader } from '@/components/shared';
 import PulseSurvey from '@/components/boussole/PulseSurvey';
 import { getUserOrg } from '@/lib/supabase/auth';
 
 export default async function PulseSurveyPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
 
   if (!ctx) {

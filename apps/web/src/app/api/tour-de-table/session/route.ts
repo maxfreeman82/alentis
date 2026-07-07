@@ -1,5 +1,5 @@
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { NextResponse } from 'next/server';
-import { withAuth } from '@workos-inc/authkit-nextjs';
 import { z } from 'zod';
 import { createServerClient, setOrgContext } from '@/lib/supabase/server';
 import { getUserOrg } from '@/lib/supabase/auth';
@@ -16,7 +16,7 @@ const patchSchema = z.object({
 });
 
 export async function POST(req: Request) {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
 
   const ctx = await getUserOrg(user.id);
   if (!ctx) return NextResponse.json({ error: 'Organisation introuvable' }, { status: 403 });
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
   const { data: myProfile } = await supabase
-    .from('profiles').select('id').eq('workos_user_id', user.id).maybeSingle();
+    .from('profiles').select('id').eq('user_id', user.id).maybeSingle();
 
   const { data, error } = await supabase.from('tdt_sessions').insert({
     organization_id:  organizationId,
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
 
   const ctx = await getUserOrg(user.id);
   if (!ctx) return NextResponse.json({ error: 'Organisation introuvable' }, { status: 403 });

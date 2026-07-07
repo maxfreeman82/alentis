@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { getUserOrg } from '@/lib/supabase/auth';
 import { CalendarDays, MapPin, Video, Users, Clock, Plus } from 'lucide-react';
 import EventCreateBtn from '@/components/community/EventCreateBtn';
@@ -14,7 +14,7 @@ function formatDate(d: string) {
 }
 
 export default async function EventsPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return null;
 
@@ -53,7 +53,7 @@ export default async function EventsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-white text-xl">Événements communauté</h1>
+          <h1 className="font-display text-slate-900 text-xl">Événements communauté</h1>
           <p className="text-slate-400 text-xs mt-0.5">{upcoming.length} événement{upcoming.length > 1 ? 's' : ''} à venir</p>
         </div>
         <EventCreateBtn profileId={profileId} />
@@ -76,14 +76,14 @@ export default async function EventsPage() {
             const tags = (ev.tags ?? []) as string[];
 
             return (
-              <div key={ev.id} className="card space-y-3 hover:border-white/10 transition-all">
+              <div key={ev.id} className="card space-y-3 hover:border-slate-200 transition-all">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full mb-2 inline-flex items-center gap-1"
                       style={{ backgroundColor: `${cfg.color}15`, color: cfg.color }}>
                       <TypeIcon className="w-2.5 h-2.5" /> {cfg.label}
                     </span>
-                    <h3 className="text-white text-sm font-semibold mt-1">{ev.title}</h3>
+                    <h3 className="text-slate-900 text-sm font-semibold mt-1">{ev.title}</h3>
                   </div>
                   {ev.is_free ? (
                     <span className="text-emerald-400 text-[10px] font-semibold flex-shrink-0">GRATUIT</span>
@@ -107,16 +107,16 @@ export default async function EventsPage() {
 
                 {tags.length > 0 && (
                   <div className="flex gap-1 flex-wrap">
-                    {tags.map(t => <span key={t} className="text-[10px] text-slate-600 bg-white/[0.03] px-1.5 py-0.5 rounded">#{t}</span>)}
+                    {tags.map(t => <span key={t} className="text-[10px] text-slate-600 bg-slate-50 px-1.5 py-0.5 rounded">#{t}</span>)}
                   </div>
                 )}
 
-                <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
+                <div className="flex items-center justify-between pt-2 border-t border-slate-200">
                   <span className="text-slate-700 text-[10px]">par {creatorName}</span>
                   <button disabled={full || registered}
                     className={`text-xs px-3 py-1 rounded-lg font-semibold transition-colors ${
                       registered ? 'bg-emerald-500/10 text-emerald-400 cursor-default'
-                      : full      ? 'bg-white/[0.03] text-slate-600 cursor-not-allowed'
+                      : full      ? 'bg-slate-50 text-slate-600 cursor-not-allowed'
                       : 'bg-sky-500/10 text-sky-400 hover:bg-sky-500/20'
                     }`}>
                     {registered ? '✓ Inscrit' : full ? 'Complet' : "S'inscrire"}
@@ -132,7 +132,7 @@ export default async function EventsPage() {
         <div className="space-y-2">
           <p className="text-slate-600 text-xs font-semibold uppercase tracking-widest">Événements passés</p>
           {past.map(ev => (
-            <div key={ev.id} className="flex items-center gap-3 py-2 border-b border-white/[0.04] opacity-50">
+            <div key={ev.id} className="flex items-center gap-3 py-2 border-b border-slate-200 opacity-50">
               <span className="text-slate-600 text-xs">{formatDate(ev.start_at)}</span>
               <span className="text-slate-400 text-xs flex-1">{ev.title}</span>
               <span className="text-slate-600 text-[10px]">{ev.attendees_count} participants</span>

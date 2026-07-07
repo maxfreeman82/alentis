@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo } from 'react';
 import { TrendingUp, TrendingDown, Minus, RotateCcw, Plus, Info } from 'lucide-react';
@@ -126,7 +126,7 @@ export default function SimulateurClient({
 
       {/* Scénarios prédéfinis */}
       <div className="card space-y-3">
-        <h3 className="font-display text-white text-sm flex items-center gap-2">
+        <h3 className="font-display text-slate-900 text-sm flex items-center gap-2">
           <Info className="w-4 h-4 text-sky-400" /> Scénarios rapides
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -144,9 +144,9 @@ export default function SimulateurClient({
                 className={`text-left px-3 py-2.5 rounded-xl border transition-all text-sm ${
                   appliedScenario === s.label
                     ? 'border-emerald-500/40 bg-emerald-500/10'
-                    : 'border-white/[0.04] hover:border-white/10 bg-white/[0.02]'
+                    : 'border-slate-200 hover:border-slate-200 bg-slate-50'
                 }`}>
-                <p className="text-white font-medium">{s.label}</p>
+                <p className="text-slate-900 font-medium">{s.label}</p>
                 <p className={`font-mono text-xs font-bold mt-0.5 ${impact > 0 ? 'text-emerald-400' : impact < 0 ? 'text-rose-400' : 'text-slate-500'}`}>
                   IAS {impact > 0 ? `+${impact}` : impact}
                 </p>
@@ -159,9 +159,9 @@ export default function SimulateurClient({
       {/* Ajustement manuel énergie */}
       <div className="card space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-display text-white text-sm">Ajustement manuel du mix énergétique</h3>
+          <h3 className="font-display text-slate-900 text-sm">Ajustement manuel du mix énergétique</h3>
           {hasChanged && (
-            <button onClick={reset} className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors">
+            <button onClick={reset} className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-600 transition-colors">
               <RotateCcw className="w-3 h-3" /> Réinitialiser
             </button>
           )}
@@ -180,13 +180,13 @@ export default function SimulateurClient({
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-medium" style={{ color }}>{f}</span>
                   <div className="flex items-center gap-3 text-slate-500">
-                    <span>Requis : <strong className="text-white">{reqVal}%</strong></span>
+                    <span>Requis : <strong className="text-slate-900">{reqVal}%</strong></span>
                     {delta !== 0 && (
                       <span className={`font-mono font-bold ${delta > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                         {delta > 0 ? `+${delta}` : delta}%
                       </span>
                     )}
-                    <span className="font-mono font-bold text-white">{simVal}%</span>
+                    <span className="font-mono font-bold text-slate-900">{simVal}%</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -213,7 +213,7 @@ export default function SimulateurClient({
 
       {/* Tableau IAS décomposé simulé */}
       <div className="card space-y-2">
-        <h3 className="font-display text-white text-sm">Impact sur les composantes IAS</h3>
+        <h3 className="font-display text-slate-900 text-sm">Impact sur les composantes IAS</h3>
         <div className="space-y-2">
           {[
             { label: 'Capacité (C)',       base: baselineCapability, sim: simCapability,    weight: 0.30 },

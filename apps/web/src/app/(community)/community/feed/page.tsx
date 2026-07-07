@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { getUserOrg } from '@/lib/supabase/auth';
 import { Heart, MessageCircle, Share2, Pin } from 'lucide-react';
 import PostComposer from '@/components/community/PostComposer';
@@ -18,7 +18,7 @@ function timeAgo(date: string) {
 }
 
 export default async function FeedPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return null;
 
@@ -70,11 +70,11 @@ export default async function FeedPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-white text-sm font-semibold">{name}</span>
+                  <span className="text-slate-900 text-sm font-semibold">{name}</span>
                   {author?.role && <span className="text-slate-600 text-[10px]">{author.role}</span>}
                   <span className="text-slate-700 text-[10px] ml-auto flex-shrink-0">{timeAgo(post.created_at)}</span>
                 </div>
-                <p className="text-slate-300 text-sm mt-2 leading-relaxed whitespace-pre-wrap">{post.content}</p>
+                <p className="text-slate-600 text-sm mt-2 leading-relaxed whitespace-pre-wrap">{post.content}</p>
                 {tags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     {tags.map(t => (
@@ -87,7 +87,7 @@ export default async function FeedPage() {
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-4 pt-2 border-t border-white/[0.04]">
+            <div className="flex items-center gap-4 pt-2 border-t border-slate-200">
               <button className="flex items-center gap-1.5 text-slate-500 hover:text-rose-400 transition-colors text-xs">
                 <Heart className="w-3.5 h-3.5" /> {post.likes_count}
               </button>

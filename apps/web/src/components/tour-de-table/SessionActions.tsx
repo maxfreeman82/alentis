@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -58,7 +58,7 @@ export default function SessionActions({ session, organizationId: _ }: Props) {
 
       {session.status === 'closed' && (
         <button onClick={() => callAction('consolidate')} disabled={!!loading}
-          className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 disabled:opacity-40 transition-all">
+          className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-slate-900 rounded-xl text-sm font-semibold hover:bg-emerald-700 disabled:opacity-40 transition-all">
           {isLoading('consolidate') ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
           Consolider dans les Passports
         </button>

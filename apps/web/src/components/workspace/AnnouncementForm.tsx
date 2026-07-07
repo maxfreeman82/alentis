@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -28,9 +28,9 @@ export default function AnnouncementForm() {
 
       {open && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-card border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+          <div className="bg-card border border-slate-200 rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-display text-white">Nouvelle annonce</h3>
+              <h3 className="font-display text-slate-900">Nouvelle annonce</h3>
               <button onClick={() => setOpen(false)}><X className="w-4 h-4 text-slate-500" /></button>
             </div>
             <form onSubmit={submit} className="space-y-4">
@@ -54,7 +54,7 @@ export default function AnnouncementForm() {
                 <label className="flex items-end gap-2 cursor-pointer pb-2">
                   <input type="checkbox" className="w-4 h-4 accent-emerald-500 rounded"
                     checked={form.pinned} onChange={e => setForm(f => ({ ...f, pinned: e.target.checked }))} />
-                  <span className="text-slate-300 text-sm">Épingler</span>
+                  <span className="text-slate-600 text-sm">Épingler</span>
                 </label>
               </div>
               <button type="submit" disabled={loading} className="btn-primary w-full">

@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { SectionHeader } from '@/components/shared';
 import { EvaluationForm } from '@/components/performance/EvaluationForm';
 import type { EvaluatorRole } from '@/lib/performance/evaluation';
@@ -19,7 +19,7 @@ interface PageProps {
 }
 
 export default async function EvaluationPage({ params, searchParams }: PageProps) {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const { profileId } = await params;
   const { role } = await searchParams;
 

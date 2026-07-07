@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { getUserOrg } from '@/lib/supabase/auth';
 import { computePayroll, type FamilySituation } from '@/lib/remuneration/payroll';
 import { formatFCFA } from '@/lib/utils';
@@ -18,7 +18,7 @@ export async function GET(
   { params }: { params: Promise<{ profileId: string }> }
 ) {
   const { profileId } = await params;
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
   if (!ctx) return new Response('Non autorisé', { status: 401 });
 

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -85,7 +85,7 @@ export function PulseSurvey({ visionStatement, quarter, year, organizationId }: 
       {visionStatement && (
         <div className="mb-6 p-4 rounded-xl bg-emerald/5 border border-emerald/15">
           <p className="text-xs text-emerald font-semibold uppercase tracking-widest mb-1">VISION ORGANISATION</p>
-          <p className="text-slate-300 text-sm italic leading-relaxed">{visionStatement}</p>
+          <p className="text-slate-600 text-sm italic leading-relaxed">{visionStatement}</p>
         </div>
       )}
 
@@ -115,8 +115,8 @@ export function PulseSurvey({ visionStatement, quarter, year, organizationId }: 
               onClick={() => i < step && setStep(i)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border whitespace-nowrap transition-all ${
                 done    ? 'bg-emerald/10 border-emerald/20 text-emerald' :
-                current ? 'border-white/20 text-white'                   :
-                          'border-white/5 text-slate-600'
+                current ? 'border-slate-200 text-slate-900'                   :
+                          'border-slate-200 text-slate-600'
               }`}
               style={current ? { borderColor: `${info.color}40`, color: info.color } : {}}
               disabled={i > step}
@@ -140,7 +140,7 @@ export function PulseSurvey({ visionStatement, quarter, year, organizationId }: 
           const selected = responses[q.id];
           return (
             <div key={q.id} className="card space-y-4">
-              <p className="text-white text-sm leading-relaxed">{q.text}</p>
+              <p className="text-slate-900 text-sm leading-relaxed">{q.text}</p>
               <div className="flex gap-2 flex-wrap">
                 {[1, 2, 3, 4, 5].map((v) => (
                   <button
@@ -148,8 +148,8 @@ export function PulseSurvey({ visionStatement, quarter, year, organizationId }: 
                     onClick={() => handleRate(q.id, v)}
                     className={`flex-1 min-w-[3.5rem] py-2.5 rounded-xl border text-xs font-bold transition-all ${
                       selected === v
-                        ? 'text-white border-transparent'
-                        : 'border-white/8 text-slate-500 hover:border-white/20 hover:text-slate-300'
+                        ? 'text-slate-900 border-transparent'
+                        : 'border-slate-200 text-slate-500 hover:border-slate-200 hover:text-slate-600'
                     }`}
                     style={selected === v ? { backgroundColor: `${RATING_COLORS[v]}20`, borderColor: RATING_COLORS[v], color: RATING_COLORS[v] } : {}}
                   >
@@ -173,7 +173,7 @@ export function PulseSurvey({ visionStatement, quarter, year, organizationId }: 
         {step > 0 && (
           <button
             onClick={() => setStep(s => s - 1)}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-white/10 text-slate-400 text-sm hover:text-white transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-400 text-sm hover:text-slate-800 transition-colors"
           >
             <ChevronLeft size={14} />
             Retour

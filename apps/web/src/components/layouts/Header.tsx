@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Bell, Search, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -15,14 +15,14 @@ export function Header({ userFirstName, orgName, iasScore }: HeaderProps) {
   const iasColor = iasScore != null ? scoreColor(iasScore) : null;
 
   return (
-    <header className="h-14 bg-bg-card border-b border-white/[0.04] flex items-center justify-between px-6 sticky top-0 z-30">
+    <header className="h-14 bg-bg-card border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-30">
       {/* Recherche */}
-      <div className="flex items-center gap-2 bg-bg-surface border border-white/[0.06] rounded-lg px-3 py-1.5 w-72">
+      <div className="flex items-center gap-2 bg-bg-surface border border-slate-200 rounded-lg px-3 py-1.5 w-72">
         <Search size={14} className="text-slate-500" />
         <input
           type="text"
           placeholder="Rechercher un employé, un OKR..."
-          className="bg-transparent text-sm text-slate-300 placeholder-slate-600 outline-none w-full"
+          className="bg-transparent text-sm text-slate-600 placeholder-slate-400 outline-none w-full"
         />
       </div>
 
@@ -56,7 +56,7 @@ export function Header({ userFirstName, orgName, iasScore }: HeaderProps) {
             </span>
           </div>
           <div className="text-left hidden sm:block">
-            <p className="text-slate-200 text-xs font-medium">{userFirstName ?? 'Utilisateur'}</p>
+            <p className="text-slate-700 text-xs font-medium">{userFirstName ?? 'Utilisateur'}</p>
             <p className="text-slate-500 text-[10px]">{orgName ?? 'Organisation'}</p>
           </div>
           <ChevronDown size={12} className="text-slate-500" />

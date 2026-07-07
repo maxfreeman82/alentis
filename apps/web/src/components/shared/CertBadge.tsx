@@ -1,4 +1,4 @@
-import { Medal, Star, Diamond } from 'lucide-react';
+﻿import { Medal, Star, Diamond } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { CertLevel } from '@teranga/types';
 
@@ -10,7 +10,7 @@ interface CertBadgeProps {
 
 const CERT_CONFIG = {
   1: { label: 'Alignée',        icon: Medal,   style: 'bg-violet/20 text-violet border-violet/30' },
-  2: { label: 'Engagée',        icon: Medal,   style: 'bg-slate-700/50 text-slate-300 border-slate-600' },
+  2: { label: 'Engagée',        icon: Medal,   style: 'bg-slate-700/50 text-slate-600 border-slate-600' },
   3: { label: 'Exemplaire',     icon: Star,    style: 'bg-amber/20 text-amber border-amber/30' },
   4: { label: 'Transformatrice',icon: Diamond, style: 'bg-emerald/20 text-emerald border-emerald/30' },
 } satisfies Record<CertLevel, { label: string; icon: React.ComponentType<{ size?: number }>; style: string }>;

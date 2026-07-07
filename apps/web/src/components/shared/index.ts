@@ -7,3 +7,4 @@ export * from './CertBadge';
 export * from './SectionHeader';
 export * from './EmptyState';
 export * from './LoadingSkeleton';
+export * from './DocumentGallery';

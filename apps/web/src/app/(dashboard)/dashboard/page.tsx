@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { TrendingUp, Users, Target, Zap, ArrowUpRight, AlertTriangle, Brain, Battery } from 'lucide-react';
 import { ScoreCircle, AIInsightCard, AlertCard, SectionHeader, CertBadge } from '@/components/shared';
 import { computeIAS, iasLabel } from '@teranga/scoring';
@@ -7,7 +7,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import type { CertLevel } from '@teranga/types';
 
 export default async function DashboardPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const user = await requireAuth();
 
   const ctx = await getUserOrg(user.id);
 
@@ -163,7 +163,7 @@ export default async function DashboardPage() {
     <div className="space-y-6 animate-fade-in">
       <SectionHeader
         tag="VUE D'ENSEMBLE"
-        title={`Bonjour, ${user.firstName ?? ctx.firstName ?? 'Dirigeant'}`}
+        title={`Bonjour, ${(user.user_metadata?.first_name ?? '') ?? ctx.firstName ?? 'Dirigeant'}`}
         subtitle={`${orgName} · ${new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`}
         action={<CertBadge level={orgCertLevel as CertLevel} />}
       />
@@ -175,7 +175,7 @@ export default async function DashboardPage() {
           <ScoreCircle value={iasComputed.score} size="lg" />
           <div>
             <p className="section-tag text-slate-500 mb-1">IAS Global</p>
-            <p className="font-display text-white text-lg">{iasComputed.label}</p>
+            <p className="font-display text-slate-900 text-lg">{iasComputed.label}</p>
             <p className="text-slate-400 text-xs mt-1">Index d&apos;Alignement Stratégique</p>
           </div>
         </div>
@@ -232,7 +232,7 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Brain size={14} style={{ color: iasColor }} />
-              <h2 className="text-white font-semibold text-sm">Décomposition IAS</h2>
+              <h2 className="text-slate-900 font-semibold text-sm">Décomposition IAS</h2>
             </div>
             <span
               className="text-xs font-bold px-3 py-1 rounded-full"
@@ -251,7 +251,7 @@ export default async function DashboardPage() {
             ] as const).map(dim => (
               <div key={dim.key} className="text-center p-3 rounded-xl bg-bg space-y-2">
                 <p className="text-xs font-bold uppercase tracking-widest" style={{ color: dim.color }}>{dim.key}</p>
-                <p className="font-display text-2xl font-bold text-white">{dim.value > 0 ? dim.value : '—'}</p>
+                <p className="font-display text-2xl font-bold text-slate-900">{dim.value > 0 ? dim.value : '—'}</p>
                 <p className="text-slate-500 text-[11px]">{dim.label}</p>
                 <div className="h-1 bg-bg-card rounded-full overflow-hidden">
                   <div className="h-full rounded-full" style={{ width: `${dim.value}%`, backgroundColor: dim.color }} />
@@ -268,7 +268,7 @@ export default async function DashboardPage() {
         <div className="lg:col-span-2 space-y-3">
           <div className="flex items-center gap-2 mb-1">
             <AlertTriangle size={14} className="text-rose" />
-            <h2 className="text-white font-semibold text-sm">Alertes critiques</h2>
+            <h2 className="text-slate-900 font-semibold text-sm">Alertes critiques</h2>
             <span className="font-mono text-xs bg-rose/10 text-rose px-2 py-0.5 rounded-full border border-rose/20">
               {alerts.length}
             </span>
@@ -287,8 +287,8 @@ export default async function DashboardPage() {
               <Battery size={18} className="text-emerald flex-shrink-0" />
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-slate-300 text-sm">Bien-être moyen</span>
-                  <span className="font-mono text-sm font-bold text-white">{avgWellbeing}/100</span>
+                  <span className="text-slate-600 text-sm">Bien-être moyen</span>
+                  <span className="font-mono text-sm font-bold text-slate-900">{avgWellbeing}/100</span>
                 </div>
                 <div className="h-1.5 bg-bg rounded-full overflow-hidden">
                   <div className="h-full rounded-full bg-emerald" style={{ width: `${avgWellbeing}%` }} />
@@ -303,7 +303,7 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <TrendingUp size={14} className="text-emerald" />
-              <h2 className="text-white font-semibold text-sm">OKR {new Date().getFullYear()}</h2>
+              <h2 className="text-slate-900 font-semibold text-sm">OKR {new Date().getFullYear()}</h2>
             </div>
             <ArrowUpRight size={14} className="text-slate-500" />
           </div>
@@ -314,7 +314,7 @@ export default async function DashboardPage() {
               {okrs.map((okr, i) => (
                 <div key={i}>
                   <div className="flex justify-between items-center mb-1.5">
-                    <p className="text-slate-300 text-xs truncate pr-2">{okr.title}</p>
+                    <p className="text-slate-600 text-xs truncate pr-2">{okr.title}</p>
                     <span className={`font-mono text-xs font-bold ${okr.on_track ? 'text-emerald' : 'text-rose'}`}>
                       {okr.progress}%
                     </span>

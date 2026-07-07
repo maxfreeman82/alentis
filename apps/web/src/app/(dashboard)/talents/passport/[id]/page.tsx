@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+﻿import { requireAuth } from '@/lib/supabase/user';
 import { notFound } from 'next/navigation';
 import {
   ScoreCircle,
@@ -53,7 +53,7 @@ interface PageProps {
 }
 
 export default async function PassportPage({ params }: PageProps) {
-  await withAuth({ ensureSignedIn: true });
+  await requireAuth();
   const { id } = await params;
 
   const passport = MOCK_PASSPORTS[id];
@@ -92,7 +92,7 @@ export default async function PassportPage({ params }: PageProps) {
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-0.5">
-              <h1 className="text-white font-bold text-xl">{passport.name}</h1>
+              <h1 className="text-slate-900 font-bold text-xl">{passport.name}</h1>
               <CertBadge level={passport.certLevel} />
             </div>
             <p className="text-slate-400 text-sm">{passport.role} · {passport.dept}</p>
@@ -130,7 +130,7 @@ export default async function PassportPage({ params }: PageProps) {
             return (
               <div key={fid}>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-slate-300 text-xs font-medium">{meta?.label}</span>
+                  <span className="text-slate-600 text-xs font-medium">{meta?.label}</span>
                   <span className="font-mono text-xs text-slate-400">{passport.energy[fid]}%</span>
                 </div>
                 <div className="h-2 bg-bg-surface rounded-full overflow-hidden">
