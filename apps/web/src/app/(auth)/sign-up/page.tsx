@@ -31,35 +31,34 @@ function SignUpForm() {
     e.preventDefault();
     setError('');
     startTransition(async () => {
-      // 1. Créer le compte
-      const { error: signUpErr } = await supabase.auth.signUp({ email, password });
-      if (signUpErr) {
-        setError(signUpErr.message.includes('already registered')
-          ? 'Ce compte existe déjà. Connectez-vous.'
-          : signUpErr.message);
+      // 1. Créer le compte via le serveur (email_confirm: true automatique)
+      const signUpRes = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!signUpRes.ok) {
+        const { error } = await signUpRes.json() as { error: string };
+        setError(error ?? 'Erreur lors de la création du compte');
         return;
       }
 
-      // 2. Se connecter immédiatement (fonctionne si "Confirm email" est désactivé)
+      // 2. Se connecter pour établir la session cookie
       const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
-      if (signInErr) {
-        // "Confirm email" est activé → flux OTP/vérification
-        router.push(`/verifier-email?email=${encodeURIComponent(email)}&step=signup`);
-        return;
-      }
+      if (signInErr) { setError(signInErr.message); return; }
 
-      // 3. Créer le profil via l'API
-      const res = await fetch('/api/auth/post-verify', {
+      // 3. Créer le profil
+      const postRes = await fetch('/api/auth/post-verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ profileType: profile }),
       });
-      if (!res.ok) {
-        const json = await res.json() as { error?: string };
-        setError(json.error ?? 'Erreur serveur');
+      if (!postRes.ok) {
+        const { error } = await postRes.json() as { error: string };
+        setError(error ?? 'Erreur serveur');
         return;
       }
-      const { redirect } = await res.json() as { redirect: string };
+      const { redirect } = await postRes.json() as { redirect: string };
       router.push(redirect ?? '/onboarding');
       router.refresh();
     });
