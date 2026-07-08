@@ -1,4 +1,5 @@
-﻿import { requireAuth } from '@/lib/supabase/user';
+﻿import { redirect } from 'next/navigation';
+import { requireAuth } from '@/lib/supabase/user';
 import { SectionHeader } from '@/components/shared';
 import { getUserOrg } from '@/lib/supabase/auth';
 import SimulateurClient from '@/components/boussole/SimulateurClient';
@@ -11,7 +12,7 @@ const FAMILIES: EnergyFamily[] = ['Pilotes', 'Initialiseurs', 'Accomplisseurs', 
 export default async function SimulateurPage() {
   const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
-  if (!ctx) return <div className="flex items-center justify-center h-64"><p className="text-slate-400">Profil en cours de configuration…</p></div>;
+  if (!ctx) redirect('/onboarding');
 
   const { supabase, organizationId, orgArchetype, orgIasScore, orgName } = ctx;
   const year = new Date().getFullYear();

@@ -1,4 +1,5 @@
-﻿import { requireAuth } from '@/lib/supabase/user';
+﻿import { redirect } from 'next/navigation';
+import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { Scale, Users, TrendingUp, Globe, Plus } from 'lucide-react';
 import { SectionHeader, ScoreCircle } from '@/components/shared';
@@ -23,7 +24,7 @@ const BAND_LABELS: Record<string, string> = {
 export default async function DeiPage() {
   const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
-  if (!ctx) return <div className="flex items-center justify-center h-64"><p className="text-slate-400">Profil en cours de configuration…</p></div>;
+  if (!ctx) redirect('/onboarding');
 
   const { supabase, organizationId } = ctx;
 

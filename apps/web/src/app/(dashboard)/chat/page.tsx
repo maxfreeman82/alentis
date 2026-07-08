@@ -1,4 +1,5 @@
-﻿import { requireAuth } from '@/lib/supabase/user';
+﻿import { redirect } from 'next/navigation';
+import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { MessageSquare } from 'lucide-react';
 import { SectionHeader } from '@/components/shared';
@@ -7,7 +8,7 @@ import { getUserOrg } from '@/lib/supabase/auth';
 export default async function ChatPage() {
   const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
-  if (!ctx) return <div className="flex items-center justify-center h-64"><p className="text-slate-400">Profil en cours de configuration…</p></div>;
+  if (!ctx) redirect('/onboarding');
 
   const { supabase, organizationId, profileId } = ctx;
 

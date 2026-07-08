@@ -1,4 +1,5 @@
-﻿import { requireAuth } from '@/lib/supabase/user';
+﻿import { redirect } from 'next/navigation';
+import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { Users, FileText, Calendar, AlertTriangle, Plus, CheckCircle, Clock, Activity, UserPlus, Award, Heart } from 'lucide-react';
 import { SectionHeader, AlertCard } from '@/components/shared';
@@ -28,14 +29,7 @@ export default async function AdminRHPage() {
   const ctx = await getUserOrg(user.id);
 
   if (!ctx) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <p className="text-slate-400 text-sm">Profil en cours de configuration…</p>
-        <a href="/onboarding" className="text-xs text-emerald hover:underline">
-          → Accéder à l&apos;onboarding
-        </a>
-      </div>
-    );
+    redirect('/onboarding');
   }
 
   const { supabase, organizationId } = ctx;

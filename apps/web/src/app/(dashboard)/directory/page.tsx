@@ -1,4 +1,5 @@
-﻿import { requireAuth } from '@/lib/supabase/user';
+﻿import { redirect } from 'next/navigation';
+import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { BookUser, Search, Award, Star } from 'lucide-react';
 import { SectionHeader } from '@/components/shared';
@@ -14,7 +15,7 @@ const ROLE_LABELS: Record<string, { label: string; color: string }> = {
 export default async function DirectoryPage() {
   const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
-  if (!ctx) return <div className="flex items-center justify-center h-64"><p className="text-slate-400">Profil en cours de configuration…</p></div>;
+  if (!ctx) redirect('/onboarding');
 
   const { supabase, organizationId } = ctx;
 

@@ -1,4 +1,5 @@
-﻿import { requireAuth } from '@/lib/supabase/user';
+﻿import { redirect } from 'next/navigation';
+import { requireAuth } from '@/lib/supabase/user';
 import { SectionHeader, EmptyState } from '@/components/shared';
 import { OKRBoard } from '@/components/boussole/OKRBoard';
 import { Target } from 'lucide-react';
@@ -9,11 +10,7 @@ export default async function ObjectifsPage() {
   const ctx = await getUserOrg(user.id);
 
   if (!ctx) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-slate-400">Profil en cours de configuration…</p>
-      </div>
-    );
+    redirect('/onboarding');
   }
 
   const { supabase, organizationId } = ctx;

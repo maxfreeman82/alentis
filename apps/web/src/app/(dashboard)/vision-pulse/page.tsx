@@ -1,4 +1,5 @@
-﻿import { requireAuth } from '@/lib/supabase/user';
+﻿import { redirect } from 'next/navigation';
+import { requireAuth } from '@/lib/supabase/user';
 import Link from 'next/link';
 import { Users, TrendingUp, AlertTriangle, QrCode } from 'lucide-react';
 import { SectionHeader, ScoreCircle, AlertCard } from '@/components/shared';
@@ -16,11 +17,7 @@ export default async function VisionPulsePage() {
   const ctx = await getUserOrg(user.id);
 
   if (!ctx) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-slate-400">Profil en cours de configuration…</p>
-      </div>
-    );
+    redirect('/onboarding');
   }
 
   const { supabase, organizationId } = ctx;
