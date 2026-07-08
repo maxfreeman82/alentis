@@ -31,35 +31,23 @@ function SignUpForm() {
     e.preventDefault();
     setError('');
     startTransition(async () => {
-      // 1. Créer le compte via le serveur (email_confirm: true automatique)
-      const signUpRes = await fetch('/api/auth/signup', {
+      // 1. Créer compte + profil côté serveur en une seule requête
+      const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, profileType: profile }),
       });
-      if (!signUpRes.ok) {
-        const { error } = await signUpRes.json() as { error: string };
-        setError(error ?? 'Erreur lors de la création du compte');
+      const json = await res.json() as { ok?: boolean; error?: string; redirect?: string };
+      if (!res.ok) {
+        setError(json.error ?? 'Erreur lors de la création du compte');
         return;
       }
 
-      // 2. Se connecter pour établir la session cookie
+      // 2. Établir la session côté navigateur
       const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
       if (signInErr) { setError(signInErr.message); return; }
 
-      // 3. Créer le profil
-      const postRes = await fetch('/api/auth/post-verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ profileType: profile }),
-      });
-      if (!postRes.ok) {
-        const { error } = await postRes.json() as { error: string };
-        setError(error ?? 'Erreur serveur');
-        return;
-      }
-      const { redirect } = await postRes.json() as { redirect: string };
-      router.push(redirect ?? '/onboarding');
+      router.push(json.redirect ?? '/onboarding');
       router.refresh();
     });
   }
