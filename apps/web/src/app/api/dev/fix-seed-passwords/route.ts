@@ -5,41 +5,44 @@ import { createAdminClient } from '@/lib/supabase/admin';
 // Réinitialise les mots de passe des utilisateurs seed via le SDK admin
 // SUPPRIMER CE FICHIER APRÈS UTILISATION
 
-const SEED_ORG_NAMES = [
-  'Dakar Tech Hub','BanqueAfrique Digital','CliniqueSenegal Plus',
-  'AfriLearn Academy','MarchePro Distribution','AgroSenegal SA',
-  'SolarAfrique Energie','ConnectAfrik Telecom','AfricaMedia Group',
-  'ProprieteAfrique Immo','TransLog Afrique','FoodAfrika Agroalim',
-  'MineralAfrica Resources','Tourisme Teranga','AssuAfrique SA',
-  'AfriConsult Partners','Developpement Afrique ONG','AfriStyle Couture',
-  'BuildAfrique BTP','FinTech Microfinance',
-];
-
 export async function GET() {
   const admin = createAdminClient();
 
-  // Récupérer toutes les orgs seed
-  const { data: orgs } = await admin
+  // D'abord : lister les orgs existantes pour debug
+  const { data: allOrgs } = await admin
     .from('organizations')
     .select('id, name')
-    .in('name', SEED_ORG_NAMES);
+    .order('name');
 
-  if (!orgs || orgs.length === 0) {
-    return NextResponse.json({ error: 'Aucune organisation seed trouvée' }, { status: 404 });
+  // Les admins seed ont tous ".adm" dans leur email
+  // Les employés seed ont un chiffre double collé au nom dans l'email
+  // On cible via le pattern email des admins + on récupère leurs orgs
+
+  // Étape 1 : admins seed (email contient '.adm')
+  const { data: adminProfiles } = await admin
+    .from('profiles')
+    .select('user_id, email, role, organization_id')
+    .eq('role', 'org_admin')
+    .like('email', '%.adm%');
+
+  if (!adminProfiles || adminProfiles.length === 0) {
+    return NextResponse.json({
+      error: 'Aucun admin seed trouvé (pattern .adm dans email)',
+      orgs_in_db: allOrgs?.map(o => o.name) ?? [],
+    }, { status: 404 });
   }
 
-  const orgIds = orgs.map(o => o.id);
+  // Étape 2 : récupérer les org_ids des admins seed
+  const seedOrgIds = [...new Set(adminProfiles.map(p => p.organization_id).filter(Boolean))];
 
-  // Récupérer tous les profils liés à ces orgs
-  const { data: profiles } = await admin
+  // Étape 3 : tous les profils de ces orgs (admins + employés)
+  const { data: allProfiles } = await admin
     .from('profiles')
     .select('user_id, email, role')
-    .in('organization_id', orgIds)
+    .in('organization_id', seedOrgIds)
     .not('user_id', 'is', null);
 
-  if (!profiles || profiles.length === 0) {
-    return NextResponse.json({ error: 'Aucun profil seed trouvé' }, { status: 404 });
-  }
+  const profiles = allProfiles ?? [];
 
   const results: { email: string; role: string; status: string }[] = [];
   let ok = 0;
@@ -62,6 +65,7 @@ export async function GET() {
   }
 
   return NextResponse.json({
+    orgs_found: seedOrgIds.length,
     total: profiles.length,
     ok,
     errors,
