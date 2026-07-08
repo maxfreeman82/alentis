@@ -2,23 +2,13 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 // GET /api/dev/fix-seed-passwords
-// Réinitialise les mots de passe des utilisateurs seed via le SDK admin
+// Recrée les auth.users seed via le SDK admin (GoTrue) et met à jour profiles.user_id
 // SUPPRIMER CE FICHIER APRÈS UTILISATION
 
 export async function GET() {
   const admin = createAdminClient();
 
-  // D'abord : lister les orgs existantes pour debug
-  const { data: allOrgs } = await admin
-    .from('organizations')
-    .select('id, name')
-    .order('name');
-
-  // Les admins seed ont tous ".adm" dans leur email
-  // Les employés seed ont un chiffre double collé au nom dans l'email
-  // On cible via le pattern email des admins + on récupère leurs orgs
-
-  // Étape 1 : admins seed (email contient '.adm')
+  // 1. Trouver les admins seed par pattern email
   const { data: adminProfiles } = await admin
     .from('profiles')
     .select('user_id, email, role, organization_id')
@@ -26,50 +16,77 @@ export async function GET() {
     .like('email', '%.adm%');
 
   if (!adminProfiles || adminProfiles.length === 0) {
-    return NextResponse.json({
-      error: 'Aucun admin seed trouvé (pattern .adm dans email)',
-      orgs_in_db: allOrgs?.map(o => o.name) ?? [],
-    }, { status: 404 });
+    return NextResponse.json({ error: 'Aucun admin seed trouvé' }, { status: 404 });
   }
 
-  // Étape 2 : récupérer les org_ids des admins seed
   const seedOrgIds = [...new Set(adminProfiles.map(p => p.organization_id).filter(Boolean))];
 
-  // Étape 3 : tous les profils de ces orgs (admins + employés)
+  // 2. Tous les profils de ces orgs
   const { data: allProfiles } = await admin
     .from('profiles')
-    .select('user_id, email, role')
-    .in('organization_id', seedOrgIds)
-    .not('user_id', 'is', null);
+    .select('id, user_id, email, role, first_name, last_name')
+    .in('organization_id', seedOrgIds);
 
   const profiles = allProfiles ?? [];
-
-  const results: { email: string; role: string; status: string }[] = [];
+  const results: { email: string; status: string }[] = [];
   let ok = 0;
   let errors = 0;
 
   for (const profile of profiles) {
-    const newPassword = profile.role === 'org_admin' ? 'Admin2026!' : 'Employe2026!';
-    const { error } = await admin.auth.admin.updateUserById(profile.user_id, {
-      password: newPassword,
+    const password = profile.role === 'org_admin' ? 'Admin2026!' : 'Employe2026!';
+
+    // 3. Créer le user via SDK admin (GoTrue)
+    const { data: created, error: createErr } = await admin.auth.admin.createUser({
+      email: profile.email,
+      password,
       email_confirm: true,
+      user_metadata: {
+        first_name: profile.first_name ?? '',
+        last_name:  profile.last_name  ?? '',
+      },
     });
 
-    if (error) {
-      results.push({ email: profile.email, role: profile.role, status: `ERREUR: ${error.message}` });
+    if (createErr) {
+      // Si l'email existe déjà dans GoTrue, récupérer l'utilisateur existant
+      if (createErr.message?.includes('already') || createErr.message?.includes('registered')) {
+        const { data: existing } = await admin.auth.admin.getUserByEmail(profile.email);
+        if (existing?.user) {
+          await admin.auth.admin.updateUserById(existing.user.id, { password, email_confirm: true });
+          await admin.from('profiles').update({ user_id: existing.user.id }).eq('id', profile.id);
+          results.push({ email: profile.email, status: 'OK (existant mis à jour)' });
+          ok++;
+        } else {
+          results.push({ email: profile.email, status: `ERREUR: ${createErr.message}` });
+          errors++;
+        }
+      } else {
+        results.push({ email: profile.email, status: `ERREUR: ${createErr.message}` });
+        errors++;
+      }
+      continue;
+    }
+
+    // 4. Mettre à jour profile.user_id avec le nouvel ID GoTrue
+    const newUserId = created.user.id;
+    const { error: updateErr } = await admin
+      .from('profiles')
+      .update({ user_id: newUserId })
+      .eq('id', profile.id);
+
+    if (updateErr) {
+      results.push({ email: profile.email, status: `CRÉÉ mais profil non mis à jour: ${updateErr.message}` });
       errors++;
     } else {
-      results.push({ email: profile.email, role: profile.role, status: 'OK' });
+      results.push({ email: profile.email, status: 'OK' });
       ok++;
     }
   }
 
   return NextResponse.json({
-    orgs_found: seedOrgIds.length,
     total: profiles.length,
     ok,
     errors,
-    message: `${ok} mots de passe réinitialisés, ${errors} erreurs`,
+    message: `${ok} users créés/mis à jour, ${errors} erreurs`,
     details: results,
   });
 }
