@@ -30,7 +30,7 @@ function statusStyle(status: string) {
 export default async function ConformitePage() {
   const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
-  if (!ctx) redirect('/onboarding');
+  if (!ctx) redirect('/setup-org');
 
   const { supabase, organizationId } = ctx;
 

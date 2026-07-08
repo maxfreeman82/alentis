@@ -17,7 +17,7 @@ export default async function VisionPulsePage() {
   const ctx = await getUserOrg(user.id);
 
   if (!ctx) {
-    redirect('/onboarding');
+    redirect('/setup-org');
   }
 
   const { supabase, organizationId } = ctx;

@@ -9,7 +9,7 @@ export default async function PulseSurveyPage() {
   const ctx = await getUserOrg(user.id);
 
   if (!ctx) {
-    redirect('/onboarding');
+    redirect('/setup-org');
   }
 
   const now     = new Date();

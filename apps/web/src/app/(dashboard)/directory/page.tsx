@@ -15,7 +15,7 @@ const ROLE_LABELS: Record<string, { label: string; color: string }> = {
 export default async function DirectoryPage() {
   const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
-  if (!ctx) redirect('/onboarding');
+  if (!ctx) redirect('/setup-org');
 
   const { supabase, organizationId } = ctx;
 

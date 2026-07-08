@@ -69,7 +69,7 @@ export default async function AbonnementPage({
   ]);
 
   const ctx = await getUserOrg(user.id);
-  if (!ctx) redirect('/onboarding');
+  if (!ctx) redirect('/setup-org');
 
   const { supabase, organizationId, orgPlan } = ctx;
 

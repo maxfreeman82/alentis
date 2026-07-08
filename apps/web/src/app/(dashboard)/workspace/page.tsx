@@ -24,7 +24,7 @@ const LINK_CATEGORY_LABELS: Record<string, { label: string; color: string }> = {
 export default async function WorkspacePage() {
   const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
-  if (!ctx) redirect('/onboarding');
+  if (!ctx) redirect('/setup-org');
 
   const { supabase, organizationId, orgName, role } = ctx;
   const isAdmin = ['org_admin', 'org_hr', 'org_manager'].includes(role);

@@ -12,7 +12,7 @@ const FAMILIES: EnergyFamily[] = ['Pilotes', 'Initialiseurs', 'Accomplisseurs', 
 export default async function SimulateurPage() {
   const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
-  if (!ctx) redirect('/onboarding');
+  if (!ctx) redirect('/setup-org');
 
   const { supabase, organizationId, orgArchetype, orgIasScore, orgName } = ctx;
   const year = new Date().getFullYear();

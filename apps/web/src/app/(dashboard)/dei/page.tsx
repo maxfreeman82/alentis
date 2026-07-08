@@ -24,7 +24,7 @@ const BAND_LABELS: Record<string, string> = {
 export default async function DeiPage() {
   const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
-  if (!ctx) redirect('/onboarding');
+  if (!ctx) redirect('/setup-org');
 
   const { supabase, organizationId } = ctx;
 

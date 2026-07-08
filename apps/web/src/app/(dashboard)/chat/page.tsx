@@ -8,7 +8,7 @@ import { getUserOrg } from '@/lib/supabase/auth';
 export default async function ChatPage() {
   const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
-  if (!ctx) redirect('/onboarding');
+  if (!ctx) redirect('/setup-org');
 
   const { supabase, organizationId, profileId } = ctx;
 

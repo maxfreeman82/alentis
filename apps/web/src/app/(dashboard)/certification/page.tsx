@@ -55,7 +55,7 @@ const LEVELS: {
 export default async function CertificationPage() {
   const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
-  if (!ctx) redirect('/onboarding');
+  if (!ctx) redirect('/setup-org');
 
   const { supabase, organizationId, orgIasScore, orgCertLevel, orgName } = ctx;
   const year = new Date().getFullYear();

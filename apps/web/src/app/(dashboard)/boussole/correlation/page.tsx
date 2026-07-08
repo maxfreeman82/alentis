@@ -23,7 +23,7 @@ const FAMILIES: EnergyFamily[] = ['Pilotes', 'Initialiseurs', 'Accomplisseurs', 
 export default async function CorrelationPage() {
   const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
-  if (!ctx) redirect('/onboarding');
+  if (!ctx) redirect('/setup-org');
 
   const { supabase, organizationId, orgArchetype, orgName, orgIasScore } = ctx;
   const year = new Date().getFullYear();

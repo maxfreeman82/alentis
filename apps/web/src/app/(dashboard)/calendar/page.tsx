@@ -23,7 +23,7 @@ export default async function CalendarPage({
 }) {
   const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
-  if (!ctx) redirect('/onboarding');
+  if (!ctx) redirect('/setup-org');
 
   const sp        = await searchParams;
   const now       = new Date();

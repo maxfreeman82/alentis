@@ -40,7 +40,7 @@ export default async function MatchingPage({
   ]);
 
   const ctx = await getUserOrg(user.id);
-  if (!ctx) redirect('/onboarding');
+  if (!ctx) redirect('/setup-org');
 
   const { supabase, organizationId } = ctx;
 

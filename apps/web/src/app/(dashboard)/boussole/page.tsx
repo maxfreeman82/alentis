@@ -21,7 +21,7 @@ export default async function BousssolePage() {
   const ctx = await getUserOrg(user.id);
 
   if (!ctx) {
-    redirect('/onboarding');
+    redirect('/setup-org');
   }
 
   const { supabase, organizationId, orgName, orgIasScore, orgCertLevel, orgArchetype } = ctx;

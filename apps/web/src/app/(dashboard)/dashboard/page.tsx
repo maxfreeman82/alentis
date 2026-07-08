@@ -14,7 +14,7 @@ export default async function DashboardPage() {
 
   if (!ctx) {
     // Pas d'organisation liée → onboarding non terminé
-    redirect('/onboarding');
+    redirect('/setup-org');
   }
 
   const { supabase, organizationId, orgName, orgCertLevel, orgArchetype } = ctx;

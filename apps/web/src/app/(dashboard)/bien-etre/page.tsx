@@ -15,7 +15,7 @@ const wellbeingLabel = (s: number) =>
 export default async function BienEtrePage() {
   const user = await requireAuth();
   const ctx = await getUserOrg(user.id);
-  if (!ctx) redirect('/onboarding');
+  if (!ctx) redirect('/setup-org');
 
   const { supabase, organizationId } = ctx;
   const now = new Date();
