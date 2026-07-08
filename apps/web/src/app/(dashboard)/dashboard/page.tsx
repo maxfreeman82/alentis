@@ -1,4 +1,5 @@
 ﻿import { requireAuth } from '@/lib/supabase/user';
+import { redirect } from 'next/navigation';
 import { TrendingUp, Users, Target, Zap, ArrowUpRight, AlertTriangle, Brain, Battery } from 'lucide-react';
 import { ScoreCircle, AIInsightCard, AlertCard, SectionHeader, CertBadge } from '@/components/shared';
 import { computeIAS, iasLabel } from '@teranga/scoring';
@@ -12,11 +13,8 @@ export default async function DashboardPage() {
   const ctx = await getUserOrg(user.id);
 
   if (!ctx) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-slate-400">Profil en cours de configuration…</p>
-      </div>
-    );
+    // Pas d'organisation liée → onboarding non terminé
+    redirect('/onboarding');
   }
 
   const { supabase, organizationId, orgName, orgCertLevel, orgArchetype } = ctx;
