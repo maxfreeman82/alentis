@@ -47,22 +47,8 @@ export async function GET() {
     });
 
     if (createErr) {
-      // Si l'email existe déjà dans GoTrue, récupérer l'utilisateur existant
-      if (createErr.message?.includes('already') || createErr.message?.includes('registered')) {
-        const { data: existing } = await admin.auth.admin.getUserByEmail(profile.email);
-        if (existing?.user) {
-          await admin.auth.admin.updateUserById(existing.user.id, { password, email_confirm: true });
-          await admin.from('profiles').update({ user_id: existing.user.id }).eq('id', profile.id);
-          results.push({ email: profile.email, status: 'OK (existant mis à jour)' });
-          ok++;
-        } else {
-          results.push({ email: profile.email, status: `ERREUR: ${createErr.message}` });
-          errors++;
-        }
-      } else {
-        results.push({ email: profile.email, status: `ERREUR: ${createErr.message}` });
-        errors++;
-      }
+      results.push({ email: profile.email, status: `ERREUR: ${createErr.message}` });
+      errors++;
       continue;
     }
 
