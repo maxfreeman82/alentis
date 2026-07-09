@@ -4,9 +4,10 @@ import { computeDiagnostic } from '@/lib/matching/diagnostic';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle2, AlertTriangle, XCircle, BookOpen, Zap, TrendingUp } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, AlertTriangle, BookOpen, Zap, TrendingUp } from 'lucide-react';
 import { ScoreCircle, ScoreBreakdown } from '@/components/shared';
 import { scoreColor } from '@teranga/scoring';
+import { ApplyButton } from '@/components/talent/ApplyButton';
 
 const VERDICT_CONFIG = {
   apply_now: {
@@ -52,10 +53,10 @@ export default async function JobDiagnosticPage({
       .select('score_hard, score_soft, score_exp, score_life, score_energy, score_risk, dominant_profile, energy_level')
       .eq('profile_id', ctx.profileId)
       .maybeSingle(),
-    admin.from('job_offers')
-      .select('id, title, company_name, description, location, contract_type, salary_min, salary_max, min_score_global, min_score_hard, min_score_soft, is_premium')
+    admin.from('jobs')
+      .select('id, title, description, requirements, ias_impact, organization_id, organizations(name)')
       .eq('id', jobId)
-      .eq('is_active', true)
+      .in('status', ['open', 'active'])
       .maybeSingle(),
   ]);
 
@@ -72,17 +73,34 @@ export default async function JobDiagnosticPage({
     );
   }
 
-  if (!jobRes.data) {
+  const rawJob   = jobRes.data as { id: string; title: string; description: string | null; requirements: Record<string, unknown> | null; ias_impact: number | null; organization_id: string; organizations: { name: string } | null } | null;
+  const passport = passportRes.data;
+
+  if (!rawJob) {
     return (
       <div className="text-center py-20 space-y-4">
         <p className="text-slate-400">Offre introuvable ou expirée.</p>
-        <Link href="/suggestions" className="text-emerald-400 hover:underline text-sm">← Retour aux opportunités</Link>
+        <Link href="/suggestions" className="text-emerald hover:underline text-sm">← Retour aux opportunités</Link>
       </div>
     );
   }
 
-  const job     = jobRes.data;
-  const passport = passportRes.data;
+  // Normaliser pour computeDiagnostic (attend company_name, min_score_global, etc.)
+  const reqs = (rawJob.requirements ?? {}) as Record<string, unknown>;
+  const job = {
+    id:               rawJob.id,
+    title:            rawJob.title,
+    company_name:     rawJob.organizations?.name ?? 'Organisation',
+    description:      rawJob.description,
+    location:         null as string | null,
+    contract_type:    null as string | null,
+    salary_min:       null as number | null,
+    salary_max:       null as number | null,
+    min_score_global: (reqs.min_score_global as number | undefined) ?? 60,
+    min_score_hard:   (reqs.min_score_hard   as number | undefined) ?? 50,
+    min_score_soft:   (reqs.min_score_soft   as number | undefined) ?? 50,
+    is_premium:       false,
+  };
 
   // Appel Claude côté serveur — résultat mis en cache implicitement par Next.js fetch dedup
   const diag = await computeDiagnostic({ passport, job });
@@ -208,25 +226,19 @@ export default async function JobDiagnosticPage({
         </div>
       )}
 
-      {/* CTA triple */}
+      {/* CTA */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-        <Link
-          href={`/candidats/${job.id}`}
-          className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-colors bg-emerald-500 hover:bg-emerald-600 text-slate-900"
-        >
-          <CheckCircle2 className="w-4 h-4" />
-          Postuler maintenant
-        </Link>
+        <ApplyButton jobId={rawJob.id} ctaStyle="bg-emerald text-bg hover:bg-emerald/90" />
         <Link
           href="/formation"
-          className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-colors bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border border-amber-500/25"
+          className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-colors bg-amber/15 hover:bg-amber/25 text-amber border border-amber/25"
         >
           <BookOpen className="w-4 h-4" />
           Voir les formations
         </Link>
         <Link
           href="/passport"
-          className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-colors bg-slate-50 hover:bg-slate-50 text-slate-600 border border-slate-200"
+          className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-colors bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200"
         >
           <TrendingUp className="w-4 h-4" />
           Mon Passport

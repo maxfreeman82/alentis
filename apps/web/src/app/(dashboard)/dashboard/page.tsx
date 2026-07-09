@@ -10,59 +10,6 @@ import type { CertLevel } from '@teranga/types';
 export default async function DashboardPage() {
   const user = await requireAuth();
 
-  // Super admin : pas d'organisation — vue plateforme globale
-  const adminCheck = createAdminClient();
-  const { data: myProfile } = await adminCheck
-    .from('profiles')
-    .select('role')
-    .eq('user_id', user.id)
-    .maybeSingle();
-
-  if (myProfile?.role === 'super_admin') {
-    const { data: orgs }  = await adminCheck.from('organizations').select('id, name, plan, ias_score, cert_level');
-    const { count: userCount } = await adminCheck.from('profiles').select('id', { count: 'exact', head: true });
-    const { count: passportCount } = await adminCheck.from('talent_passports').select('id', { count: 'exact', head: true });
-    return (
-      <div className="space-y-6 animate-fade-in">
-        <div>
-          <p className="section-tag text-violet mb-1">SUPER ADMIN · PLATEFORME</p>
-          <h1 className="font-display text-2xl text-slate-900">Vue globale Teranga Align</h1>
-        </div>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="card text-center">
-            <p className="text-3xl font-bold text-slate-900 font-mono">{orgs?.length ?? 0}</p>
-            <p className="text-emerald text-xs font-semibold mt-1">Organisations</p>
-          </div>
-          <div className="card text-center">
-            <p className="text-3xl font-bold text-slate-900 font-mono">{userCount ?? 0}</p>
-            <p className="text-violet text-xs font-semibold mt-1">Utilisateurs</p>
-          </div>
-          <div className="card text-center">
-            <p className="text-3xl font-bold text-slate-900 font-mono">{passportCount ?? 0}</p>
-            <p className="text-amber text-xs font-semibold mt-1">Talent Passports</p>
-          </div>
-        </div>
-        <div className="card !p-0 overflow-hidden">
-          <div className="px-5 py-3 border-b border-slate-200">
-            <p className="text-slate-900 font-semibold text-sm">Organisations actives</p>
-          </div>
-          <div className="divide-y divide-slate-200">
-            {(orgs ?? []).map(org => (
-              <div key={org.id} className="flex items-center justify-between px-5 py-3">
-                <p className="text-slate-900 text-sm font-medium">{org.name}</p>
-                <div className="flex items-center gap-3 text-xs text-slate-500">
-                  <span className="capitalize">{org.plan}</span>
-                  <span>IAS {org.ias_score ?? '—'}</span>
-                  <span>Cert. {org.cert_level ?? '—'}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const ctx = await getUserOrg(user.id);
 
   if (!ctx) {

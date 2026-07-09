@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Briefcase, KanbanSquare, Sparkles, ArrowRight, TrendingUp } from 'lucide-react';
 import { SectionHeader } from '@/components/shared';
 import { CreateJobButton } from '@/components/recrutement/CreateJobButton';
+import { AIAdvisorWidget } from '@/components/recrutement/AIAdvisorWidget';
 import { getUserOrg } from '@/lib/supabase/auth';
 
 export default async function RecrutementPage() {
@@ -70,6 +71,9 @@ export default async function RecrutementPage() {
           <p className="text-slate-400 text-xs mt-1">Impact IAS si pourvus</p>
         </div>
       </div>
+
+      {/* Conseiller IA Stratégique */}
+      <AIAdvisorWidget />
 
       {/* Modules */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

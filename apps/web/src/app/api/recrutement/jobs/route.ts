@@ -8,13 +8,15 @@ import { checkPermission } from '@/lib/api-auth';
 // status, ias_impact, created_at
 
 const createSchema = z.object({
-  title:           z.string().min(2),
-  description:     z.string().optional(),
-  requirements:    z.record(z.string(), z.unknown()).optional(),
-  soft_thresholds: z.record(z.string(), z.unknown()).optional(),
-  ias_impact:      z.number().optional(),
-  weights_6d:      z.record(z.string(), z.number()).optional(),
-  okr_id:          z.string().uuid().optional(),
+  title:            z.string().min(2),
+  description:      z.string().optional(),
+  required_family:  z.string().optional(),
+  min_score_global: z.number().min(0).max(100).default(60),
+  requirements:     z.record(z.string(), z.unknown()).optional(),
+  soft_thresholds:  z.record(z.string(), z.unknown()).optional(),
+  ias_impact:       z.number().optional(),
+  weights_6d:       z.record(z.string(), z.number()).optional(),
+  okr_id:           z.string().uuid().optional(),
 });
 
 const patchSchema = z.object({
@@ -60,18 +62,25 @@ export async function POST(req: Request) {
   const parsed = createSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
+  // Fusionner required_family et min_score_global dans requirements JSONB
+  const requirements = {
+    ...(parsed.data.requirements ?? {}),
+    ...(parsed.data.required_family  !== undefined && { required_family:  parsed.data.required_family }),
+    ...(parsed.data.min_score_global !== undefined && { min_score_global: parsed.data.min_score_global }),
+  };
+
   const { data, error } = await supabase
     .from('jobs')
     .insert({
       organization_id: organizationId,
       title:           parsed.data.title,
-      description:     parsed.data.description          ?? null,
-      requirements:    parsed.data.requirements         ?? null,
-      soft_thresholds: parsed.data.soft_thresholds      ?? null,
-      ias_impact:      parsed.data.ias_impact           ?? null,
-      weights_6d:      parsed.data.weights_6d           ?? null,
-      okr_id:          parsed.data.okr_id               ?? null,
-      status:          'draft',
+      description:     parsed.data.description   ?? null,
+      requirements,
+      soft_thresholds: parsed.data.soft_thresholds ?? null,
+      ias_impact:      parsed.data.ias_impact      ?? null,
+      weights_6d:      parsed.data.weights_6d      ?? null,
+      okr_id:          parsed.data.okr_id          ?? null,
+      status:          'open',
     })
     .select()
     .single();

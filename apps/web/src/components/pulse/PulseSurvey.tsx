@@ -1,49 +1,89 @@
-﻿'use client';
+'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronRight, ChevronLeft, Check, Loader2 } from 'lucide-react';
+import { ChevronRight, Check, Loader2, LockKeyhole, AlertTriangle } from 'lucide-react';
 import { PULSE_QUESTIONS, DIMENSIONS } from '@/lib/vision-pulse/survey';
 import type { PulseDimension } from '@/lib/vision-pulse/survey';
+import { IntegrityTracker } from '@/components/assessment/IntegrityTracker';
 
 interface PulseSurveyProps {
   visionStatement?: string | null;
-  quarter: number;
-  year: number;
-  organizationId: string;
+  quarter:          number;
+  year:             number;
+  organizationId:   string;
 }
 
 const DIM_ORDER: PulseDimension[] = ['knowledge', 'credibility', 'connection', 'capability', 'projection'];
 
 const RATING_LABELS: Record<number, string> = {
-  1: 'Jamais',
-  2: 'Rarement',
-  3: 'Parfois',
-  4: 'Souvent',
-  5: 'Toujours',
+  1: 'Jamais', 2: 'Rarement', 3: 'Parfois', 4: 'Souvent', 5: 'Toujours',
+};
+const RATING_COLORS: Record<number, string> = {
+  1: '#F43F5E', 2: '#F97316', 3: '#F59E0B', 4: '#0EA5E9', 5: '#10B981',
 };
 
-const RATING_COLORS: Record<number, string> = {
-  1: '#F43F5E',
-  2: '#F97316',
-  3: '#F59E0B',
-  4: '#0EA5E9',
-  5: '#10B981',
-};
+type SessionStatus = 'loading' | 'active' | 'completed' | 'expired' | 'error';
 
 export function PulseSurvey({ visionStatement, quarter, year, organizationId }: PulseSurveyProps) {
-  const router  = useRouter();
-  const [step,  setStep]      = useState(0); // index de dimension (0-4)
+  const router = useRouter();
+
+  // ── Session anti-triche ───────────────────────────────────────────────────
+  const [sessionId,     setSessionId]     = useState<string | null>(null);
+  const [sessionStatus, setSessionStatus] = useState<SessionStatus>('loading');
+
+  useEffect(() => {
+    let cancelled = false;
+    async function initSession() {
+      try {
+        const res  = await fetch('/api/assessment/session/start', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ assessmentType: 'vision_pulse', organizationId }),
+        });
+        const data = await res.json() as {
+          status:        string;
+          cannotRetake?: boolean;
+          session?:      { id: string; current_index: number; responses: Record<string, number> };
+        };
+        if (cancelled) return;
+
+        if (data.status === 'completed' || data.cannotRetake) {
+          setSessionStatus('completed');
+          return;
+        }
+
+        const session = data.session;
+        if (!session) { setSessionStatus('error'); return; }
+
+        setSessionId(session.id);
+        // Reprendre les réponses et l'étape sauvegardées
+        if (Object.keys(session.responses ?? {}).length > 0) {
+          setResponses(session.responses);
+        }
+        if (session.current_index > 0) {
+          setStep(Math.min(session.current_index, DIM_ORDER.length - 1));
+        }
+        setSessionStatus('active');
+      } catch {
+        if (!cancelled) setSessionStatus('error');
+      }
+    }
+    void initSession();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organizationId]);
+
+  // ── État questionnaire ─────────────────────────────────────────────────────
+  const [step,      setStep]      = useState(0);
   const [responses, setResponses] = useState<Record<string, number>>({});
-  const [loading, setLoading] = useState(false);
-  const [error,  setError]    = useState<string | null>(null);
+  const [loading,   setLoading]   = useState(false);
+  const [error,     setError]     = useState<string | null>(null);
 
-  const currentDim  = DIM_ORDER[step] ?? 'knowledge';
-  const dimInfo     = DIMENSIONS[currentDim];
+  const currentDim   = DIM_ORDER[step] ?? 'knowledge';
+  const dimInfo      = DIMENSIONS[currentDim];
   const dimQuestions = PULSE_QUESTIONS.filter(q => q.dimension === currentDim);
-
-  const dimResponses = dimQuestions.map(q => responses[q.id]);
-  const dimComplete  = dimResponses.every(v => v !== undefined);
+  const dimComplete  = dimQuestions.every(q => responses[q.id] !== undefined);
 
   const totalAnswered = Object.keys(responses).length;
   const progress      = Math.round((totalAnswered / PULSE_QUESTIONS.length) * 100);
@@ -53,19 +93,36 @@ export function PulseSurvey({ visionStatement, quarter, year, organizationId }: 
   }
 
   async function handleNext() {
-    if (!dimComplete) return;
+    if (!dimComplete || !sessionId) return;
+
+    // Sauvegarder l'index avancé côté serveur (lock-back)
+    void fetch('/api/assessment/session/answer', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ sessionId, question_id: '_nav', time_ms: 0, focus_lost: 0, nextIndex: step + 1 }),
+    });
+
     if (step < DIM_ORDER.length - 1) {
       setStep(s => s + 1);
       return;
     }
+
     // Dernière dimension — soumettre
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/vision-pulse/submit', {
-        method: 'POST',
+      // 1. Enregistrer l'intégrité de la session
+      await fetch('/api/assessment/session/complete', {
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ organizationId, quarter, year, responses }),
+        body:    JSON.stringify({ sessionId, responses }),
+      });
+
+      // 2. Soumettre les réponses au Vision Pulse
+      const res = await fetch('/api/vision-pulse/submit', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ organizationId, quarter, year, responses }),
       });
       if (!res.ok) {
         const data = await res.json() as { error?: string };
@@ -79,6 +136,52 @@ export function PulseSurvey({ visionStatement, quarter, year, organizationId }: 
     }
   }
 
+  // ── États spéciaux ─────────────────────────────────────────────────────────
+
+  if (sessionStatus === 'loading') {
+    return (
+      <div className="max-w-lg mx-auto flex items-center justify-center py-20">
+        <div className="text-center space-y-3">
+          <Loader2 size={22} className="animate-spin text-violet mx-auto" />
+          <p className="text-slate-400 text-sm">Préparation de votre session…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (sessionStatus === 'completed') {
+    return (
+      <div className="max-w-lg mx-auto card border-l-4 border-l-emerald py-10 text-center space-y-3">
+        <LockKeyhole size={26} className="text-emerald mx-auto" />
+        <p className="text-slate-900 font-semibold">Pulse déjà soumis ce trimestre</p>
+        <p className="text-slate-400 text-sm">Vous avez déjà répondu au Vision Pulse pour Q{quarter} {year}.</p>
+        <a href="/boussole/pulse" className="inline-block text-violet text-sm hover:underline">
+          Voir les résultats →
+        </a>
+      </div>
+    );
+  }
+
+  if (sessionStatus === 'expired') {
+    return (
+      <div className="max-w-lg mx-auto card border-l-4 border-l-amber py-10 text-center space-y-3">
+        <AlertTriangle size={26} className="text-amber mx-auto" />
+        <p className="text-slate-900 font-semibold">Session expirée</p>
+        <p className="text-slate-400 text-sm">Votre session de 45 minutes a expiré. Contactez votre référent.</p>
+      </div>
+    );
+  }
+
+  if (sessionStatus === 'error') {
+    return (
+      <div className="max-w-lg mx-auto card border-l-4 border-l-rose py-10 text-center">
+        <p className="text-rose text-sm">Impossible d'initialiser la session. Rechargez la page.</p>
+      </div>
+    );
+  }
+
+  // ── Questionnaire principal ────────────────────────────────────────────────
+
   return (
     <div className="max-w-lg mx-auto">
       {/* Vision context */}
@@ -89,7 +192,7 @@ export function PulseSurvey({ visionStatement, quarter, year, organizationId }: 
         </div>
       )}
 
-      {/* Barre de progression globale */}
+      {/* Barre de progression */}
       <div className="mb-6">
         <div className="flex justify-between text-[11px] text-slate-500 mb-1.5">
           <span>Question {totalAnswered}/{PULSE_QUESTIONS.length}</span>
@@ -103,43 +206,47 @@ export function PulseSurvey({ visionStatement, quarter, year, organizationId }: 
         </div>
       </div>
 
-      {/* Pastilles dimensions */}
+      {/* Pastilles dimensions — lecture seule (pas de retour arrière) */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
         {DIM_ORDER.map((d, i) => {
           const info    = DIMENSIONS[d];
           const done    = i < step || (i === step && dimComplete);
           const current = i === step;
           return (
-            <button
+            <div
               key={d}
-              onClick={() => i < step && setStep(i)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border whitespace-nowrap transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border whitespace-nowrap ${
                 done    ? 'bg-emerald/10 border-emerald/20 text-emerald' :
-                current ? 'border-slate-200 text-slate-900'                   :
-                          'border-slate-200 text-slate-600'
+                current ? 'border-slate-200 text-slate-900'              :
+                          'border-slate-200 text-slate-400'
               }`}
               style={current ? { borderColor: `${info.color}40`, color: info.color } : {}}
-              disabled={i > step}
             >
               {done ? <Check size={10} /> : <span>{info.icon}</span>}
               {info.label}
-            </button>
+            </div>
           );
         })}
       </div>
 
       {/* Questions de la dimension courante */}
       <div className="space-y-5">
-        <div className="mb-2">
-          <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: dimInfo.color }}>
-            {dimInfo.label}
-          </p>
-        </div>
+        <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: dimInfo.color }}>
+          {dimInfo.label}
+        </p>
 
         {dimQuestions.map((q) => {
           const selected = responses[q.id];
           return (
             <div key={q.id} className="card space-y-4">
+              {/* Tracker invisible */}
+              {sessionId && (
+                <IntegrityTracker
+                  questionId={q.id}
+                  sessionId={sessionId}
+                  answer={selected ?? null}
+                />
+              )}
               <p className="text-slate-900 text-sm leading-relaxed">{q.text}</p>
               <div className="flex gap-2 flex-wrap">
                 {[1, 2, 3, 4, 5].map((v) => (
@@ -163,26 +270,14 @@ export function PulseSurvey({ visionStatement, quarter, year, organizationId }: 
         })}
       </div>
 
-      {/* Erreur */}
-      {error && (
-        <p className="mt-4 text-rose-400 text-xs text-center">{error}</p>
-      )}
+      {error && <p className="mt-4 text-rose-400 text-xs text-center">{error}</p>}
 
-      {/* Navigation */}
-      <div className="flex gap-3 mt-6">
-        {step > 0 && (
-          <button
-            onClick={() => setStep(s => s - 1)}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-400 text-sm hover:text-slate-800 transition-colors"
-          >
-            <ChevronLeft size={14} />
-            Retour
-          </button>
-        )}
+      {/* Navigation — PAS de bouton Retour (anti-triche) */}
+      <div className="mt-6">
         <button
           onClick={handleNext}
-          disabled={!dimComplete || loading}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          disabled={!dimComplete || loading || !sessionId}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
           style={{
             backgroundColor: dimComplete ? dimInfo.color : undefined,
             color:           dimComplete ? '#000' : undefined,

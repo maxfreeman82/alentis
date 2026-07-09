@@ -25,7 +25,7 @@ export default async function HomePage() {
     if (profile.onboarding_completed) {
       if (r === 'talent_free' || r === 'talent_premium') redirect('/passport');
       if (r === 'founder')   redirect('/demarrer');
-      if (r === 'super_admin') redirect('/dashboard');
+      if (r === 'super_admin') redirect('/admin');
       redirect('/dashboard');
     }
 
