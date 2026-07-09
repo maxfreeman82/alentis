@@ -63,10 +63,7 @@ const ORG_NAV: NavItem[] = [
 ];
 
 const SUPER_ADMIN_NAV: NavItem[] = [
-  { href: '/dashboard',     label: 'Vue plateforme', icon: LayoutDashboard },
-  { href: '/analytics',     label: 'Analytics',      icon: BarChart3,  color: 'text-cyan' },
-  { href: '/certification', label: 'Certifications', icon: Award,      color: 'text-amber' },
-  { href: '/abonnement',    label: 'Abonnements',    icon: CreditCard, color: 'text-emerald' },
+  { href: '/dashboard', label: 'Vue plateforme', icon: LayoutDashboard },
 ];
 
 export function Sidebar({ role = '' }: { role?: string }) {

@@ -1,11 +1,25 @@
 ﻿'use client';
 
-import { useState } from 'react';
-import { Plus, X, Loader2 } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Plus, X, Loader2, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { z } from 'zod';
 
-const ENERGY_FAMILIES = ['Pilotes', 'Initialiseurs', 'Accomplisseurs', 'Dynamiseurs', 'Régulateurs'];
+const FAMILY_KEYWORDS: Record<string, string[]> = {
+  Pilotes:       ['directeur','director','manager','lead','chef','responsable','head','ceo','cto','dg','president'],
+  Initialiseurs: ['innovation','créatif','creative','r&d','recherche','product','design','ux','stratégie','business developer'],
+  Accomplisseurs:['opérations','production','qualité','ingénieur','technique','développeur','dev','engineer','logistique','supply'],
+  Dynamiseurs:   ['commercial','vente','sales','marketing','communication','relation','client','business dev','growth','brand'],
+  Régulateurs:   ['finance','comptable','audit','conformité','rh','juridique','contrôle','analyste','data','compliance','assistant'],
+};
+
+function suggestFamily(title: string): string | null {
+  const t = title.toLowerCase();
+  for (const [family, keywords] of Object.entries(FAMILY_KEYWORDS)) {
+    if (keywords.some(k => t.includes(k))) return family;
+  }
+  return null;
+}
 
 const schema = z.object({
   title:            z.string().min(2, 'Titre requis'),
@@ -24,10 +38,11 @@ export function CreateJobButton() {
   const [form, setForm] = useState({
     title:            '',
     description:      '',
-    required_family:  '',
     min_score_global: 60,
     ias_impact:       '',
   });
+
+  const suggestedFamily = useMemo(() => suggestFamily(form.title), [form.title]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -36,7 +51,7 @@ export function CreateJobButton() {
     const parsed = schema.safeParse({
       ...form,
       ias_impact: form.ias_impact ? parseFloat(form.ias_impact) : undefined,
-      required_family: form.required_family || undefined,
+      required_family: suggestedFamily ?? undefined,
       description: form.description || undefined,
     });
 
@@ -57,7 +72,7 @@ export function CreateJobButton() {
         throw new Error(d.error ?? 'Erreur serveur');
       }
       setOpen(false);
-      setForm({ title: '', description: '', required_family: '', min_score_global: 60, ias_impact: '' });
+      setForm({ title: '', description: '', min_score_global: 60, ias_impact: '' });
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erreur inconnue');
@@ -115,32 +130,30 @@ export function CreateJobButton() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                {/* Famille énergétique */}
-                <div>
-                  <label className="block text-slate-400 text-xs mb-1.5">Famille souhaitée</label>
-                  <select
-                    value={form.required_family}
-                    onChange={e => setForm(f => ({ ...f, required_family: e.target.value }))}
-                    className="w-full bg-bg border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-emerald/40"
-                  >
-                    <option value="">Toutes</option>
-                    {ENERGY_FAMILIES.map(f => <option key={f} value={f}>{f}</option>)}
-                  </select>
+              {/* Suggestion IA famille énergétique */}
+              {form.title.trim().length > 3 && (
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-violet/5 border border-violet/20">
+                  <Sparkles size={13} className="text-violet flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-violet text-[10px] font-semibold uppercase tracking-wider mb-0.5">Suggestion IA — Profil énergétique</p>
+                    <p className="text-slate-900 text-sm font-medium">
+                      {suggestedFamily ?? 'Analyse en cours…'}
+                    </p>
+                  </div>
                 </div>
+              )}
 
-                {/* Score minimum */}
-                <div>
-                  <label className="block text-slate-400 text-xs mb-1.5">Score min 6D</label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={form.min_score_global}
-                    onChange={e => setForm(f => ({ ...f, min_score_global: parseInt(e.target.value) || 60 }))}
-                    className="w-full bg-bg border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-emerald/40"
-                  />
-                </div>
+              {/* Score minimum */}
+              <div>
+                <label className="block text-slate-400 text-xs mb-1.5">Score min 6D</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={form.min_score_global}
+                  onChange={e => setForm(f => ({ ...f, min_score_global: parseInt(e.target.value) || 60 }))}
+                  className="w-full bg-bg border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-emerald/40"
+                />
               </div>
 
               {/* Impact IAS */}
