@@ -7,14 +7,7 @@ const PASSWORD = 'SuperAdmin2026!';
 export async function GET() {
   const admin = createAdminClient();
 
-  // 1. Supprimer l'ancien auth.user (CASCADE supprimera le profile)
-  const { error: delErr } = await admin.auth.admin.deleteUser(
-    '72fb5870-cf3c-40f4-9c0d-999aa4d57fc1',
-  );
-  if (delErr && !delErr.message.includes('not found'))
-    return NextResponse.json({ step: 'delete', error: delErr.message }, { status: 500 });
-
-  // 2. Recréer via GoTrue SDK
+  // Créer le compte GoTrue
   const { data: created, error: createErr } = await admin.auth.admin.createUser({
     email:         EMAIL,
     password:      PASSWORD,
@@ -26,7 +19,7 @@ export async function GET() {
 
   const newId = created.user.id;
 
-  // 3. Recréer le profile super_admin (cascade l'a supprimé)
+  // Recréer le profile super_admin
   const { error: profileErr } = await admin.from('profiles').insert({
     user_id:              newId,
     email:                EMAIL,
