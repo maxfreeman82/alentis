@@ -37,7 +37,7 @@ interface NavItem {
   children?: { href: string; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[];
 }
 
-const NAV_ITEMS: NavItem[] = [
+const ORG_NAV: NavItem[] = [
   { href: '/dashboard',       label: 'Dashboard',     icon: LayoutDashboard },
   { href: '/boussole',        label: 'Boussole',      icon: Compass,       color: 'text-violet' },
   { href: '/vision-pulse',    label: 'Vision Pulse',  icon: Radio,         color: 'text-emerald' },
@@ -59,11 +59,19 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/directory',       label: 'Annuaire',      icon: BookUser },
   { href: '/analytics',       label: 'Analytics',     icon: BarChart3,     color: 'text-cyan' },
   { href: '/certification',   label: 'Certification', icon: Award,         color: 'text-amber' },
-  { href: '/abonnement',     label: 'Abonnement',    icon: CreditCard,    color: 'text-emerald' },
+  { href: '/abonnement',      label: 'Abonnement',    icon: CreditCard,    color: 'text-emerald' },
 ];
 
-export function Sidebar() {
-  const pathname = usePathname();
+const SUPER_ADMIN_NAV: NavItem[] = [
+  { href: '/dashboard',     label: 'Vue plateforme', icon: LayoutDashboard },
+  { href: '/analytics',     label: 'Analytics',      icon: BarChart3,  color: 'text-cyan' },
+  { href: '/certification', label: 'Certifications', icon: Award,      color: 'text-amber' },
+  { href: '/abonnement',    label: 'Abonnements',    icon: CreditCard, color: 'text-emerald' },
+];
+
+export function Sidebar({ role = '' }: { role?: string }) {
+  const pathname   = usePathname();
+  const NAV_ITEMS  = role === 'super_admin' ? SUPER_ADMIN_NAV : ORG_NAV;
 
   return (
     <aside className="w-60 h-screen bg-bg-card border-r border-slate-200 flex flex-col fixed left-0 top-0 z-40">

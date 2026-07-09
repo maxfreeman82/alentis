@@ -8,13 +8,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const admin   = createAdminClient();
   const { data: profile } = await admin
     .from('profiles')
-    .select('first_name, email')
+    .select('first_name, email, role')
     .eq('user_id', user.id)
     .maybeSingle();
 
   return (
     <div className="flex h-screen bg-bg overflow-hidden">
-      <Sidebar />
+      <Sidebar role={profile?.role ?? ''} />
       <div className="flex-1 flex flex-col ml-60 overflow-hidden">
         <Header
           userFirstName={profile?.first_name ?? ''}
