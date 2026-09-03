@@ -31,6 +31,10 @@ CREATE TABLE public.energy_assessment_questions (
   dimension_tested   TEXT,
   hypothesis_tested  TEXT,
   energy_signals     JSONB       NOT NULL,
+  -- Libellés affichables des options ({key, text} uniquement — JAMAIS energyCode) :
+  -- nécessaire pour pouvoir réafficher une question déjà générée (reprise d'une
+  -- passation in_progress) sans rappeler l'IA ni exposer le mapping énergie.
+  option_labels      JSONB       NOT NULL DEFAULT '[]',
   candidate_answer   TEXT,
   response_timestamp TIMESTAMPTZ,
   created_at         TIMESTAMPTZ NOT NULL DEFAULT now()
