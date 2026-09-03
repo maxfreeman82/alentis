@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { tallyEvidence, type AnsweredQuestion } from './engine';
+import { tallyEvidence, decideNextStep, BROAD_SIGNALS, CONTEXT_TAGS_CYCLE, type AnsweredQuestion } from './engine';
 
 describe('tallyEvidence', () => {
   it('retourne un total de 0 pour toutes les énergies quand rien n\'est répondu', () => {
@@ -33,5 +33,28 @@ describe('tallyEvidence', () => {
     ];
     const evidence = tallyEvidence(answered);
     expect(evidence.P.total).toBe(0);
+  });
+});
+
+describe('decideNextStep — phase exploration', () => {
+  it('démarre en exploration avec les 5 énergies proposées', () => {
+    const decision = decideNextStep([]);
+    expect(decision.action).toBe('ask');
+    if (decision.action !== 'ask') throw new Error('unreachable');
+    expect(decision.phase).toBe('exploration');
+    expect(decision.dimensionTested).toBeNull();
+    expect(Object.values(decision.energySignals).sort()).toEqual(['A', 'D', 'I', 'P', 'R']);
+    expect(decision.contextTag).toBe(CONTEXT_TAGS_CYCLE[0]);
+  });
+
+  it('reste en exploration tant que les 5 énergies n\'ont pas toutes au moins 1 preuve', () => {
+    const answered: AnsweredQuestion[] = Array.from({ length: 4 }, (_, i) => ({
+      dimensionTested: null, hypothesisTested: null, contextTag: CONTEXT_TAGS_CYCLE[i % CONTEXT_TAGS_CYCLE.length]!,
+      energySignals: BROAD_SIGNALS, candidateAnswer: 'opt_P', // toujours P → I/D/A/R jamais couverts
+    }));
+    const decision = decideNextStep(answered);
+    expect(decision.action).toBe('ask');
+    if (decision.action !== 'ask') throw new Error('unreachable');
+    expect(decision.phase).toBe('exploration');
   });
 });
