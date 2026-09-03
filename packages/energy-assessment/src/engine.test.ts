@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { tallyEvidence, rankEvidence, decideNextStep, BROAD_SIGNALS, CONTEXT_TAGS_CYCLE, type AnsweredQuestion } from './engine';
+import type { EnergyCode } from './referentiel';
+
+function answeredFor(code: EnergyCode, contextTag: string): AnsweredQuestion {
+  return {
+    dimensionTested: null, hypothesisTested: null, contextTag,
+    energySignals: BROAD_SIGNALS, candidateAnswer: `opt_${code}`,
+  };
+}
 
 describe('tallyEvidence', () => {
   it('retourne un total de 0 pour toutes les énergies quand rien n\'est répondu', () => {
@@ -75,5 +83,64 @@ describe('decideNextStep — phase exploration', () => {
     expect(decision.action).toBe('ask');
     if (decision.action !== 'ask') throw new Error('unreachable');
     expect(decision.phase).toBe('exploration');
+  });
+});
+
+describe('decideNextStep — discrimination', () => {
+  it('bascule en discrimination quand deux énergies sont proches après couverture complète', () => {
+    // Couvre les 5 énergies, avec A et P proches (2 vs 2) et les autres à 1
+    const answered: AnsweredQuestion[] = [
+      answeredFor('A', 'incertitude'), answeredFor('A', 'pression'),
+      answeredFor('P', 'changement'), answeredFor('P', 'collectif'),
+      answeredFor('I', 'decision'), answeredFor('D', 'incertitude'), answeredFor('R', 'pression'),
+    ];
+    const decision = decideNextStep(answered);
+    expect(decision.action).toBe('ask');
+    if (decision.action !== 'ask') throw new Error('unreachable');
+    expect(decision.phase).toBe('discrimination');
+    expect(decision.hypothesisTested).toBe('A-P');
+    expect(Object.values(decision.energySignals).sort()).toEqual(['A', 'P']);
+  });
+});
+
+describe('decideNextStep — confirmation', () => {
+  it('bascule en confirmation quand un leader est net mais count < MIN_QUESTIONS', () => {
+    const answered: AnsweredQuestion[] = [
+      answeredFor('A', 'incertitude'), answeredFor('A', 'pression'), answeredFor('A', 'changement'),
+      answeredFor('P', 'collectif'), answeredFor('I', 'decision'),
+      answeredFor('D', 'incertitude'), answeredFor('R', 'pression'),
+    ];
+    const decision = decideNextStep(answered);
+    expect(decision.action).toBe('ask');
+    if (decision.action !== 'ask') throw new Error('unreachable');
+    expect(decision.phase).toBe('confirmation');
+    expect(decision.dimensionTested).toBe('A');
+  });
+});
+
+describe('decideNextStep — conclusion', () => {
+  it('conclut quand le seuil de confiance et le nombre de contextes sont atteints après MIN_QUESTIONS', () => {
+    const contexts = ['incertitude', 'pression', 'changement', 'collectif', 'decision'];
+    const answered: AnsweredQuestion[] = [
+      ...Array.from({ length: 8 }, (_, i) => answeredFor('A', contexts[i % contexts.length]!)),
+      answeredFor('P', 'incertitude'), answeredFor('I', 'pression'),
+      answeredFor('D', 'changement'), answeredFor('R', 'collectif'),
+    ];
+    const decision = decideNextStep(answered);
+    expect(decision.action).toBe('conclude');
+    if (decision.action !== 'conclude') throw new Error('unreachable');
+    expect(decision.dominant).toBe('A');
+    expect(decision.forced).toBe(false);
+  });
+
+  it('force la conclusion à MAX_QUESTIONS même sans seuil de confiance atteint', () => {
+    const contexts = ['incertitude', 'pression', 'changement', 'collectif', 'decision'];
+    const answered: AnsweredQuestion[] = Array.from({ length: 20 }, (_, i) =>
+      answeredFor((['A', 'P', 'I', 'D', 'R'] as const)[i % 5]!, contexts[i % contexts.length]!)
+    );
+    const decision = decideNextStep(answered);
+    expect(decision.action).toBe('conclude');
+    if (decision.action !== 'conclude') throw new Error('unreachable');
+    expect(decision.forced).toBe(true);
   });
 });

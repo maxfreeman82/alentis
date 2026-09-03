@@ -93,6 +93,53 @@ export function decideNextStep(answered: AnsweredQuestion[]): EngineDecision {
     };
   }
 
-  // Phases suivantes : implémentées à la Task 5.
-  throw new Error('not implemented past exploration');
+  // `ranked` always has one entry per ENERGY_CODES (5), so index 0 and 1 are
+  // always in bounds — the assertions are safe under noUncheckedIndexedAccess.
+  const leader = ranked[0]!;
+  const challenger = ranked[1]!;
+  const gap = leader.total - challenger.total;
+  const totalEvidence = ranked.reduce((sum, r) => sum + r.total, 0);
+  const share = totalEvidence > 0 ? leader.total / totalEvidence : 0;
+
+  const canConclude =
+    count >= MIN_QUESTIONS &&
+    share >= CONFIDENCE_THRESHOLD &&
+    leader.contextCount >= MIN_CONTEXTS_FOR_DOMINANT &&
+    gap > CLOSE_GAP;
+
+  const secondaryOf = (leaderCode: EnergyCode, leaderTotal: number) =>
+    ranked
+      .filter(r => r.code !== leaderCode && r.total > 0 && leaderTotal - r.total <= CLOSE_GAP)
+      .map(r => r.code);
+
+  if (canConclude) {
+    return {
+      action: 'conclude', dominant: leader.code,
+      secondary: secondaryOf(leader.code, leader.total),
+      confidence: share, forced: false,
+    };
+  }
+
+  if (count >= MAX_QUESTIONS) {
+    return {
+      action: 'conclude', dominant: leader.code,
+      secondary: secondaryOf(leader.code, leader.total),
+      confidence: share, forced: true,
+    };
+  }
+
+  if (gap <= CLOSE_GAP) {
+    return {
+      action: 'ask', phase: 'discrimination',
+      dimensionTested: leader.code, hypothesisTested: `${leader.code}-${challenger.code}`,
+      energySignals: { opt_1: leader.code, opt_2: challenger.code },
+      contextTag,
+    };
+  }
+
+  return {
+    action: 'ask', phase: 'confirmation',
+    dimensionTested: leader.code, hypothesisTested: leader.code,
+    energySignals: BROAD_SIGNALS, contextTag,
+  };
 }
