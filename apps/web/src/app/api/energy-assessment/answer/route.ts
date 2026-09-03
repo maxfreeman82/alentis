@@ -175,7 +175,35 @@ export async function POST(req: Request) {
     })
     .select('id, question_text, question_format')
     .single();
-  if (nextErr || !nextQuestion) return NextResponse.json({ error: nextErr?.message ?? 'Création impossible' }, { status: 500 });
+  if (nextErr || !nextQuestion) {
+    // Course concurrente entre deux retries après échec IA (cf. isRetryAfterFailure
+    // plus haut) : idx_energy_assessment_questions_one_pending (migration 006) a
+    // rejeté ce 2e INSERT avec 23505 (unique_violation) — un autre POST /answer a
+    // déjà créé la question suivante entre-temps. On ne renvoie pas 500 : on relit
+    // la question en attente déjà créée par le gagnant et on la renvoie telle quelle,
+    // pour que le perdant de la course reparte avec une réponse exploitable.
+    if (nextErr?.code === '23505') {
+      const { data: pending, error: pendingErr } = await admin
+        .from('energy_assessment_questions')
+        .select('id, question_text, question_format, option_labels')
+        .eq('assessment_id', assessment.id)
+        .is('candidate_answer', null)
+        .maybeSingle();
+      if (pendingErr) return NextResponse.json({ error: pendingErr.message }, { status: 500 });
+      if (pending) {
+        return NextResponse.json({
+          done: false,
+          question: {
+            id: pending.id,
+            text: pending.question_text,
+            format: pending.question_format,
+            options: pending.option_labels,
+          },
+        });
+      }
+    }
+    return NextResponse.json({ error: nextErr?.message ?? 'Création impossible' }, { status: 500 });
+  }
 
   // Ne JAMAIS renvoyer energy_signals (mapping option → énergie) au client.
   return NextResponse.json({

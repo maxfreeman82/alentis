@@ -50,6 +50,17 @@ CREATE INDEX idx_energy_assessment_questions_assessment ON public.energy_assessm
 CREATE UNIQUE INDEX idx_energy_assessments_one_in_progress
   ON public.energy_assessments(profile_id) WHERE status = 'in_progress';
 
+-- Même principe pour la question en attente : POST /answer peut, après un échec de
+-- génération, être rejoué en retry (cf. isRetryAfterFailure dans la route). Deux
+-- retries concurrents passeraient tous les deux la vérification applicative
+-- "aucune question créée depuis" et inséreraient chacun une question suivante,
+-- laissant une ligne orpheline (candidate_answer NULL) qui gonflerait indûment
+-- answered.length côté moteur. Cette contrainte rend l'état structurellement
+-- impossible : le 2e INSERT échoue avec 23505, que la route rattrape en relisant
+-- et renvoyant la question en attente déjà créée par le gagnant de la course.
+CREATE UNIQUE INDEX idx_energy_assessment_questions_one_pending
+  ON public.energy_assessment_questions(assessment_id) WHERE candidate_answer IS NULL;
+
 -- Chaque politique RLS de cette migration filtre via profiles.user_id = auth.uid() ;
 -- sans index, chaque SELECT/INSERT/UPDATE déclenche un scan séquentiel de profiles.
 -- Unique car un utilisateur auth ne doit correspondre qu'à un seul profil
