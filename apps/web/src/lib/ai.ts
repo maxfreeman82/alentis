@@ -1,4 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { validateGeneratedQuestion, type ValidatedQuestion } from '@teranga/energy-assessment';
+import type { EnergyCode } from '@teranga/energy-assessment';
 
 // RÈGLE : toutes les fonctions IA sont server-side uniquement
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -106,4 +108,44 @@ JSON:
     risks: string[];
     recommendation: string;
   };
+}
+
+// 5. Génération d'une question Energy Assessment
+// L'IA ne choisit NI la dimension testée NI le mapping option→énergie : ces
+// deux éléments sont décidés par le moteur déterministe (packages/energy-assessment)
+// et transmis ici en contrainte. L'IA rédige uniquement le texte.
+export async function generateEnergyQuestion(
+  contextSnapshot: Record<string, unknown>,
+  phase: 'exploration' | 'discrimination' | 'confirmation',
+  contextTag: string,
+  energySignals: Record<string, EnergyCode>
+): Promise<ValidatedQuestion | null> {
+  const optionKeys = Object.keys(energySignals);
+
+  const msg = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 700,
+    system: `Expert RH. Tu rédiges UNE question de mise en situation professionnelle pour un
+             assessment comportemental. Contrainte stricte : tu ne dois PAS choisir quelles
+             dimensions sont testées ni les associer à un chiffre — cela t'est déjà imposé.
+             Chaque option doit décrire un comportement professionnellement légitime, sans
+             révéler quelle "énergie" elle mesure. Réponds UNIQUEMENT en JSON valide, sans markdown.`,
+    messages: [{
+      role: 'user',
+      content: `Contexte candidat: ${JSON.stringify(contextSnapshot)}
+Phase: ${phase}
+Tag de contexte à utiliser pour le décor de la situation: ${contextTag}
+Clés d'options obligatoires (dans cet ordre, une phrase par clé): ${optionKeys.join(', ')}
+
+JSON attendu:
+{"question_text":"string","question_format":"${optionKeys.length === 2 ? 'arbitration' : 'forced_choice'}",
+ "options":[${optionKeys.map(k => `{"key":"${k}","text":"string"}`).join(',')}]}`,
+    }],
+  });
+
+  const text = msg.content[0]?.type === 'text' ? msg.content[0].text : '{}';
+  let raw: unknown;
+  try { raw = JSON.parse(text); } catch { return null; }
+
+  return validateGeneratedQuestion(raw, energySignals);
 }
