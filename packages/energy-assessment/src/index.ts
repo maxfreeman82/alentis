@@ -1,1 +1,1 @@
-export const PACKAGE_READY = true;
+export * from './referentiel';
