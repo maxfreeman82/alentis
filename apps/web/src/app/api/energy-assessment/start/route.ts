@@ -12,6 +12,50 @@ const schema = z.object({
   contextSnapshot: z.record(z.string(), z.unknown()).default({}),
 });
 
+type AdminClient = ReturnType<typeof createAdminClient>;
+
+// Anti-abus : une seule passation "in_progress" par candidat. Si une existe
+// déjà, on reprend sa question en attente plutôt que de recréer une passation
+// et de rappeler l'IA (appel Claude payant à chaque insertion). Appelée à la
+// fois en amont (chemin nominal) et en repli après une violation de
+// contrainte unique (chemin concurrent, cf. idx_energy_assessments_one_in_progress).
+// Retourne null si aucune passation in_progress n'existe pour ce profil.
+async function resumeInProgressAssessment(admin: AdminClient, profileId: string): Promise<NextResponse | null> {
+  const { data: existingAssessment, error: existingErr } = await admin
+    .from('energy_assessments')
+    .select('id')
+    .eq('profile_id', profileId)
+    .eq('status', 'in_progress')
+    .maybeSingle();
+  if (existingErr) return NextResponse.json({ error: existingErr.message }, { status: 500 });
+  if (!existingAssessment) return null;
+
+  const { data: pendingQuestion, error: pendingErr } = await admin
+    .from('energy_assessment_questions')
+    .select('id, question_text, question_format, option_labels')
+    .eq('assessment_id', existingAssessment.id)
+    .is('candidate_answer', null)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (pendingErr) return NextResponse.json({ error: pendingErr.message }, { status: 500 });
+
+  if (pendingQuestion) {
+    return NextResponse.json({
+      assessmentId: existingAssessment.id,
+      question: {
+        id: pendingQuestion.id,
+        text: pendingQuestion.question_text,
+        format: pendingQuestion.question_format,
+        options: pendingQuestion.option_labels,
+      },
+    });
+  }
+  // Passation in_progress sans question en attente (état incohérent) :
+  // on ne fabrique pas de comportement non spécifié, on remonte une erreur claire.
+  return NextResponse.json({ error: 'Passation en cours sans question active.' }, { status: 500 });
+}
+
 export async function POST(req: Request) {
   const user = await requireAuth();
   const ctx = await getTalentProfile(user.id);
@@ -23,43 +67,8 @@ export async function POST(req: Request) {
 
   const admin = createAdminClient();
 
-  // Anti-abus : une seule passation "in_progress" par candidat. Si une existe
-  // déjà, on reprend sa question en attente plutôt que de recréer une
-  // passation et de rappeler l'IA (appel Claude payant à chaque insertion).
-  const { data: existingAssessment, error: existingErr } = await admin
-    .from('energy_assessments')
-    .select('id')
-    .eq('profile_id', ctx.profileId)
-    .eq('status', 'in_progress')
-    .maybeSingle();
-  if (existingErr) return NextResponse.json({ error: existingErr.message }, { status: 500 });
-
-  if (existingAssessment) {
-    const { data: pendingQuestion, error: pendingErr } = await admin
-      .from('energy_assessment_questions')
-      .select('id, question_text, question_format, option_labels')
-      .eq('assessment_id', existingAssessment.id)
-      .is('candidate_answer', null)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (pendingErr) return NextResponse.json({ error: pendingErr.message }, { status: 500 });
-
-    if (pendingQuestion) {
-      return NextResponse.json({
-        assessmentId: existingAssessment.id,
-        question: {
-          id: pendingQuestion.id,
-          text: pendingQuestion.question_text,
-          format: pendingQuestion.question_format,
-          options: pendingQuestion.option_labels,
-        },
-      });
-    }
-    // Passation in_progress sans question en attente (état incohérent) :
-    // on ne fabrique pas de comportement non spécifié, on remonte une erreur claire.
-    return NextResponse.json({ error: 'Passation en cours sans question active.' }, { status: 500 });
-  }
+  const resumed = await resumeInProgressAssessment(admin, ctx.profileId);
+  if (resumed) return resumed;
 
   const decision = decideNextStep([]);
   if (decision.action !== 'ask') {
@@ -79,6 +88,13 @@ export async function POST(req: Request) {
     .select('id')
     .single();
   if (assessmentErr || !assessment) {
+    // Course concurrente : un autre POST /start pour ce même profil a gagné
+    // l'insertion en premier (contrainte unique idx_energy_assessments_one_in_progress,
+    // code Postgres 23505). On ne renvoie pas 500 : on retombe sur la reprise.
+    if (assessmentErr?.code === '23505') {
+      const resumedAfterRace = await resumeInProgressAssessment(admin, ctx.profileId);
+      if (resumedAfterRace) return resumedAfterRace;
+    }
     return NextResponse.json({ error: assessmentErr?.message ?? 'Création impossible' }, { status: 500 });
   }
 

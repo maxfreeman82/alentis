@@ -43,6 +43,13 @@ CREATE TABLE public.energy_assessment_questions (
 CREATE INDEX idx_energy_assessments_profile ON public.energy_assessments(profile_id);
 CREATE INDEX idx_energy_assessment_questions_assessment ON public.energy_assessment_questions(assessment_id);
 
+-- Backstop contre la race du dedup applicatif (check-then-insert non atomique) :
+-- deux POST /start concurrents pour le même profil ne doivent jamais produire
+-- 2 passations in_progress. Le 2e INSERT échoue avec 23505 (unique_violation),
+-- que la route rattrape en retombant sur la logique de reprise existante.
+CREATE UNIQUE INDEX idx_energy_assessments_one_in_progress
+  ON public.energy_assessments(profile_id) WHERE status = 'in_progress';
+
 -- Chaque politique RLS de cette migration filtre via profiles.user_id = auth.uid() ;
 -- sans index, chaque SELECT/INSERT/UPDATE déclenche un scan séquentiel de profiles.
 -- Unique car un utilisateur auth ne doit correspondre qu'à un seul profil
