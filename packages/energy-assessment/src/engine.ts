@@ -69,10 +69,13 @@ function nextContextTag(answeredCount: number): string {
   return CONTEXT_TAGS_CYCLE[answeredCount % CONTEXT_TAGS_CYCLE.length]!;
 }
 
-function rankEvidence(evidence: EvidenceMap) {
+export function rankEvidence(evidence: EvidenceMap) {
   return ENERGY_CODES
     .map(code => ({ code, total: evidence[code].total, contextCount: evidence[code].contexts.size }))
-    .sort((a, b) => b.total - a.total);
+    // Ties fall back to alphabetical order by code (A < D < I < P < R) so the
+    // ranking is deterministic — Task 5's discrimination phase depends on this
+    // (e.g. A and P tied at the same total must yield 'A-P', not 'P-A').
+    .sort((a, b) => b.total - a.total || a.code.localeCompare(b.code));
 }
 
 export function decideNextStep(answered: AnsweredQuestion[]): EngineDecision {

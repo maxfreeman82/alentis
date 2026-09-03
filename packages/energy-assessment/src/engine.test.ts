@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { tallyEvidence, decideNextStep, BROAD_SIGNALS, CONTEXT_TAGS_CYCLE, type AnsweredQuestion } from './engine';
+import { tallyEvidence, rankEvidence, decideNextStep, BROAD_SIGNALS, CONTEXT_TAGS_CYCLE, type AnsweredQuestion } from './engine';
 
 describe('tallyEvidence', () => {
   it('retourne un total de 0 pour toutes les énergies quand rien n\'est répondu', () => {
@@ -33,6 +33,25 @@ describe('tallyEvidence', () => {
     ];
     const evidence = tallyEvidence(answered);
     expect(evidence.P.total).toBe(0);
+  });
+});
+
+describe('rankEvidence', () => {
+  it('départage les égalités par ordre alphabétique de code (A < D < I < P < R)', () => {
+    const answered: AnsweredQuestion[] = [
+      { dimensionTested: null, hypothesisTested: null, contextTag: 'incertitude', energySignals: BROAD_SIGNALS, candidateAnswer: 'opt_P' },
+      { dimensionTested: null, hypothesisTested: null, contextTag: 'pression', energySignals: BROAD_SIGNALS, candidateAnswer: 'opt_P' },
+      { dimensionTested: null, hypothesisTested: null, contextTag: 'changement', energySignals: BROAD_SIGNALS, candidateAnswer: 'opt_A' },
+      { dimensionTested: null, hypothesisTested: null, contextTag: 'collectif', energySignals: BROAD_SIGNALS, candidateAnswer: 'opt_A' },
+    ];
+    const evidence = tallyEvidence(answered);
+    // A et P sont à égalité (2 chacun) : l'ordre de déclaration ENERGY_CODES (P avant A)
+    // ne doit PAS déterminer le tri — c'est l'ordre alphabétique qui doit primer.
+    const ranked = rankEvidence(evidence);
+    expect(ranked[0]?.code).toBe('A');
+    expect(ranked[0]?.total).toBe(2);
+    expect(ranked[1]?.code).toBe('P');
+    expect(ranked[1]?.total).toBe(2);
   });
 });
 
