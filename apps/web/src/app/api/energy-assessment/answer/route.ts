@@ -47,21 +47,60 @@ export async function POST(req: Request) {
   // Enregistrer la réponse à la question courante
   const { data: currentQuestion, error: currentErr } = await admin
     .from('energy_assessment_questions')
-    .select('id, energy_signals, candidate_answer')
+    .select('id, created_at, energy_signals, candidate_answer')
     .eq('id', parsed.data.questionId)
     .eq('assessment_id', assessment.id)
     .maybeSingle();
   if (currentErr || !currentQuestion) return NextResponse.json({ error: 'Question introuvable.' }, { status: 404 });
-  if (currentQuestion.candidate_answer) return NextResponse.json({ error: 'Question déjà répondue.' }, { status: 409 });
   if (!(parsed.data.answerKey in (currentQuestion.energy_signals as Record<string, string>))) {
     return NextResponse.json({ error: 'Réponse invalide.' }, { status: 400 });
   }
 
-  const { error: updateErr } = await admin
-    .from('energy_assessment_questions')
-    .update({ candidate_answer: parsed.data.answerKey, response_timestamp: new Date().toISOString() })
-    .eq('id', currentQuestion.id);
-  if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 });
+  // Retry après échec de génération de la question suivante : le client rejoue le
+  // même POST /answer sur une question déjà enregistrée. On ne rejette pas d'office
+  // (cf. commentaire plus bas sur l'état "in_progress sans question active") — on
+  // distingue un vrai retry (même réponse, aucune question créée depuis) d'un client
+  // périmé (autre réponse soumise, ou une question suivante existe déjà).
+  let isRetryAfterFailure = false;
+  if (currentQuestion.candidate_answer) {
+    const { data: laterQuestion, error: laterErr } = await admin
+      .from('energy_assessment_questions')
+      .select('id')
+      .eq('assessment_id', assessment.id)
+      .gt('created_at', currentQuestion.created_at)
+      .limit(1)
+      .maybeSingle();
+    if (laterErr) return NextResponse.json({ error: laterErr.message }, { status: 500 });
+
+    const sameAnswerResubmitted = currentQuestion.candidate_answer === parsed.data.answerKey;
+    if (!sameAnswerResubmitted || laterQuestion) {
+      return NextResponse.json({ error: 'Question déjà répondue.' }, { status: 409 });
+    }
+    // Réponse déjà correctement enregistrée : on ne relance pas l'UPDATE, on passe
+    // directement à la reconstruction de l'historique + décision du moteur.
+    isRetryAfterFailure = true;
+  }
+
+  if (!isRetryAfterFailure) {
+    // Garde .is('candidate_answer', null) + vérification des lignes affectées : protège
+    // contre un double-submit concurrent (double-clic, retry réseau) qui passerait tous
+    // les deux la lecture ci-dessus avant qu'aucun UPDATE n'ait atterri. Sans cette garde,
+    // les deux requêtes généreraient chacune une question suivante en double, polluant
+    // l'historique lu par le moteur (candidate_answer = NULL, gonfle answered.length).
+    const { data: updatedRows, error: updateErr } = await admin
+      .from('energy_assessment_questions')
+      .update({ candidate_answer: parsed.data.answerKey, response_timestamp: new Date().toISOString() })
+      .eq('id', currentQuestion.id)
+      .is('candidate_answer', null)
+      .select('id');
+    if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 });
+    if (!updatedRows || updatedRows.length === 0) {
+      // Perdant de la course : une autre requête a déjà enregistré la réponse entre
+      // notre lecture et notre UPDATE. On recule proprement plutôt que de générer une
+      // deuxième question suivante en double.
+      return NextResponse.json({ error: 'Réponse déjà enregistrée par une requête concurrente.' }, { status: 409 });
+    }
+  }
 
   // Reconstruire l'historique pour le moteur
   const { data: allQuestions, error: allErr } = await admin
@@ -114,11 +153,10 @@ export async function POST(req: Request) {
   // cette réponse est une donnée candidat valide et fait partie de l'audit-trail de
   // la passation (aucune policy DELETE candidat sur ces tables, cf. migration 006 —
   // l'annuler pour "faire propre" irait à l'encontre de ce choix). L'échec laisse la
-  // passation "in_progress" sans question active : un état incohérent au même titre
-  // que celui déjà anticipé dans resumeInProgressAssessment() (/start), mais qu'aucune
-  // route actuelle ne sait résorber automatiquement — un nouveau POST /answer sur cette
-  // question échouerait sur "Question déjà répondue" (409) plutôt que de relancer la
-  // génération. Limitation connue, hors périmètre de cette tâche (cf. rapport).
+  // passation "in_progress" sans question active, mais c'est récupérable : le bloc
+  // isRetryAfterFailure plus haut détecte un nouveau POST /answer rejouant la même
+  // réponse sur cette même question (la plus récente, sans question créée depuis) et
+  // relance directement la génération sans re-toucher la réponse déjà enregistrée.
   if (!generated) return NextResponse.json({ error: 'Échec de génération de la question suivante.' }, { status: 502 });
 
   const optionLabels = generated.options.map(o => ({ key: o.key, text: o.text }));
