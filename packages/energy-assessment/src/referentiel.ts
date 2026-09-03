@@ -16,7 +16,7 @@ export const ENERGY_SKILLS: readonly EnergySkillDefinition[] = [
   { code: 'R', name: 'Régulateur',    definition: 'Analyse, structure, sécurise, fiabilise et prévient les risques.' },
 ] as const;
 
-export const ENERGY_CODES: EnergyCode[] = ENERGY_SKILLS.map(s => s.code);
+export const ENERGY_CODES: readonly EnergyCode[] = ENERGY_SKILLS.map(s => s.code);
 
 // Dimensions comportementales transverses (PRD §8) — sous-ensemble utilisé pour
 // faire tourner le "décor" des questions et diversifier les contextes observés.
