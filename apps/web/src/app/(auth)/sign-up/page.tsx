@@ -31,24 +31,36 @@ function SignUpForm() {
     e.preventDefault();
     setError('');
     startTransition(async () => {
-      // 1. Créer compte + profil côté serveur en une seule requête
-      const res = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, profileType: profile }),
-      });
-      const json = await res.json() as { ok?: boolean; error?: string; redirect?: string };
-      if (!res.ok) {
-        setError(json.error ?? 'Erreur lors de la création du compte');
-        return;
+      try {
+        // 1. Créer compte + profil côté serveur en une seule requête
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, profileType: profile }),
+        });
+
+        let json: { ok?: boolean; error?: string; redirect?: string };
+        try {
+          json = await res.json() as typeof json;
+        } catch {
+          setError('Le serveur a répondu de façon inattendue. Réessayez dans un instant.');
+          return;
+        }
+
+        if (!res.ok) {
+          setError(json.error ?? 'Erreur lors de la création du compte');
+          return;
+        }
+
+        // 2. Établir la session côté navigateur
+        const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInErr) { setError(signInErr.message); return; }
+
+        router.push(json.redirect ?? '/onboarding');
+        router.refresh();
+      } catch {
+        setError('Impossible de contacter le serveur. Vérifiez votre connexion et réessayez.');
       }
-
-      // 2. Établir la session côté navigateur
-      const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
-      if (signInErr) { setError(signInErr.message); return; }
-
-      router.push(json.redirect ?? '/onboarding');
-      router.refresh();
     });
   }
 
