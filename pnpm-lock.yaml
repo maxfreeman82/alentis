@@ -41,6 +41,9 @@ importers:
       '@tanstack/react-table':
         specifier: ^8.20.5
         version: 8.21.3(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@teranga/energy-assessment':
+        specifier: workspace:*
+        version: link:../../packages/energy-assessment
       '@teranga/scoring':
         specifier: workspace:*
         version: link:../../packages/scoring
@@ -123,6 +126,19 @@ importers:
       typescript:
         specifier: ^5.5.4
         version: 5.9.3
+
+  packages/energy-assessment:
+    dependencies:
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: ^5.5.4
+        version: 5.9.3
+      vitest:
+        specifier: ^2.0.5
+        version: 2.1.9(@types/node@22.20.0)
 
   packages/scoring:
     dependencies:

@@ -45,3 +45,6 @@ apps/web/e2e/test-results/
 apps/web/e2e/playwright-report/
 
 .vercel
+
+# Superpowers git worktrees
+.worktrees/
