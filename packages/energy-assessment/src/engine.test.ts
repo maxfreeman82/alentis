@@ -144,3 +144,29 @@ describe('decideNextStep — conclusion', () => {
     expect(decision.forced).toBe(true);
   });
 });
+
+describe('decideNextStep — evidence exposée à la conclusion', () => {
+  it('inclut les décomptes bruts des 5 énergies dans une conclusion normale', () => {
+    const contexts = ['incertitude', 'pression', 'changement', 'collectif', 'decision'];
+    const answered: AnsweredQuestion[] = [
+      ...Array.from({ length: 8 }, (_, i) => answeredFor('A', contexts[i % contexts.length]!)),
+      answeredFor('P', 'incertitude'), answeredFor('I', 'pression'),
+      answeredFor('D', 'changement'), answeredFor('R', 'collectif'),
+    ];
+    const decision = decideNextStep(answered);
+    expect(decision.action).toBe('conclude');
+    if (decision.action !== 'conclude') throw new Error('unreachable');
+    expect(decision.evidence).toEqual({ A: 8, P: 1, I: 1, D: 1, R: 1 });
+  });
+
+  it('inclut les décomptes bruts dans une conclusion forcée', () => {
+    const contexts = ['incertitude', 'pression', 'changement', 'collectif', 'decision'];
+    const answered: AnsweredQuestion[] = Array.from({ length: 20 }, (_, i) =>
+      answeredFor((['A', 'P', 'I', 'D', 'R'] as const)[i % 5]!, contexts[i % contexts.length]!)
+    );
+    const decision = decideNextStep(answered);
+    expect(decision.action).toBe('conclude');
+    if (decision.action !== 'conclude') throw new Error('unreachable');
+    expect(decision.evidence.A + decision.evidence.P + decision.evidence.I + decision.evidence.D + decision.evidence.R).toBe(20);
+  });
+});

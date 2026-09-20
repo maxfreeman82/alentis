@@ -60,6 +60,10 @@ export interface ConcludeAction {
   secondary: EnergyCode[];
   confidence: number;
   forced: boolean;
+  // Décomptes bruts par énergie au moment de la conclusion — jamais montrés au
+  // candidat, utilisés uniquement par les intégrations en aval (ex. le pont
+  // talent_passports) pour dériver des pourcentages par famille.
+  evidence: Record<EnergyCode, number>;
 }
 
 export type EngineDecision = AskAction | ConcludeAction;
@@ -76,6 +80,10 @@ export function rankEvidence(evidence: EvidenceMap) {
     // ranking is deterministic — Task 5's discrimination phase depends on this
     // (e.g. A and P tied at the same total must yield 'A-P', not 'P-A').
     .sort((a, b) => b.total - a.total || a.code.localeCompare(b.code));
+}
+
+function evidenceOf(ranked: ReturnType<typeof rankEvidence>): Record<EnergyCode, number> {
+  return Object.fromEntries(ranked.map(r => [r.code, r.total])) as Record<EnergyCode, number>;
 }
 
 export function decideNextStep(answered: AnsweredQuestion[]): EngineDecision {
@@ -117,6 +125,7 @@ export function decideNextStep(answered: AnsweredQuestion[]): EngineDecision {
       action: 'conclude', dominant: leader.code,
       secondary: secondaryOf(leader.code, leader.total),
       confidence: share, forced: false,
+      evidence: evidenceOf(ranked),
     };
   }
 
@@ -125,6 +134,7 @@ export function decideNextStep(answered: AnsweredQuestion[]): EngineDecision {
       action: 'conclude', dominant: leader.code,
       secondary: secondaryOf(leader.code, leader.total),
       confidence: share, forced: true,
+      evidence: evidenceOf(ranked),
     };
   }
 
