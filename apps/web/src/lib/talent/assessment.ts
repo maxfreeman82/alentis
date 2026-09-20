@@ -93,7 +93,7 @@ export const FAMILY_PROFILES: Record<EnergyFamily, string[]> = {
 
 export function computeAssessment(
   responses: Record<string, number>,
-  energyContext: { dominantFamily: EnergyFamily; scoreEnergy: number }
+  scoreEnergy: number
 ): AssessmentResult {
   // Hard Skills
   const hQs = QUESTIONS.filter(q => q.dim === 'H');
@@ -116,7 +116,7 @@ export function computeAssessment(
   const rRaw = rQs.reduce((s, q) => s + (responses[q.id] ?? 3), 0) / rQs.length;
   const R    = Math.round(rRaw * 20); // 100 = risque max
 
-  const E = energyContext.scoreEnergy;
+  const E = scoreEnergy;
 
   // Score global 6D : H*0.25 + S*0.20 + X*0.15 + L*0.10 + E*0.20 - R*0.10
   const riskPenalty = R > 70 ? 0.10 * Math.pow(R / 100, 2) * 100 : 0.10 * (R / 100) * 100;
