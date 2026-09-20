@@ -122,17 +122,6 @@ export async function POST(req: Request) {
 
   if (decision.action === 'conclude') {
     const interpretation = buildInterpretation(decision.dominant, decision.secondary);
-    const { error: concludeErr } = await admin
-      .from('energy_assessments')
-      .update({
-        status: 'completed',
-        dominant_energy: decision.dominant,
-        secondary_energies: decision.secondary,
-        confidence_state: { share: decision.confidence, forced: decision.forced },
-        profile_interpretation: interpretation,
-      })
-      .eq('id', assessment.id);
-    if (concludeErr) return NextResponse.json({ error: concludeErr.message }, { status: 500 });
 
     // Pont vers talent_passports : passport/page.tsx, boussole/correlation et le
     // matching recrutement lisent déjà ces colonnes et ont besoin de vrais
@@ -140,6 +129,14 @@ export async function POST(req: Request) {
     // design doc). N'écrit QUE ces colonnes — dominant_profile et le reste du
     // Talent Passport (H/S/X/L/R, score_global) restent gérés par
     // /api/talent/assessment, qui les upsertera séparément sans écraser ceci.
+    // Écrit AVANT de marquer energy_assessments "completed" (et non après) : si cet
+    // upsert échoue, la passation reste "in_progress" et un retry du candidat avec la
+    // même réponse retombe sur le chemin isRetryAfterFailure plus haut (candidate_answer
+    // déjà enregistrée, aucune question suivante créée) — decideNextStep recalcule la
+    // même conclusion et cette écriture (idempotente via onConflict) est simplement
+    // retentée. Ne pas inverser cet ordre : une fois "completed", le garde-fou de la
+    // ligne 45 bloque toute requête suivante avant même d'atteindre isRetryAfterFailure,
+    // rendant un échec de ce pont irrécupérable.
     const bridge = bridgeConclusionToTalentPassport(decision);
     const { error: bridgeErr } = await admin.from('talent_passports').upsert(
       {
@@ -156,6 +153,18 @@ export async function POST(req: Request) {
       { onConflict: 'profile_id' }
     );
     if (bridgeErr) return NextResponse.json({ error: bridgeErr.message }, { status: 500 });
+
+    const { error: concludeErr } = await admin
+      .from('energy_assessments')
+      .update({
+        status: 'completed',
+        dominant_energy: decision.dominant,
+        secondary_energies: decision.secondary,
+        confidence_state: { share: decision.confidence, forced: decision.forced },
+        profile_interpretation: interpretation,
+      })
+      .eq('id', assessment.id);
+    if (concludeErr) return NextResponse.json({ error: concludeErr.message }, { status: 500 });
 
     return NextResponse.json({
       done: true,
