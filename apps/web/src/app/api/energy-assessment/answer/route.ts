@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getTalentProfile } from '@/lib/supabase/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { decideNextStep, findEnergySkill, type AnsweredQuestion, type EnergyCode } from '@teranga/energy-assessment';
+import { decideNextStep, findEnergySkill, bridgeConclusionToTalentPassport, type AnsweredQuestion, type EnergyCode } from '@teranga/energy-assessment';
 import { generateEnergyQuestion } from '@/lib/ai';
 
 const schema = z.object({
@@ -133,6 +133,29 @@ export async function POST(req: Request) {
       })
       .eq('id', assessment.id);
     if (concludeErr) return NextResponse.json({ error: concludeErr.message }, { status: 500 });
+
+    // Pont vers talent_passports : passport/page.tsx, boussole/correlation et le
+    // matching recrutement lisent déjà ces colonnes et ont besoin de vrais
+    // pourcentages par famille, pas seulement d'une dominante qualitative (cf.
+    // design doc). N'écrit QUE ces colonnes — dominant_profile et le reste du
+    // Talent Passport (H/S/X/L/R, score_global) restent gérés par
+    // /api/talent/assessment, qui les upsertera séparément sans écraser ceci.
+    const bridge = bridgeConclusionToTalentPassport(decision);
+    const { error: bridgeErr } = await admin.from('talent_passports').upsert(
+      {
+        profile_id: ctx.profileId,
+        energy_pilotes: bridge.energyPercentages.pilotes,
+        energy_initialiseurs: bridge.energyPercentages.initialiseurs,
+        energy_accomplisseurs: bridge.energyPercentages.accomplisseurs,
+        energy_dynamiseurs: bridge.energyPercentages.dynamiseurs,
+        energy_regulateurs: bridge.energyPercentages.regulateurs,
+        dominant_family: bridge.dominantFamily,
+        score_energy: bridge.scoreEnergy,
+        energy_level: bridge.energyLevel,
+      },
+      { onConflict: 'profile_id' }
+    );
+    if (bridgeErr) return NextResponse.json({ error: bridgeErr.message }, { status: 500 });
 
     return NextResponse.json({
       done: true,
