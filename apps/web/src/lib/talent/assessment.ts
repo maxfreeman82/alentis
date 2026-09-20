@@ -14,14 +14,7 @@ export interface Question {
 }
 
 export interface AssessmentResult {
-  scores: {
-    H: number; S: number; X: number; L: number;
-    energy: Record<EnergyFamily, number>;
-    R: number;
-  };
-  dominant_family:  EnergyFamily;
-  dominant_profile: string;
-  energy_level:     string;
+  scores: { H: number; S: number; X: number; L: number; R: number };
   score_global:     number;
   score_risk:       number;
   growth_potential: number;
@@ -83,18 +76,6 @@ export const QUESTIONS: Question[] = [
   { id: 'L5', dim: 'L', text: 'J\'ai des activités enrichissantes en dehors du travail (sport, art, famille, engagement).', options: AGR5 },
   { id: 'L6', dim: 'L', text: 'Je me sens optimiste concernant l\'évolution de ma carrière.', options: AGR5 },
 
-  // ── ÉNERGIE (E) — 5 familles × 2 questions ───────────────────────────────
-  { id: 'E_PIL1', dim: 'E', family: 'pilotes',        text: 'Je prends naturellement les décisions et assume les responsabilités de l\'équipe.', options: AGR5 },
-  { id: 'E_PIL2', dim: 'E', family: 'pilotes',        text: 'Je fixe le cap et mets les autres en mouvement vers des objectifs ambitieux.', options: AGR5 },
-  { id: 'E_INI1', dim: 'E', family: 'initialiseurs',  text: 'Je génère de nouvelles idées et propose constamment des innovations.', options: AGR5 },
-  { id: 'E_INI2', dim: 'E', family: 'initialiseurs',  text: 'Je suis à l\'aise dans l\'incertitude et les situations non-balisées.', options: AGR5 },
-  { id: 'E_ACC1', dim: 'E', family: 'accomplisseurs', text: 'Je finis systématiquement ce que je commence et livre dans les délais.', options: AGR5 },
-  { id: 'E_ACC2', dim: 'E', family: 'accomplisseurs', text: 'J\'aime optimiser les processus pour les rendre plus efficaces.', options: AGR5 },
-  { id: 'E_DYN1', dim: 'E', family: 'dynamiseurs',    text: 'J\'insuffle de l\'énergie et de la motivation dans les équipes que je côtoie.', options: AGR5 },
-  { id: 'E_DYN2', dim: 'E', family: 'dynamiseurs',    text: 'Je crée du lien entre les personnes et facilite les synergies.', options: AGR5 },
-  { id: 'E_REG1', dim: 'E', family: 'regulateurs',    text: 'Je maintiens l\'équilibre et la stabilité dans les situations de tension.', options: AGR5 },
-  { id: 'E_REG2', dim: 'E', family: 'regulateurs',    text: 'J\'assure la cohérence et la qualité des processus sur le long terme.', options: AGR5 },
-
   // ── RISQUE (R) — 4 questions (inversées) ─────────────────────────────────
   { id: 'R1', dim: 'R', inverse: true, text: 'Je me sens souvent débordé(e) et sous pression au travail.', options: AGR5 },
   { id: 'R2', dim: 'R', inverse: true, text: 'J\'ai du mal à déconnecter du travail le soir ou le week-end.', options: AGR5 },
@@ -102,8 +83,7 @@ export const QUESTIONS: Question[] = [
   { id: 'R4', dim: 'R', inverse: true, text: 'Des conflits récurrents avec ma hiérarchie ou mes collègues perturbent mon efficacité.', options: AGR5 },
 ];
 
-const FAMILIES: EnergyFamily[] = ['pilotes', 'initialiseurs', 'accomplisseurs', 'dynamiseurs', 'regulateurs'];
-const FAMILY_PROFILES: Record<EnergyFamily, string[]> = {
+export const FAMILY_PROFILES: Record<EnergyFamily, string[]> = {
   pilotes:        ['Le Stratège', 'Le Commandant', 'Le Visionnaire'],
   initialiseurs:  ['L\'Innovateur', 'Le Créatif', 'L\'Explorateur'],
   accomplisseurs: ['L\'Expert', 'Le Bâtisseur', 'L\'Optimiseur'],
@@ -111,9 +91,10 @@ const FAMILY_PROFILES: Record<EnergyFamily, string[]> = {
   regulateurs:    ['Le Gardien', 'L\'Harmoniseur', 'Le Stabilisateur'],
 };
 
-const ENERGY_LEVELS = ['C1', 'C2', 'C3', 'C4', 'C5'];
-
-export function computeAssessment(responses: Record<string, number>): AssessmentResult {
+export function computeAssessment(
+  responses: Record<string, number>,
+  energyContext: { dominantFamily: EnergyFamily; scoreEnergy: number }
+): AssessmentResult {
   // Hard Skills
   const hQs = QUESTIONS.filter(q => q.dim === 'H');
   const H = Math.round((hQs.reduce((s, q) => s + (responses[q.id] ?? 3), 0) / hQs.length) * 20);
@@ -130,44 +111,17 @@ export function computeAssessment(responses: Record<string, number>): Assessment
   const lQs = QUESTIONS.filter(q => q.dim === 'L');
   const L = Math.round((lQs.reduce((s, q) => s + (responses[q.id] ?? 3), 0) / lQs.length) * 20);
 
-  // Énergie par famille
-  const energyRaw: Record<EnergyFamily, number> = {
-    pilotes: 0, initialiseurs: 0, accomplisseurs: 0, dynamiseurs: 0, regulateurs: 0,
-  };
-  for (const family of FAMILIES) {
-    const fQs = QUESTIONS.filter(q => q.dim === 'E' && q.family === family);
-    energyRaw[family] = Math.round((fQs.reduce((s, q) => s + (responses[q.id] ?? 3), 0) / fQs.length) * 20);
-  }
-
-  // Normaliser énergie (somme → 100)
-  const energySum = FAMILIES.reduce((s, f) => s + energyRaw[f], 0);
-  const energy: Record<EnergyFamily, number> = {} as Record<EnergyFamily, number>;
-  for (const f of FAMILIES) {
-    energy[f] = energySum > 0 ? Math.round((energyRaw[f] / energySum) * 100) : 20;
-  }
-
-  // Énergie fit = famille dominante / moyenne
-  const dominant_family = FAMILIES.reduce((best, f) => energy[f] > (energy[best] ?? 0) ? f : best, FAMILIES[0]!) as EnergyFamily;
-  const E = energyRaw[dominant_family] ?? 0;
-
   // Risque (inverse)
   const rQs = QUESTIONS.filter(q => q.dim === 'R');
   const rRaw = rQs.reduce((s, q) => s + (responses[q.id] ?? 3), 0) / rQs.length;
   const R    = Math.round(rRaw * 20); // 100 = risque max
 
+  const E = energyContext.scoreEnergy;
+
   // Score global 6D : H*0.25 + S*0.20 + X*0.15 + L*0.10 + E*0.20 - R*0.10
   const riskPenalty = R > 70 ? 0.10 * Math.pow(R / 100, 2) * 100 : 0.10 * (R / 100) * 100;
-  const raw = 0.25 * H + 0.20 * S + 0.15 * X + 0.10 * L + 0.20 * (E / 100 * 100) - riskPenalty;
+  const raw = 0.25 * H + 0.20 * S + 0.15 * X + 0.10 * L + 0.20 * E - riskPenalty;
   const score_global = Math.round(Math.max(0, Math.min(100, raw)));
-
-  // Profil dominant
-  const profileList = FAMILY_PROFILES[dominant_family] ?? ['Profil Unique'];
-  const profileIdx  = Math.min(Math.floor(score_global / 34), 2);
-  const dominant_profile = profileList[profileIdx] ?? (profileList[0] ?? 'Profil Unique');
-
-  // Niveau énergie C1-C5
-  const energyLevelIdx = Math.min(Math.floor(E / 20), 4);
-  const energy_level = ENERGY_LEVELS[energyLevelIdx] ?? 'C3';
 
   // Growth potential = capacité à monter (soft + learning speed)
   const growth_potential = Math.round((S * 0.6 + X * 0.4));
@@ -175,16 +129,7 @@ export function computeAssessment(responses: Record<string, number>): Assessment
   // Transfer score = polyvalence
   const transfer_score = Math.round((H * 0.3 + S * 0.4 + X * 0.3));
 
-  return {
-    scores:           { H, S, X, L, energy, R },
-    dominant_family,
-    dominant_profile,
-    energy_level,
-    score_global,
-    score_risk:       R,
-    growth_potential,
-    transfer_score,
-  };
+  return { scores: { H, S, X, L, R }, score_global, score_risk: R, growth_potential, transfer_score };
 }
 
 // Grouper les questions par dimension pour l'affichage step-by-step
@@ -193,6 +138,5 @@ export const QUESTION_STEPS = [
   { key: 'S',   label: 'Soft Skills',              questions: QUESTIONS.filter(q => q.dim === 'S') },
   { key: 'X',   label: 'Expérience',               questions: QUESTIONS.filter(q => q.dim === 'X') },
   { key: 'L',   label: 'Life Score',               questions: QUESTIONS.filter(q => q.dim === 'L') },
-  { key: 'E',   label: 'Profil énergétique',       questions: QUESTIONS.filter(q => q.dim === 'E') },
   { key: 'R',   label: 'Risques & bien-être',      questions: QUESTIONS.filter(q => q.dim === 'R') },
 ];
