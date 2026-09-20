@@ -223,6 +223,8 @@ export function bridgeConclusionToTalentPassport(decision: ConcludeAction): Tale
 }
 ```
 
+**Erratum constaté à l'implémentation :** le code ci-dessus (arrondi indépendant par famille) ne garantit pas une somme à 100 — vérifié : `{A:8,P:1,I:1,D:1,R:1}` produit 99, pas 100. L'implémentation réelle dans `talent-passport-bridge.ts` utilise un algorithme d'apportionnement au plus fort reste (Hamilton) à la place ; voir ce fichier pour le code correct.
+
 **Step 4: Run test to verify it passes**
 
 Run: `pnpm --filter @teranga/energy-assessment test`

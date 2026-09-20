@@ -44,4 +44,11 @@ describe('bridgeConclusionToTalentPassport', () => {
     const result = bridgeConclusionToTalentPassport(conclude({ A: 8, P: 1, I: 1, D: 1, R: 1 }, 'A'));
     expect(['C1', 'C2', 'C3', 'C4', 'C5']).toContain(result.energyLevel);
   });
+
+  it('départage les égalités de façon déterministe (ordre P/I/D/A/R)', () => {
+    const result = bridgeConclusionToTalentPassport(conclude({ P: 1, I: 1, D: 1, A: 0, R: 0 }, 'P'));
+    expect(result.energyPercentages).toEqual({
+      pilotes: 34, initialiseurs: 33, dynamiseurs: 33, accomplisseurs: 0, regulateurs: 0,
+    });
+  });
 });
