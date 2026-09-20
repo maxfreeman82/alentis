@@ -5,8 +5,8 @@ import { Loader2 } from 'lucide-react';
 
 interface QuestionOption { key: string; text: string; }
 interface Question { id: string; text: string; format: 'forced_choice' | 'arbitration'; options: QuestionOption[]; }
-interface EnergySkill { code: string; name: string; definition: string; }
-interface FinalProfile { dominant: EnergySkill; secondary: EnergySkill[]; interpretation: string; }
+export interface EnergySkill { code: string; name: string; definition: string; }
+export interface FinalProfile { dominant: EnergySkill; secondary: EnergySkill[]; interpretation: string; }
 type ApiError = string | Record<string, unknown>;
 interface StartResponse { assessmentId?: string; question?: Question; error?: ApiError; }
 interface AnswerResponse { done?: boolean; question?: Question; profile?: FinalProfile; error?: ApiError; }
@@ -16,13 +16,14 @@ function errorMessage(err: ApiError | undefined, fallback: string): string {
 }
 
 interface Props {
-  onComplete: () => void;
+  onComplete: (profile: FinalProfile) => void;
+  initialProfile?: FinalProfile | null;
 }
 
-export default function EnergyStepAdaptive({ onComplete }: Props) {
+export default function EnergyStepAdaptive({ onComplete, initialProfile }: Props) {
   const [assessmentId, setAssessmentId] = useState<string | null>(null);
   const [question, setQuestion] = useState<Question | null>(null);
-  const [profile, setProfile] = useState<FinalProfile | null>(null);
+  const [profile, setProfile] = useState<FinalProfile | null>(initialProfile ?? null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [lastAnswerKey, setLastAnswerKey] = useState<string | null>(null);
@@ -79,7 +80,7 @@ export default function EnergyStepAdaptive({ onComplete }: Props) {
         setProfile(json.profile);
         setQuestion(null);
         setLastAnswerKey(null);
-        onComplete();
+        onComplete(json.profile);
         return;
       }
       if (json.question) {

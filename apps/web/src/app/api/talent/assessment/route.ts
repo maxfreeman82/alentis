@@ -29,9 +29,10 @@ export async function POST(req: Request) {
   // dans un autre onglet/session pile dans cette fenêtre, score_global et
   // dominant_profile calculés ici peuvent se baser sur une énergie pré-conclusion
   // périmée, même si dominant_family/score_energy en base finissent post-conclusion.
-  // L'UI actuelle (gate `energyStepDone` dans AssessmentForm.tsx) rend ce cas
-  // très difficile à atteindre en parcours mono-onglet — accepté tel quel,
-  // pas de transaction/RPC pour ce cas limite.
+  // L'UI actuelle (état `energyProfile` dans AssessmentForm.tsx, qui gate
+  // stepComplete/sDone pour l'onglet E) rend ce cas très difficile à atteindre
+  // en parcours mono-onglet — accepté tel quel, pas de transaction/RPC pour ce
+  // cas limite.
   const { data: existingPassport, error: existingErr } = await admin
     .from('talent_passports')
     .select('dominant_family, score_energy')

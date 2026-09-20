@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronRight, ChevronLeft, CheckCircle } from 'lucide-react';
 import type { QUESTION_STEPS } from '@/lib/talent/assessment';
+import EnergyStepAdaptive, { type FinalProfile } from './EnergyStepAdaptive';
 
 type Step = typeof QUESTION_STEPS[number];
 interface Props { steps: Step[]; profileId: string; }
@@ -21,6 +22,7 @@ export default function AssessmentForm({ steps, profileId }: Props) {
   const [responses, setResponses] = useState<Record<string, number>>({});
   const [loading, setLoading]     = useState(false);
   const [done, setDone]           = useState(false);
+  const [energyProfile, setEnergyProfile] = useState<FinalProfile | null>(null);
 
   const currentStep  = steps[step];
   if (!currentStep) return null;
@@ -31,7 +33,7 @@ export default function AssessmentForm({ steps, profileId }: Props) {
 
   const stepQuestions  = currentStep.questions;
   const stepAnswered   = stepQuestions.filter(q => responses[q.id] != null).length;
-  const stepComplete   = stepAnswered === stepQuestions.length;
+  const stepComplete   = currentStep.key === 'E' ? energyProfile !== null : stepAnswered === stepQuestions.length;
   const isLastStep     = step === steps.length - 1;
   const color          = DIM_COLORS[currentStep.key] ?? '#10B981';
 
@@ -78,7 +80,9 @@ export default function AssessmentForm({ steps, profileId }: Props) {
       <div className="flex gap-2 overflow-x-auto pb-1">
         {steps.map((s, i) => {
           const sAnswered = s.questions.filter(q => responses[q.id] != null).length;
-          const sDone     = sAnswered === s.questions.length;
+          const sDone     = s.key === 'E'
+            ? energyProfile !== null
+            : s.questions.length > 0 && sAnswered === s.questions.length;
           const sColor    = DIM_COLORS[s.key] ?? '#10B981';
           return (
             <button key={s.key} onClick={() => setStep(i)}
@@ -102,41 +106,50 @@ export default function AssessmentForm({ steps, profileId }: Props) {
           </div>
           <div>
             <p className="text-slate-900 font-semibold">{currentStep.label}</p>
-            <p className="text-slate-500 text-xs">{stepAnswered}/{stepQuestions.length} répondues</p>
+            {currentStep.key !== 'E' && (
+              <p className="text-slate-500 text-xs">{stepAnswered}/{stepQuestions.length} répondues</p>
+            )}
           </div>
         </div>
 
-        <div className="space-y-8">
-          {stepQuestions.map((q, qi) => {
-            const selected = responses[q.id];
-            return (
-              <div key={q.id} className="space-y-3">
-                <p className="text-slate-700 text-sm leading-relaxed">
-                  <span className="text-slate-600 text-xs font-mono mr-2">{qi + 1}.</span>
-                  {q.text}
-                  {q.inverse && <span className="ml-2 text-[10px] text-rose-400/70">[score inversé]</span>}
-                </p>
-                <div className="grid grid-cols-1 gap-1.5">
-                  {q.options.map(opt => (
-                    <button key={opt.value} onClick={() => answer(q.id, opt.value)}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-left transition-all border ${
-                        selected === opt.value
-                          ? 'border-current font-medium'
-                          : 'border-slate-200 text-slate-400 hover:border-slate-200 hover:text-slate-600'
-                      }`}
-                      style={selected === opt.value ? { borderColor: color, color, backgroundColor: `${color}10` } : {}}>
-                      <span className="w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center"
-                        style={selected === opt.value ? { borderColor: color, backgroundColor: color } : { borderColor: '#374151' }}>
-                        {selected === opt.value && <span className="w-2 h-2 rounded-full bg-white" />}
-                      </span>
-                      {opt.label}
-                    </button>
-                  ))}
+        {currentStep.key === 'E' ? (
+          <EnergyStepAdaptive
+            onComplete={(profile) => setEnergyProfile(profile)}
+            initialProfile={energyProfile}
+          />
+        ) : (
+          <div className="space-y-8">
+            {stepQuestions.map((q, qi) => {
+              const selected = responses[q.id];
+              return (
+                <div key={q.id} className="space-y-3">
+                  <p className="text-slate-700 text-sm leading-relaxed">
+                    <span className="text-slate-600 text-xs font-mono mr-2">{qi + 1}.</span>
+                    {q.text}
+                    {q.inverse && <span className="ml-2 text-[10px] text-rose-400/70">[score inversé]</span>}
+                  </p>
+                  <div className="grid grid-cols-1 gap-1.5">
+                    {q.options.map(opt => (
+                      <button key={opt.value} onClick={() => answer(q.id, opt.value)}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-left transition-all border ${
+                          selected === opt.value
+                            ? 'border-current font-medium'
+                            : 'border-slate-200 text-slate-400 hover:border-slate-200 hover:text-slate-600'
+                        }`}
+                        style={selected === opt.value ? { borderColor: color, color, backgroundColor: `${color}10` } : {}}>
+                        <span className="w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center"
+                          style={selected === opt.value ? { borderColor: color, backgroundColor: color } : { borderColor: '#374151' }}>
+                          {selected === opt.value && <span className="w-2 h-2 rounded-full bg-white" />}
+                        </span>
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Navigation */}

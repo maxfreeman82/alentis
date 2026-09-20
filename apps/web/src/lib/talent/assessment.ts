@@ -138,5 +138,6 @@ export const QUESTION_STEPS = [
   { key: 'S',   label: 'Soft Skills',              questions: QUESTIONS.filter(q => q.dim === 'S') },
   { key: 'X',   label: 'Expérience',               questions: QUESTIONS.filter(q => q.dim === 'X') },
   { key: 'L',   label: 'Life Score',               questions: QUESTIONS.filter(q => q.dim === 'L') },
+  { key: 'E',   label: 'Profil énergétique',       questions: [] as Question[] },
   { key: 'R',   label: 'Risques & bien-être',      questions: QUESTIONS.filter(q => q.dim === 'R') },
 ];
