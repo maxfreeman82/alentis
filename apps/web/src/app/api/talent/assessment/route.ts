@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getTalentProfile } from '@/lib/supabase/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { computeAssessment } from '@/lib/talent/assessment';
+import { computeAssessment, FAMILY_PROFILES, type EnergyFamily } from '@/lib/talent/assessment';
 
 const schema = z.object({
   responses: z.record(z.string(), z.number().min(1).max(5)),
@@ -18,9 +18,27 @@ export async function POST(req: Request) {
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
-  const result = computeAssessment(parsed.data.responses);
-  const admin  = createAdminClient();
+  const admin = createAdminClient();
+
+  // Profil énergie déjà posé par la conclusion de l'Energy Assessment adaptatif
+  // (cf. /api/energy-assessment/answer). Si le candidat a sauté cette étape,
+  // on retombe sur un défaut neutre — même esprit que l'ancien défaut "3/Neutre"
+  // pour une question Likert non répondue.
+  const { data: existingPassport } = await admin
+    .from('talent_passports')
+    .select('dominant_family, score_energy')
+    .eq('profile_id', ctx.profileId)
+    .maybeSingle();
+
+  const dominantFamily = (existingPassport?.dominant_family as EnergyFamily | undefined) ?? 'pilotes';
+  const scoreEnergy    = existingPassport?.score_energy ?? 20;
+
+  const result = computeAssessment(parsed.data.responses, scoreEnergy);
   const passportRef = `TP-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 99999)).padStart(5, '0')}-SN`;
+
+  const profileIdx = Math.min(Math.floor(result.score_global / 34), 2);
+  const dominantProfileList = FAMILY_PROFILES[dominantFamily] ?? ['Profil Unique'];
+  const dominant_profile = dominantProfileList[profileIdx] ?? (dominantProfileList[0] ?? 'Profil Unique');
 
   const { error } = await admin.from('talent_passports').upsert(
     {
@@ -30,18 +48,10 @@ export async function POST(req: Request) {
       score_soft:            result.scores.S,
       score_exp:             result.scores.X,
       score_life:            result.scores.L,
-      score_energy:          result.scores.energy[result.dominant_family],
       score_risk:            result.score_risk,
       growth_potential:      result.growth_potential,
       transfer_score:        result.transfer_score,
-      energy_pilotes:        result.scores.energy.pilotes,
-      energy_initialiseurs:  result.scores.energy.initialiseurs,
-      energy_accomplisseurs: result.scores.energy.accomplisseurs,
-      energy_dynamiseurs:    result.scores.energy.dynamiseurs,
-      energy_regulateurs:    result.scores.energy.regulateurs,
-      dominant_family:       result.dominant_family,
-      dominant_profile:      result.dominant_profile,
-      energy_level:          result.energy_level,
+      dominant_profile,
       last_assessment:       new Date().toISOString(),
       passport_version:      1,
       passport_id:           passportRef,
