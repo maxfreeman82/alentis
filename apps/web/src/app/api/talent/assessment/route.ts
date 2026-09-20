@@ -24,11 +24,20 @@ export async function POST(req: Request) {
   // (cf. /api/energy-assessment/answer). Si le candidat a sauté cette étape,
   // on retombe sur un défaut neutre — même esprit que l'ancien défaut "3/Neutre"
   // pour une question Likert non répondue.
-  const { data: existingPassport } = await admin
+  // Note (race acceptée) : rien ne verrouille cette ligne entre ce SELECT et
+  // l'upsert plus bas. Si le candidat termine l'Energy Assessment adaptatif
+  // dans un autre onglet/session pile dans cette fenêtre, score_global et
+  // dominant_profile calculés ici peuvent se baser sur une énergie pré-conclusion
+  // périmée, même si dominant_family/score_energy en base finissent post-conclusion.
+  // L'UI actuelle (gate `energyStepDone` dans AssessmentForm.tsx) rend ce cas
+  // très difficile à atteindre en parcours mono-onglet — accepté tel quel,
+  // pas de transaction/RPC pour ce cas limite.
+  const { data: existingPassport, error: existingErr } = await admin
     .from('talent_passports')
     .select('dominant_family, score_energy')
     .eq('profile_id', ctx.profileId)
     .maybeSingle();
+  if (existingErr) return NextResponse.json({ error: existingErr.message }, { status: 500 });
 
   const dominantFamily = (existingPassport?.dominant_family as EnergyFamily | undefined) ?? 'pilotes';
   const scoreEnergy    = existingPassport?.score_energy ?? 20;
