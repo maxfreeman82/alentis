@@ -34,16 +34,50 @@ async function callAI(systemPrompt: string, userContent: string): Promise<string
   return data.response ?? '{}';
 }
 
-// 1. Parsing CV
-export async function parseCV(cvText: string) {
+// 1. Parsing CV — extrait les champs structurés utilisés par le profil talent
+// (job title, employeur, secteur, années d'expérience, compétences). Reprend
+// exactement les mêmes secteurs autorisés que l'ancien /api/cv/parse (onboarding,
+// inchangé par ailleurs) pour rester cohérent avec les données déjà en base.
+export const CV_SECTORS = [
+  'Technologie', 'Finance & Banque', 'Agriculture & Agritech',
+  'Santé & Healthcare', 'Éducation & EdTech', 'Logistique & Transport',
+  'Médias & Communication', 'BTP & Construction', 'Tourisme & Hôtellerie',
+  'Microfinance & Inclusion', 'Énergie & Environnement', 'Commerce & Distribution',
+  'Industrie & Manufacturing', 'Conseil & Services', 'Immobilier',
+] as const;
+
+export interface CvExtract {
+  jobTitle:   string;
+  employer:   string;
+  sector:     string;
+  yearsExp:   number;
+  hardSkills: string[];
+}
+
+export async function parseCV(cvText: string): Promise<CvExtract> {
   const text = await callAI(
-    `Expert RH africain. Extrais compétences, expériences du CV.
-     Réponds UNIQUEMENT en JSON valide, sans markdown.`,
+    `Expert RH africain. Analyse ce texte de CV et extrais les informations en JSON strict.
+     Secteurs autorisés : ${CV_SECTORS.join(', ')}.
+     Réponds UNIQUEMENT avec le JSON valide, sans markdown ni explication.`,
     `CV:\n\n${cvText}\n\nJSON attendu:
-    {"hard_skills":[{"name":string,"level":1-5,"recency_months":number}],
-     "experience_years":number,"education":string,"languages":string[]}`
+    {"jobTitle":"titre du poste actuel ou dernier poste",
+     "employer":"nom de l'employeur actuel ou dernier",
+     "sector":"un secteur parmi la liste autorisée",
+     "yearsExp":"nombre entier d'années d'expérience totale",
+     "hardSkills":["compétence1","..."] (max 12, noms courts)}`
   );
-  return JSON.parse(text) as Record<string, unknown>;
+
+  let raw: unknown;
+  try { raw = JSON.parse(text); } catch { raw = {}; }
+  const r = raw as Partial<CvExtract>;
+
+  return {
+    jobTitle:   typeof r.jobTitle === 'string' ? r.jobTitle : '',
+    employer:   typeof r.employer === 'string' ? r.employer : '',
+    sector:     typeof r.sector === 'string' && (CV_SECTORS as readonly string[]).includes(r.sector) ? r.sector : '',
+    yearsExp:   typeof r.yearsExp === 'number' ? Math.max(0, Math.round(r.yearsExp)) : 0,
+    hardSkills: Array.isArray(r.hardSkills) ? r.hardSkills.slice(0, 12).map(String) : [],
+  };
 }
 
 // 2. Classification vision -> archétype
