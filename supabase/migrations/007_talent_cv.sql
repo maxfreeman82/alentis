@@ -10,30 +10,36 @@ ALTER TABLE public.profiles
 -- L'upload/la lecture passent par la route API (service role, bypass RLS) —
 -- ces policies sont une défense en profondeur pour un éventuel accès direct
 -- depuis un client Supabase authentifié, pas le chemin principal.
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('cv-uploads', 'cv-uploads', false)
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('cv-uploads', 'cv-uploads', false, 5242880, ARRAY['application/pdf'])
 ON CONFLICT (id) DO NOTHING;
 
 CREATE POLICY "cv_own_select" ON storage.objects FOR SELECT
   USING (
     bucket_id = 'cv-uploads'
-    AND (storage.foldername(name))[1] = (
-      SELECT id::text FROM public.profiles WHERE user_id = auth.uid()
+    AND EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.user_id = auth.uid()
+        AND p.id::text = (storage.foldername(name))[1]
     )
   );
 
 CREATE POLICY "cv_own_insert" ON storage.objects FOR INSERT
   WITH CHECK (
     bucket_id = 'cv-uploads'
-    AND (storage.foldername(name))[1] = (
-      SELECT id::text FROM public.profiles WHERE user_id = auth.uid()
+    AND EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.user_id = auth.uid()
+        AND p.id::text = (storage.foldername(name))[1]
     )
   );
 
 CREATE POLICY "cv_own_update" ON storage.objects FOR UPDATE
   USING (
     bucket_id = 'cv-uploads'
-    AND (storage.foldername(name))[1] = (
-      SELECT id::text FROM public.profiles WHERE user_id = auth.uid()
+    AND EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.user_id = auth.uid()
+        AND p.id::text = (storage.foldername(name))[1]
     )
   );
