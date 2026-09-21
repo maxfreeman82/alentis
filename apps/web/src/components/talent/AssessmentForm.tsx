@@ -114,6 +114,7 @@ export default function AssessmentForm({ steps, profileId }: Props) {
 
         {currentStep.key === 'E' ? (
           <EnergyStepAdaptive
+            key="energy-step"
             onComplete={(profile) => setEnergyProfile(profile)}
             initialProfile={energyProfile}
           />
