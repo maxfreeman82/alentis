@@ -67,8 +67,22 @@ export async function parseCV(cvText: string): Promise<CvExtract> {
      "hardSkills":["compétence1","..."] (max 12, noms courts)}`
   );
 
+  // Ne lève jamais : le CV doit être stocké même si l'IA renvoie un JSON invalide
+  // (l'appelant traite `parsed`/données vides comme un échec silencieux à part).
+  // Le proxy daba est une API de chat brute (pas de sortie structurée) : malgré
+  // la consigne "sans markdown", le JSON peut arriver entouré de prose ou de
+  // fences — on l'extrait défensivement avant de parser, comme /api/cv/parse.
+  const match = text.match(/\{[\s\S]*\}/);
   let raw: unknown;
-  try { raw = JSON.parse(text); } catch { raw = {}; }
+  if (!match) {
+    console.error('[parseCV] no JSON found in AI response:', text.slice(0, 200));
+    raw = {};
+  } else {
+    try { raw = JSON.parse(match[0]); } catch {
+      console.error('[parseCV] invalid JSON from AI:', match[0].slice(0, 200));
+      raw = {};
+    }
+  }
   const r = raw as Partial<CvExtract>;
 
   return {
