@@ -7,11 +7,11 @@ import { parseCV } from '@/lib/ai';
 import pdfParse from 'pdf-parse';
 
 export async function POST(req: NextRequest) {
-  try {
-    const user = await requireAuth();
-    const ctx = await getTalentProfile(user.id);
-    if (!ctx) return NextResponse.json({ error: 'Profil introuvable.' }, { status: 401 });
+  const user = await requireAuth();
+  const ctx = await getTalentProfile(user.id);
+  if (!ctx) return NextResponse.json({ error: 'Profil introuvable.' }, { status: 401 });
 
+  try {
     const form = await req.formData();
     const file = form.get('cv');
     if (!(file instanceof File)) return NextResponse.json({ error: 'Fichier manquant.' }, { status: 400 });
