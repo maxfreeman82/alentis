@@ -50,7 +50,7 @@ export interface CvExtract {
   jobTitle:   string;
   employer:   string;
   sector:     string;
-  yearsExp:   number;
+  yearsExp:   number | null;
   hardSkills: string[];
 }
 
@@ -89,7 +89,7 @@ export async function parseCV(cvText: string): Promise<CvExtract> {
     jobTitle:   typeof r.jobTitle === 'string' ? r.jobTitle : '',
     employer:   typeof r.employer === 'string' ? r.employer : '',
     sector:     typeof r.sector === 'string' && (CV_SECTORS as readonly string[]).includes(r.sector) ? r.sector : '',
-    yearsExp:   typeof r.yearsExp === 'number' ? Math.max(0, Math.round(r.yearsExp)) : 0,
+    yearsExp:   typeof r.yearsExp === 'number' ? Math.max(0, Math.round(r.yearsExp)) : null,
     hardSkills: Array.isArray(r.hardSkills) ? r.hardSkills.slice(0, 12).map(String) : [],
   };
 }
