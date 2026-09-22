@@ -1,15 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Loader2, FileText, UploadCloud } from 'lucide-react';
-
-interface CvExtract {
-  jobTitle: string;
-  employer: string;
-  sector: string;
-  yearsExp: number | null;
-  hardSkills: string[];
-}
+import type { CvExtract } from '@/lib/ai';
 
 interface Props {
   hasExistingCv: boolean;
@@ -20,6 +13,7 @@ export default function CvUploadCard({ hasExistingCv, existingSkills }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState<{ parsed: boolean; extract: CvExtract | null } | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -72,7 +66,7 @@ export default function CvUploadCard({ hasExistingCv, existingSkills }: Props) {
       )}
 
       {result && (
-        <div className="bg-emerald/10 border border-emerald/20 rounded-xl px-4 py-3 text-xs text-slate-700 space-y-1">
+        <div role="status" className="bg-emerald/10 border border-emerald/20 rounded-xl px-4 py-3 text-xs text-slate-700 space-y-1">
           <p className="font-semibold text-emerald">CV enregistré.</p>
           {result.parsed && result.extract ? (
             <>
@@ -88,14 +82,24 @@ export default function CvUploadCard({ hasExistingCv, existingSkills }: Props) {
         </div>
       )}
 
-      <label
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={loading}
         className={`inline-flex items-center gap-2 bg-emerald text-white py-2.5 px-4 rounded-xl font-semibold text-sm hover:bg-emerald-500 transition-colors w-fit ${
           loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
         }`}>
         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
         {loading ? 'Envoi…' : hasExistingCv ? 'Remplacer mon CV' : 'Téléverser mon CV'}
-        <input type="file" accept=".pdf,application/pdf" className="hidden" disabled={loading} onChange={handleFileChange} />
-      </label>
+      </button>
+      <input
+        type="file"
+        ref={inputRef}
+        accept=".pdf,application/pdf"
+        className="hidden"
+        disabled={loading}
+        onChange={handleFileChange}
+      />
     </div>
   );
 }

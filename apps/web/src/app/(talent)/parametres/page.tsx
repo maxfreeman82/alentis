@@ -15,11 +15,15 @@ export default async function ParametresPage() {
   // au typecheck. On lit via le client admin non typé, comme POST /api/talent/cv
   // le fait déjà en écriture pour cette même colonne.
   const admin = createAdminClient();
-  const { data: profile } = await admin
+  const { data: profile, error: profileError } = await admin
     .from('profiles')
     .select('cv_url, cv_extracted_skills')
     .eq('id', ctx.profileId)
     .maybeSingle();
+
+  if (profileError) {
+    console.error('[parametres] failed to load CV profile data:', profileError);
+  }
 
   return (
     <div className="space-y-6">
