@@ -1,10 +1,10 @@
 import { requireAuth } from '@/lib/supabase/user';
-import { NextResponse } from 'next/server';
+import { after, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getTalentProfile } from '@/lib/supabase/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { decideNextStep, resolveStepConfig, STEP_IDS, type StepId } from '@teranga/talent-assessment';
-import { createQuestion, loadAnswered } from '@/lib/talent-assessment/server';
+import { createQuestion, loadAnswered, prepareNextQuestions } from '@/lib/talent-assessment/server';
 
 const schema = z.object({
   sessionId:  z.string().uuid(),
@@ -100,12 +100,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ done: true });
   }
 
-  const created = await createQuestion(
-    admin, session.id, config, decision, session.context_snapshot as Record<string, unknown>,
-  );
+  const context = session.context_snapshot as Record<string, unknown>;
+  // Brouillon préparé pendant la lecture de la question courante, sinon génération.
+  const created = await createQuestion(admin, session.id, config, decision, context, current.id);
   // La réponse reste enregistrée (audit-trail) ; le client rejouera la même
   // réponse, ce qui emprunte le chemin retry ci-dessus.
   if (!created.ok) return NextResponse.json({ error: created.error }, { status: created.status });
 
-  return NextResponse.json({ done: false, question: created.value });
+  // Après la réponse HTTP : préparer la question suivante pendant la lecture.
+  const { asked } = created.value;
+  if (asked) after(() => prepareNextQuestions(admin, session.id, config, context, asked));
+
+  // Uniquement le payload client : `asked` contient les valeurs cachées.
+  return NextResponse.json({ done: false, question: created.value.payload });
 }

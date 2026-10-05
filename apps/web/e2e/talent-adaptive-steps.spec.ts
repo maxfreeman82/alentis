@@ -22,6 +22,8 @@ test.describe('Questionnaire 6D — étapes adaptatives', () => {
     expect(res.ok()).toBeTruthy();
     const body = await res.text();
     expect(body).not.toContain('option_values');
+    expect(body).not.toContain('optionValues');
+    expect(body).not.toContain('asked');
     expect(body).not.toMatch(/"value"/);
   });
 

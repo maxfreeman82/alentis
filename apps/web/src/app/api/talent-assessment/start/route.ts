@@ -1,10 +1,10 @@
 import { requireAuth } from '@/lib/supabase/user';
-import { NextResponse } from 'next/server';
+import { after, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getTalentProfile } from '@/lib/supabase/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { decideNextStep, resolveStepConfig, STEP_IDS } from '@teranga/talent-assessment';
-import { buildContextSnapshot, createQuestion, readPendingQuestion } from '@/lib/talent-assessment/server';
+import { buildContextSnapshot, createQuestion, prepareNextQuestions, readPendingQuestion } from '@/lib/talent-assessment/server';
 
 const schema = z.object({ step: z.enum(STEP_IDS) });
 
@@ -82,5 +82,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: created.error }, { status: created.status });
   }
 
-  return NextResponse.json({ sessionId: session.id, question: created.value });
+  // Après la réponse HTTP : préparer la question suivante pendant la lecture.
+  const { asked } = created.value;
+  if (asked) after(() => prepareNextQuestions(admin, session.id, config, context, asked));
+
+  // Uniquement le payload client : `asked` contient les valeurs cachées.
+  return NextResponse.json({ sessionId: session.id, question: created.value.payload });
 }

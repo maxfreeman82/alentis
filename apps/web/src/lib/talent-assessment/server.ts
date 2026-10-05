@@ -1,6 +1,7 @@
 import type { createAdminClient } from '@/lib/supabase/admin';
 import {
-  buildFallbackQuestion, sanitizeSkills, type AnsweredItem, type AskDecision, type StepConfig,
+  anticipateNextSteps, buildFallbackQuestion, sameStep, sanitizeSkills,
+  type AnsweredItem, type AskDecision, type ClientQuestion, type StepConfig,
 } from '@teranga/talent-assessment';
 import { generateAdaptiveQuestion } from '@/lib/ai';
 
@@ -64,14 +65,35 @@ export async function loadAnswered(admin: AdminClient, sessionId: string): Promi
   };
 }
 
-// Génère (IA, sinon banque de secours) et insère la question décidée par le moteur.
-export async function createQuestion(
+// Question prête à insérer : textes + valeurs cachées propres à cette génération.
+interface Draft {
+  question:     ClientQuestion;
+  aiGenerated:  boolean;
+  optionValues: Record<string, number>;
+}
+
+// Ce qui a été posé, pour préparer la suite (jamais renvoyé au client).
+export interface AskedQuestion {
+  id:           string;
+  facet:        string;
+  optionValues: Record<string, number>;
+  difficulty:   number | null;
+}
+
+export interface CreatedQuestion {
+  payload: ClientQuestionPayload;
+  // null quand la question vient d'une requête concurrente (rien à préparer)
+  asked:   AskedQuestion | null;
+}
+
+// Génère (IA, sinon banque de secours) la question décidée par le moteur.
+async function generateDraft(
   admin: AdminClient,
   sessionId: string,
   config: StepConfig,
   decision: AskDecision,
   context: Record<string, unknown>,
-): Promise<Result<ClientQuestionPayload>> {
+): Promise<Draft | null> {
   // Situations déjà posées : transmises à l'IA pour qu'elle ne les recycle pas.
   const { data: previous } = await admin
     .from('talent_assessment_questions')
@@ -85,8 +107,50 @@ export async function createQuestion(
     previousQuestions,
   );
   const question = generated ?? buildFallbackQuestion(config, decision.facet, decision.optionValues);
+  if (!question) return null;
+  return { question, aiGenerated: generated !== null, optionValues: decision.optionValues };
+}
+
+// Brouillon préparé pendant la lecture de la question précédente, s'il
+// correspond à la décision réelle. Si la table n'existe pas (migration 009 non
+// appliquée) ou que rien n'est prêt, on retombe sur la génération synchrone.
+async function takePreparedDraft(
+  admin: AdminClient,
+  sessionId: string,
+  afterQuestionId: string,
+  decision: AskDecision,
+): Promise<Draft | null> {
+  const { data } = await admin
+    .from('talent_assessment_prepared')
+    .select('phase, facet, difficulty, question_text, option_labels, option_values, ai_generated')
+    .eq('session_id', sessionId)
+    .eq('after_question_id', afterQuestionId);
+  // Utilisés ou non, les brouillons de cette question ne serviront plus.
+  await admin.from('talent_assessment_prepared').delete().eq('after_question_id', afterQuestionId);
+
+  const match = (data ?? []).find(p => sameStep(p as Pick<AskDecision, 'phase' | 'facet' | 'difficulty'>, decision));
+  if (!match) return null;
+  return {
+    question:     { questionText: match.question_text, options: match.option_labels },
+    aiGenerated:  match.ai_generated,
+    optionValues: match.option_values as Record<string, number>,
+  };
+}
+
+// Insère la question décidée par le moteur : brouillon préparé si disponible,
+// sinon génération immédiate.
+export async function createQuestion(
+  admin: AdminClient,
+  sessionId: string,
+  config: StepConfig,
+  decision: AskDecision,
+  context: Record<string, unknown>,
+  afterQuestionId: string | null = null,
+): Promise<Result<CreatedQuestion>> {
+  const draft = (afterQuestionId && await takePreparedDraft(admin, sessionId, afterQuestionId, decision))
+    || await generateDraft(admin, sessionId, config, decision, context);
   // Pas de banque de secours en technique : le candidat réessaie (chemin retry).
-  if (!question) return { ok: false, error: 'La génération de la question a échoué. Réessayez dans un instant.', status: 502 };
+  if (!draft) return { ok: false, error: 'La génération de la question a échoué. Réessayez dans un instant.', status: 502 };
 
   const { data, error } = await admin
     .from('talent_assessment_questions')
@@ -95,10 +159,10 @@ export async function createQuestion(
       phase:         decision.phase,
       facet:         decision.facet,
       difficulty:    decision.difficulty,
-      question_text: question.questionText,
-      option_labels: question.options,
-      option_values: decision.optionValues,
-      ai_generated:  generated !== null,
+      question_text: draft.question.questionText,
+      option_labels: draft.question.options,
+      option_values: draft.optionValues,
+      ai_generated:  draft.aiGenerated,
     })
     .select('id')
     .single();
@@ -108,10 +172,50 @@ export async function createQuestion(
     // requête a déjà créé la question en attente — on la renvoie telle quelle.
     if (error?.code === '23505') {
       const pending = await readPendingQuestion(admin, sessionId);
-      if (pending.ok && pending.value) return { ok: true, value: pending.value };
+      if (pending.ok && pending.value) return { ok: true, value: { payload: pending.value, asked: null } };
     }
     return { ok: false, error: error?.message ?? 'Création question impossible', status: 500 };
   }
 
-  return { ok: true, value: { id: data.id, text: question.questionText, options: question.options } };
+  return {
+    ok: true,
+    value: {
+      payload: { id: data.id, text: draft.question.questionText, options: draft.question.options },
+      asked:   { id: data.id, facet: decision.facet, optionValues: draft.optionValues, difficulty: decision.difficulty },
+    },
+  };
+}
+
+// À lancer après la réponse HTTP (after()) : prépare la question suivante pour
+// chaque branche possible du moteur. Ne lève jamais — au pire, la question
+// suivante sera générée à la demande, comme sans pré-génération.
+export async function prepareNextQuestions(
+  admin: AdminClient,
+  sessionId: string,
+  config: StepConfig,
+  context: Record<string, unknown>,
+  asked: AskedQuestion,
+): Promise<void> {
+  try {
+    const answered = await loadAnswered(admin, sessionId);
+    if (!answered.ok) return;
+    const branches = anticipateNextSteps(config, answered.value, asked);
+    await Promise.all(branches.map(async decision => {
+      const draft = await generateDraft(admin, sessionId, config, decision, context);
+      if (!draft) return;
+      await admin.from('talent_assessment_prepared').insert({
+        session_id:        sessionId,
+        after_question_id: asked.id,
+        phase:             decision.phase,
+        facet:             decision.facet,
+        difficulty:        decision.difficulty,
+        question_text:     draft.question.questionText,
+        option_labels:     draft.question.options,
+        option_values:     draft.optionValues,
+        ai_generated:      draft.aiGenerated,
+      });
+    }));
+  } catch (err) {
+    console.error('[prepareNextQuestions] failed:', err);
+  }
 }
