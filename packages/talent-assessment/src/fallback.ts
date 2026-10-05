@@ -101,6 +101,57 @@ export const FALLBACK_BANKS: Record<StepId, Record<string, FallbackEntry>> = {
       ],
     },
   },
+  // Étapes factuelles : optionsByRank va de la situation la plus favorable à la
+  // plus préoccupante. « Travail » = emploi actuel ou dernière expérience.
+  life: {
+    fulfillment: {
+      text: 'Au cours des 4 dernières semaines, combien de vos journées de travail vous ont laissé un sentiment d\'accomplissement ?',
+      optionsByRank: ['La plupart', 'Environ la moitié', 'Quelques-unes', 'Presque aucune'],
+    },
+    values_alignment: {
+      text: 'Au cours des 3 derniers mois, combien de fois vous a-t-on demandé de faire quelque chose qui allait contre vos principes professionnels ?',
+      optionsByRank: ['Jamais', 'Une fois', '2 à 3 fois', 'Plus de 3 fois'],
+    },
+    work_life_balance: {
+      text: 'Au cours des 2 dernières semaines, combien de soirées ou de jours de week-end avez-vous consacrés au travail en dehors de vos horaires ?',
+      optionsByRank: ['Aucun', '1 ou 2', '3 à 5', 'Plus de 5'],
+    },
+    health: {
+      text: 'Au cours des 4 dernières semaines, combien de nuits avez-vous mal dormi à cause du travail ?',
+      optionsByRank: ['Aucune', '1 à 3', '4 à 8', 'Plus de 8'],
+    },
+    outside_activities: {
+      text: 'Au cours des 2 dernières semaines, combien de fois avez-vous pratiqué une activité qui vous ressource (sport, famille, art, engagement associatif…) ?',
+      optionsByRank: ['Plus de 4 fois', '3 ou 4 fois', '1 ou 2 fois', 'Aucune'],
+    },
+    optimism: {
+      text: 'En pensant à votre situation professionnelle dans un an, quelle phrase décrit le mieux ce que vous avez concrètement prévu ?',
+      optionsByRank: [
+        'J\'ai un objectif précis et des actions déjà engagées',
+        'J\'ai un objectif précis mais rien d\'engagé pour l\'instant',
+        'J\'ai quelques idées, sans objectif clair',
+        'Je n\'arrive pas à me projeter',
+      ],
+    },
+  },
+  risk: {
+    overload: {
+      text: 'Au cours des 4 dernières semaines, combien de fois avez-vous dû reporter ou bâcler une tâche faute de temps ?',
+      optionsByRank: ['Jamais', '1 ou 2 fois', 'Chaque semaine', 'Presque tous les jours'],
+    },
+    disconnection: {
+      text: 'La semaine dernière, combien de fois avez-vous consulté vos messages professionnels le soir, le week-end ou en congé ?',
+      optionsByRank: ['Jamais', '1 ou 2 fois', '3 à 6 fois', 'Plus souvent'],
+    },
+    meaning_recognition: {
+      text: 'Au cours des 3 derniers mois, combien de fois votre travail a-t-il été reconnu explicitement (remerciement, retour positif, mise en avant) ?',
+      optionsByRank: ['Plus de 5 fois', '3 à 5 fois', '1 ou 2 fois', 'Jamais'],
+    },
+    conflicts: {
+      text: 'Au cours du dernier mois, combien de désaccords avec un collègue ou un supérieur sont restés sans solution ?',
+      optionsByRank: ['Aucun', 'Un', 'Deux ou trois', 'Plus de trois'],
+    },
+  },
 };
 
 export function buildFallbackQuestion(

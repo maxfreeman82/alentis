@@ -27,4 +27,6 @@ export const SOFT_CONFIG: StepConfig = {
   // Grille SJT : meilleure pratique / correcte mais incomplète / peu efficace / contre-productive
   valueLadder: [1, 0.66, 0.33, 0],
   contextTags: ['réunion', 'client', 'urgence', 'projet', 'hiérarchie', 'nouvelle équipe'],
+  questionStyle: 'situational',
+  orderedOptions: false,
 };

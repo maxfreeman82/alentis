@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { assignOptionValues, decideNextStep, type AskDecision } from './engine';
 import { SOFT_CONFIG } from './steps/soft';
+import { RISK_CONFIG } from './steps/risk';
 import type { AnsweredItem } from './types';
 
 // RNG déterministe (LCG) pour des tests reproductibles
@@ -18,6 +19,19 @@ describe('assignOptionValues', () => {
     const out = assignOptionValues(ladder, seeded());
     expect(Object.keys(out)).toEqual(['k1', 'k2', 'k3', 'k4']);
     expect(Object.values(out).sort()).toEqual([...ladder].sort());
+  });
+
+  it('en mode ordonné, garde une échelle monotone dans un sens ou l\'autre', () => {
+    const ladder = [1, 0.66, 0.33, 0];
+    const rng = seeded(3);
+    const seen = new Set<string>();
+    for (let i = 0; i < 20; i++) {
+      const values = Object.values(assignOptionValues(ladder, rng, true));
+      const asc = [...ladder].reverse();
+      expect([JSON.stringify(ladder), JSON.stringify(asc)]).toContain(JSON.stringify(values));
+      seen.add(JSON.stringify(values));
+    }
+    expect(seen.size).toBe(2);
   });
 
   it('ne place pas toujours la meilleure option en k1', () => {
@@ -117,5 +131,30 @@ describe('decideNextStep', () => {
     const d1 = decideNextStep(SOFT_CONFIG, answered.slice(0, 1), seeded());
     if (d0.action !== 'ask' || d1.action !== 'ask') throw new Error('attendu: ask');
     expect(d0.contextTag).not.toBe(d1.contextTag);
+  });
+
+  it('Risques : respecte le minimum de questions même sans aucun signal', () => {
+    const rng = seeded(5);
+    const answered: AnsweredItem[] = [];
+    let d = decideNextStep(RISK_CONFIG, answered, rng);
+    while (d.action === 'ask') {
+      answered.push(answerWith(d, 1));
+      d = decideNextStep(RISK_CONFIG, answered, rng);
+    }
+    expect(answered).toHaveLength(RISK_CONFIG.minQuestions);
+    expect(d).toMatchObject({ forced: false, stepScore: 100 });
+  });
+
+  it("Risques : un signal d'alerte est confirmé avant d'être retenu", () => {
+    const rng = seeded(5);
+    const answered: AnsweredItem[] = [];
+    let d = decideNextStep(RISK_CONFIG, answered, rng);
+    while (d.action === 'ask') {
+      answered.push(answerWith(d, d.facet === 'overload' ? 0 : 1));
+      d = decideNextStep(RISK_CONFIG, answered, rng);
+    }
+    expect(answered.filter(a => a.facet === 'overload')).toHaveLength(2);
+    if (d.action !== 'conclude') throw new Error('attendu: conclude');
+    expect(d.facetScores.overload).toBe(0);
   });
 });

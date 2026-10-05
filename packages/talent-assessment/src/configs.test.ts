@@ -21,6 +21,19 @@ describe('STEP_CONFIGS', () => {
     }
   });
 
+  it('livre Soft Skills, Life Score et Risques', () => {
+    expect([...STEP_IDS].sort()).toEqual(['life', 'risk', 'soft']);
+  });
+
+  it('Life Score et Risques posent des questions factuelles à options ordonnées', () => {
+    for (const step of ['life', 'risk'] as const) {
+      expect(STEP_CONFIGS[step].questionStyle).toBe('behavioral');
+      expect(STEP_CONFIGS[step].orderedOptions).toBe(true);
+    }
+    expect(STEP_CONFIGS.soft.questionStyle).toBe('situational');
+    expect(STEP_CONFIGS.soft.orderedOptions).toBe(false);
+  });
+
   it('Soft Skills couvre les 10 colonnes soft_* de talent_passports', () => {
     expect([...STEP_CONFIGS.soft.facets].sort()).toEqual([
       'adaptability', 'collaboration', 'communication', 'critical_thinking',

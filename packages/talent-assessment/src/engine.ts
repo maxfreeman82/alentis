@@ -28,12 +28,18 @@ export interface ConcludeDecision {
 export type Decision = AskDecision | ConcludeDecision;
 
 // Clés opaques k1..kN, valeurs mélangées (Fisher-Yates) : la position
-// d'affichage ne trahit jamais la meilleure réponse.
+// d'affichage ne trahit jamais la meilleure réponse. En mode ordonné (échelles
+// de fréquence), l'ordre est conservé mais son sens est tiré au hasard.
 export function assignOptionValues(
   ladder: readonly number[],
   rng: () => number = Math.random,
+  ordered = false,
 ): Record<string, number> {
   const values = [...ladder];
+  if (ordered) {
+    if (rng() < 0.5) values.reverse();
+    return Object.fromEntries(values.map((v, i) => [`k${i + 1}`, v]));
+  }
   for (let i = values.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1));
     [values[i], values[j]] = [values[j]!, values[i]!];
@@ -83,7 +89,7 @@ export function decideNextStep(
 
   const ask = (phase: Phase, facet: string): AskDecision => ({
     action: 'ask', phase, facet, contextTag,
-    optionValues: assignOptionValues(config.valueLadder, rng),
+    optionValues: assignOptionValues(config.valueLadder, rng, config.orderedOptions),
   });
 
   const conclude = (forced: boolean): ConcludeDecision => {
