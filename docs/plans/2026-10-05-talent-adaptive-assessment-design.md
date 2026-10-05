@@ -126,3 +126,13 @@ Clés d'options opaques (`k1`–`k4`) assignées aléatoirement par le moteur : 
 4. **Expérience** + badge, bascule de `/api/talent/assessment` sur les sessions, retrait des questions statiques.
 
 Jusqu'à la tranche 4, les étapes non migrées gardent leurs questions statiques : aucune régression en cours de route.
+
+## Écarts décidés pendant l'implémentation (2026-10-05)
+
+- **Life / Risques** : questions factuelles datées (style `behavioral`), options affichées dans l'ordre de l'échelle avec un sens tiré au hasard. `score_risk = 100 − score d'étape`. Facettes : life 6 (6–9 questions), risk 4 (5–8 questions).
+- **Compétences techniques** : mode `knowledge` — 1 bonne réponse / 3 distracteurs, difficulté 3 ±1 (bornes 1–5), facette stable une fois encadrée ou confirmée à une borne (max 3 questions), score = plus haut niveau réussi × 20. Chaque question est **résolue par un second appel IA indépendant** ; servie seulement si les deux concordent.
+- **Expérience** : style `proof`, grille [1, 0.5, 0, 0], même double vérification. `score_exp = palier d'années du CV × crédibilité / 100` ; `corroborated` dès 66 de crédibilité et années connues.
+- **Pas de banque de secours** pour `hard` et `exp` (questions propres au CV) : en cas d'échec IA, réponse 502 et bouton « Réessayer ».
+- **Porte CV** : compétences + poste requis ; saisie manuelle pré-remplie si l'analyse est incomplète (`POST /api/talent/skills`).
+- **Réponses très lentes** (> 90 s, ≥ 3 fois) signalées `slow_answers` en technique.
+- **Limite connue** : une étape terminée n'est pas re-passable depuis `/assessment` (le bouton « Refaire » du Passport régénère avec les passations existantes). À traiter si besoin d'une réévaluation périodique.
