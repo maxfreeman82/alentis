@@ -8,3 +8,4 @@ export * from './steps/exp';
 export * from './engine';
 export * from './validation';
 export * from './fallback';
+export * from './anticipate';
