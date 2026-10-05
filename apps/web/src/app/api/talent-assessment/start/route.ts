@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getTalentProfile } from '@/lib/supabase/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { decideNextStep, STEP_CONFIGS, STEP_IDS } from '@teranga/talent-assessment';
+import { decideNextStep, resolveStepConfig, STEP_IDS } from '@teranga/talent-assessment';
 import { buildContextSnapshot, createQuestion, readPendingQuestion } from '@/lib/talent-assessment/server';
 
 const schema = z.object({ step: z.enum(STEP_IDS) });
@@ -39,7 +39,6 @@ export async function POST(req: Request) {
   const parsed = schema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: 'Étape invalide.' }, { status: 400 });
   const { step } = parsed.data;
-  const config = STEP_CONFIGS[step];
 
   const admin = createAdminClient();
 
@@ -47,6 +46,10 @@ export async function POST(req: Request) {
   if (resumed) return resumed;
 
   const context = await buildContextSnapshot(admin, ctx.profileId);
+  const config = resolveStepConfig(step, context);
+  if (config.facets.length === 0) {
+    return NextResponse.json({ error: 'Déposez votre CV pour que nous puissions évaluer vos compétences techniques.' }, { status: 400 });
+  }
 
   const { data: session, error: sessionErr } = await admin
     .from('talent_assessment_sessions')

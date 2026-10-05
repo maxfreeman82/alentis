@@ -1,6 +1,6 @@
 import type { createAdminClient } from '@/lib/supabase/admin';
 import {
-  buildFallbackQuestion, type AnsweredItem, type AskDecision, type StepConfig,
+  buildFallbackQuestion, sanitizeSkills, type AnsweredItem, type AskDecision, type StepConfig,
 } from '@teranga/talent-assessment';
 import { generateAdaptiveQuestion } from '@/lib/ai';
 
@@ -21,13 +21,15 @@ type Result<T> = { ok: true; value: T } | { ok: false; error: string; status: nu
 export async function buildContextSnapshot(admin: AdminClient, profileId: string): Promise<Record<string, unknown>> {
   const { data } = await admin
     .from('profiles')
-    .select('job_title, sector, years_experience')
+    .select('job_title, sector, years_experience, cv_extracted_skills')
     .eq('id', profileId)
     .maybeSingle();
   return {
     job_title:        data?.job_title ?? null,
     sector:           data?.sector ?? null,
     years_experience: data?.years_experience ?? null,
+    // Compétences testées par l'étape technique (cf. resolveStepConfig)
+    skills:           sanitizeSkills(data?.cv_extracted_skills),
   };
 }
 
@@ -46,7 +48,7 @@ export async function readPendingQuestion(admin: AdminClient, sessionId: string)
 export async function loadAnswered(admin: AdminClient, sessionId: string): Promise<Result<AnsweredItem[]>> {
   const { data, error } = await admin
     .from('talent_assessment_questions')
-    .select('facet, option_values, candidate_answer, response_ms')
+    .select('facet, option_values, candidate_answer, response_ms, difficulty')
     .eq('session_id', sessionId)
     .order('created_at', { ascending: true });
   if (error || !data) return { ok: false, error: error?.message ?? 'Lecture impossible', status: 500 };
@@ -57,6 +59,7 @@ export async function loadAnswered(admin: AdminClient, sessionId: string): Promi
       optionValues:    q.option_values as Record<string, number>,
       candidateAnswer: q.candidate_answer,
       responseMs:      q.response_ms,
+      difficulty:      q.difficulty,
     })),
   };
 }
@@ -70,10 +73,11 @@ export async function createQuestion(
   context: Record<string, unknown>,
 ): Promise<Result<ClientQuestionPayload>> {
   const generated = await generateAdaptiveQuestion(
-    config, decision.facet, decision.contextTag, decision.optionValues, context,
+    config, decision.facet, decision.contextTag, decision.optionValues, context, decision.difficulty,
   );
   const question = generated ?? buildFallbackQuestion(config, decision.facet, decision.optionValues);
-  if (!question) return { ok: false, error: 'Aucune question disponible pour cette facette.', status: 500 };
+  // Pas de banque de secours en technique : le candidat réessaie (chemin retry).
+  if (!question) return { ok: false, error: 'La génération de la question a échoué. Réessayez dans un instant.', status: 502 };
 
   const { data, error } = await admin
     .from('talent_assessment_questions')
@@ -81,6 +85,7 @@ export async function createQuestion(
       session_id:    sessionId,
       phase:         decision.phase,
       facet:         decision.facet,
+      difficulty:    decision.difficulty,
       question_text: question.questionText,
       option_labels: question.options,
       option_values: decision.optionValues,

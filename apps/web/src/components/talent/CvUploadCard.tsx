@@ -7,9 +7,10 @@ import type { CvExtract } from '@/lib/ai';
 interface Props {
   hasExistingCv: boolean;
   existingSkills: string[];
+  onUploaded?: (result: { parsed: boolean; extract: CvExtract | null }) => void;
 }
 
-export default function CvUploadCard({ hasExistingCv, existingSkills }: Props) {
+export default function CvUploadCard({ hasExistingCv, existingSkills, onUploaded }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState<{ parsed: boolean; extract: CvExtract | null } | null>(null);
@@ -30,7 +31,9 @@ export default function CvUploadCard({ hasExistingCv, existingSkills }: Props) {
         setError(json.error ?? 'Échec de l\'envoi.');
         return;
       }
-      setResult({ parsed: !!json.parsed, extract: json.extract ?? null });
+      const uploaded = { parsed: !!json.parsed, extract: json.extract ?? null };
+      setResult(uploaded);
+      onUploaded?.(uploaded);
     } catch {
       setError('Impossible de contacter le serveur.');
     } finally {

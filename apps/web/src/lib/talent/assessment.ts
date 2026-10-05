@@ -16,15 +16,13 @@ export interface Question {
 
 // Type de widget affiché. Toutes les réponses restent codées 1→5.
 //  agree     : échelle Likert horizontale (pas d'accord ↔ d'accord)
-//  frequency : curseur gradué (faible ↔ élevé)
 //  range     : plage numérique en segments (années, nombre…)
 //  choice    : cartes de choix qualitatives
-export type QuestionKind = 'agree' | 'frequency' | 'range' | 'choice';
+export type QuestionKind = 'agree' | 'range' | 'choice';
 
 export function questionKind(q: Question): QuestionKind {
   if (q.kind) return q.kind;
   if (q.options === AGR5) return 'agree';
-  if (q.options[0]?.label === FREQ5_OPTIONS[0]?.label) return 'frequency';
   return 'choice';
 }
 
@@ -37,14 +35,6 @@ export interface AssessmentResult {
 }
 
 // ─── Options communes ─────────────────────────────────────────────────────────
-const FREQ5_OPTIONS: Question['options'] = [
-  { value: 1, label: 'Jamais / Très faible' },
-  { value: 2, label: 'Rarement / Faible' },
-  { value: 3, label: 'Parfois / Moyen' },
-  { value: 4, label: 'Souvent / Élevé' },
-  { value: 5, label: 'Toujours / Très élevé' },
-];
-const FREQ5 = (_q: string): Question['options'] => FREQ5_OPTIONS;
 const AGR5: Question['options'] = [
   { value: 1, label: 'Pas du tout d\'accord' },
   { value: 2, label: 'Plutôt pas d\'accord' },
@@ -54,16 +44,6 @@ const AGR5: Question['options'] = [
 ];
 
 export const QUESTIONS: Question[] = [
-  // ── HARD SKILLS (H) — 8 questions ────────────────────────────────────────
-  { id: 'H1', dim: 'H', text: 'Quel est votre niveau de maîtrise dans votre domaine d\'expertise principal ?', options: [{ value:1,label:'Débutant'},{value:2,label:'Intermédiaire'},{value:3,label:'Avancé'},{value:4,label:'Expert'},{value:5,label:'Maître reconnu'}] },
-  { id: 'H2', dim: 'H', kind: 'range', text: 'Combien d\'années d\'expérience pratique avez-vous dans vos compétences clés ?', options: [{ value:1,label:'< 1 an'},{value:2,label:'1-3 ans'},{value:3,label:'3-5 ans'},{value:4,label:'5-10 ans'},{value:5,label:'> 10 ans'}] },
-  { id: 'H3', dim: 'H', text: 'Êtes-vous capable de former d\'autres personnes sur vos compétences techniques ?', options: AGR5 },
-  { id: 'H4', dim: 'H', kind: 'range', text: 'Combien de langues professionnelles maîtrisez-vous (niveau B2+) ?', options: [{ value:1,label:'1'},{value:2,label:'2'},{value:3,label:'3'},{value:4,label:'4'},{value:5,label:'5+'}] },
-  { id: 'H5', dim: 'H', text: 'À quelle vitesse intégrez-vous de nouveaux outils technologiques ?', options: FREQ5('') },
-  { id: 'H6', dim: 'H', kind: 'range', text: 'Vos compétences sont-elles validées par des certifications reconnues ?', options: [{ value:1,label:'Aucune'},{value:2,label:'1 certification'},{value:3,label:'2-3 certifications'},{value:4,label:'4-5 certifications'},{value:5,label:'6+ certifications'}] },
-  { id: 'H7', dim: 'H', text: 'Avez-vous des compétences dans des domaines complémentaires (polyvalence) ?', options: AGR5 },
-  { id: 'H8', dim: 'H', text: 'Vos compétences techniques sont-elles à jour avec les évolutions récentes du marché ?', options: AGR5 },
-
   // ── EXPÉRIENCE (X) — 6 questions ─────────────────────────────────────────
   { id: 'X1', dim: 'X', kind: 'range', text: 'Combien d\'années d\'expérience professionnelle totale avez-vous ?', options: [{ value:1,label:'< 2 ans'},{value:2,label:'2-5 ans'},{value:3,label:'5-10 ans'},{value:4,label:'10-15 ans'},{value:5,label:'> 15 ans'}] },
   { id: 'X2', dim: 'X', kind: 'range', text: 'Avez-vous managé des équipes de façon régulière ?', options: [{ value:1,label:'Jamais'},{value:2,label:'Équipes < 3 pers.'},{value:3,label:'Équipes 3-10 pers.'},{value:4,label:'Équipes 10-30 pers.'},{value:5,label:'Équipes > 30 pers.'}] },
@@ -89,9 +69,8 @@ export function computeAssessment(
   scoreEnergy: number,
   overrides: ScoreOverrides = {},
 ): AssessmentResult {
-  // Hard Skills
-  const hQs = QUESTIONS.filter(q => q.dim === 'H');
-  const H = Math.round((hQs.reduce((s, q) => s + (responses[q.id] ?? 3), 0) / hQs.length) * 20);
+  // Hard Skills — quiz adaptatif sur les compétences du CV
+  const H = overrides.H ?? 0;
 
   // Soft Skills — mesurées par l'étape adaptative (talent_assessment_sessions)
   const S = overrides.S ?? 0;
@@ -122,7 +101,7 @@ export function computeAssessment(
 
 // Grouper les questions par dimension pour l'affichage step-by-step
 export const QUESTION_STEPS = [
-  { key: 'H',   label: 'Compétences techniques',  questions: QUESTIONS.filter(q => q.dim === 'H') },
+  { key: 'H',   label: 'Compétences techniques',  questions: [] as Question[] },
   { key: 'S',   label: 'Soft Skills',              questions: [] as Question[] },
   { key: 'X',   label: 'Expérience',               questions: QUESTIONS.filter(q => q.dim === 'X') },
   { key: 'L',   label: 'Life Score',               questions: [] as Question[] },

@@ -56,17 +56,21 @@ export async function POST(req: Request) {
   const latest = new Map<string, StepResult>();
   for (const s of sessions ?? []) if (!latest.has(s.step) && s.result) latest.set(s.step, s.result as StepResult);
 
-  const STEP_LABELS: Record<string, string> = { soft: 'Soft Skills', life: 'Life Score', risk: 'Risques & bien-être' };
+  const STEP_LABELS: Record<string, string> = {
+    hard: 'Compétences techniques', soft: 'Soft Skills', life: 'Life Score', risk: 'Risques & bien-être',
+  };
   const missing = Object.keys(STEP_LABELS).filter(step => !latest.has(step));
   if (missing.length > 0) {
     const names = missing.map(step => STEP_LABELS[step]).join(', ');
     return NextResponse.json({ error: `Terminez ces étapes avant de générer votre Passport : ${names}.` }, { status: 400 });
   }
+  const hard = latest.get('hard')!;
   const soft = latest.get('soft')!;
   const life = latest.get('life')!;
   const risk = latest.get('risk')!;
 
   const result = computeAssessment(parsed.data.responses, scoreEnergy, {
+    H: hard.stepScore,
     S: soft.stepScore,
     L: life.stepScore,
     // Étape Risques : 100 = aucun signal ; score_risk : 100 = risque max.
@@ -78,7 +82,7 @@ export async function POST(req: Request) {
   const dominantProfileList = FAMILY_PROFILES[dominantFamily] ?? ['Profil Unique'];
   const dominant_profile = dominantProfileList[profileIdx] ?? (dominantProfileList[0] ?? 'Profil Unique');
 
-  const { error } = await admin.from('talent_passports').upsert(
+  const { data: passport, error } = await admin.from('talent_passports').upsert(
     {
       profile_id:            ctx.profileId,
       score_global:          result.score_global,
@@ -106,9 +110,25 @@ export async function POST(req: Request) {
       soft_emotional_intel:   soft.facetScores.emotional_intel ?? null,
     },
     { onConflict: 'profile_id' }
-  );
+  ).select('id').single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error || !passport) return NextResponse.json({ error: error?.message ?? 'Enregistrement impossible' }, { status: 500 });
+
+  // Compétences vérifiées par le quiz : on remplace les précédentes lignes validées.
+  // Niveau 1–5 = plus haut niveau réussi (facetScore / 20), au minimum 1.
+  const { error: delErr } = await admin.from('hard_skills').delete()
+    .eq('passport_id', passport.id).eq('validated', true);
+  if (delErr) return NextResponse.json({ error: delErr.message }, { status: 500 });
+  const skillRows = Object.entries(hard.facetScores).map(([name, score]) => ({
+    passport_id: passport.id,
+    name,
+    level:       Math.max(1, Math.round(score / 20)),
+    validated:   true,
+  }));
+  if (skillRows.length > 0) {
+    const { error: skillsErr } = await admin.from('hard_skills').insert(skillRows);
+    if (skillsErr) return NextResponse.json({ error: skillsErr.message }, { status: 500 });
+  }
 
   // Marquer passport généré dans onboarding_progress
   await admin.from('onboarding_progress').upsert({

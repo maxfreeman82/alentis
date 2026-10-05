@@ -6,10 +6,11 @@ import { ChevronRight, ChevronLeft, CheckCircle } from 'lucide-react';
 import { questionKind, type Question, type QUESTION_STEPS } from '@/lib/talent/assessment';
 import EnergyStepAdaptive, { type FinalProfile } from './EnergyStepAdaptive';
 import AdaptiveStep from './AdaptiveStep';
+import CvGate from './CvGate';
 import type { StepId } from '@teranga/talent-assessment';
 
 type Step = typeof QUESTION_STEPS[number];
-interface Props { steps: Step[]; profileId: string; completedAdaptiveSteps: string[]; }
+interface Props { steps: Step[]; profileId: string; completedAdaptiveSteps: string[]; hasCvSkills: boolean; }
 
 const DIM_COLORS: Record<string, string> = {
   H: '#0EA5E9', S: '#8B5CF6', X: '#F97316', L: '#10B981', E: '#F59E0B', R: '#F43F5E',
@@ -17,10 +18,10 @@ const DIM_COLORS: Record<string, string> = {
 const DIM_ICONS: Record<string, string> = {
   H: '⚙', S: '🧩', X: '📈', L: '🌿', E: '⚡', R: '🛡',
 };
-// Onglets du wizard pilotés par le moteur adaptatif (tranches suivantes : H, X).
-const ADAPTIVE_STEPS: Partial<Record<string, StepId>> = { S: 'soft', L: 'life', R: 'risk' };
+// Onglets du wizard pilotés par le moteur adaptatif (tranche suivante : X).
+const ADAPTIVE_STEPS: Partial<Record<string, StepId>> = { H: 'hard', S: 'soft', L: 'life', R: 'risk' };
 
-export default function AssessmentForm({ steps, profileId, completedAdaptiveSteps }: Props) {
+export default function AssessmentForm({ steps, profileId, completedAdaptiveSteps, hasCvSkills }: Props) {
   const router = useRouter();
   const [step, setStep]           = useState(0);
   const [responses, setResponses] = useState<Record<string, number>>({});
@@ -32,6 +33,8 @@ export default function AssessmentForm({ steps, profileId, completedAdaptiveStep
 
   const currentStep  = steps[step];
   if (!currentStep) return null;
+  // Le CV est la base des compétences testées : obligatoire avant tout le reste.
+  if (!hasCvSkills) return <CvGate />;
 
   const totalQ       = steps.reduce((s, st) => s + st.questions.length, 0);
   const answeredQ    = Object.keys(responses).length;
@@ -211,7 +214,6 @@ interface InputProps {
 function QuestionInput(props: InputProps) {
   switch (questionKind(props.question)) {
     case 'agree':     return <AgreeScale {...props} />;
-    case 'frequency': return <FrequencySlider {...props} />;
     case 'range':     return <RangeSegments {...props} />;
     case 'choice':    return <ChoiceCards {...props} />;
   }
@@ -241,36 +243,6 @@ function AgreeScale({ question, selected, color, onAnswer }: InputProps) {
         <span className="hidden sm:block text-xs text-slate-500 w-24 text-right">D&apos;accord</span>
       </div>
       <p className="text-center text-xs h-4 font-medium" style={{ color }}>{current?.label ?? ''}</p>
-    </div>
-  );
-}
-
-// Fréquence : curseur gradué
-function FrequencySlider({ question, selected, color, onAnswer }: InputProps) {
-  const current = question.options.find(o => o.value === selected);
-  const pct = selected ? ((selected - 1) / 4) * 100 : 0;
-  return (
-    <div className="space-y-2 px-1">
-      <input type="range" min={1} max={5} step={1}
-        value={selected ?? 3}
-        onChange={e => onAnswer(Number(e.target.value))}
-        onClick={e => onAnswer(Number(e.currentTarget.value))}
-        aria-label={question.text}
-        className="w-full h-2 rounded-full appearance-none cursor-pointer"
-        style={{
-          accentColor: color,
-          background: selected ? `linear-gradient(to right, ${color} ${pct}%, #E2E8F0 ${pct}%)` : '#E2E8F0',
-        }} />
-      <div className="flex justify-between text-[11px] text-slate-500">
-        {question.options.map(o => (
-          <span key={o.value} className="w-1/5 text-center first:text-left last:text-right">
-            {o.label.split(' / ')[1] ?? o.label}
-          </span>
-        ))}
-      </div>
-      <p className="text-center text-xs h-4 font-medium" style={{ color: current ? color : undefined }}>
-        {current ? current.label : 'Cliquez ou déplacez le curseur'}
-      </p>
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getTalentProfile } from '@/lib/supabase/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { decideNextStep, STEP_CONFIGS, STEP_IDS, type StepId } from '@teranga/talent-assessment';
+import { decideNextStep, resolveStepConfig, STEP_IDS, type StepId } from '@teranga/talent-assessment';
 import { createQuestion, loadAnswered } from '@/lib/talent-assessment/server';
 
 const schema = z.object({
@@ -37,7 +37,8 @@ export async function POST(req: Request) {
   if (!(STEP_IDS as readonly string[]).includes(session.step)) {
     return NextResponse.json({ error: 'Étape non prise en charge.' }, { status: 400 });
   }
-  const config = STEP_CONFIGS[session.step as StepId];
+  // Config figée au démarrage : les compétences testées viennent du snapshot de session.
+  const config = resolveStepConfig(session.step as StepId, session.context_snapshot as Record<string, unknown>);
 
   const { data: current, error: currentErr } = await admin
     .from('talent_assessment_questions')

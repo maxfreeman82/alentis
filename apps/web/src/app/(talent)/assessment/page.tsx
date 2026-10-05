@@ -3,6 +3,7 @@ import { getTalentProfile } from '@/lib/supabase/auth';
 import { redirect } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { QUESTION_STEPS } from '@/lib/talent/assessment';
+import { sanitizeSkills } from '@teranga/talent-assessment';
 import AssessmentForm from '@/components/talent/AssessmentForm';
 
 export default async function AssessmentPage() {
@@ -30,13 +31,21 @@ export default async function AssessmentPage() {
     .eq('status', 'completed');
   const completedAdaptiveSteps = (adaptiveDone ?? []).map(r => r.step as string);
 
+  // CV obligatoire : sans compétences extraites, l'étape technique n'a rien à tester.
+  const { data: cvProfile } = await createAdminClient()
+    .from('profiles')
+    .select('cv_extracted_skills')
+    .eq('id', profileId)
+    .maybeSingle();
+  const hasCvSkills = sanitizeSkills(cvProfile?.cv_extracted_skills).length > 0;
+
   return (
     <div className="space-y-6">
       <div>
         <p className="text-emerald-400 text-xs font-semibold uppercase tracking-widest mb-2">QUESTIONNAIRE 6D</p>
         <h1 className="font-display text-slate-900 text-2xl">Évaluation Talent Passport</h1>
         <p className="text-slate-400 text-sm mt-1">
-          40 questions · ~15 minutes · Votre profil complet : compétences, expérience, énergie et life score
+          Questionnaire adaptatif · ~30 minutes · Les questions s'ajustent à vos réponses : compétences, expérience, énergie et life score
         </p>
       </div>
 
@@ -47,7 +56,7 @@ export default async function AssessmentPage() {
         </div>
       )}
 
-      <AssessmentForm steps={QUESTION_STEPS} profileId={profileId} completedAdaptiveSteps={completedAdaptiveSteps} />
+      <AssessmentForm steps={QUESTION_STEPS} profileId={profileId} completedAdaptiveSteps={completedAdaptiveSteps} hasCvSkills={hasCvSkills} />
     </div>
   );
 }
