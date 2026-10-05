@@ -19,17 +19,11 @@ export interface Question {
 //  frequency : curseur gradué (faible ↔ élevé)
 //  range     : plage numérique en segments (années, nombre…)
 //  choice    : cartes de choix qualitatives
-//  mood      : visages émotionnels (bien-être)
-// Chaque étape a son propre rendu pour que le parcours H → R ne soit pas monotone.
-export type QuestionKind = 'agree' | 'frequency' | 'range' | 'choice' | 'mood';
+export type QuestionKind = 'agree' | 'frequency' | 'range' | 'choice';
 
 export function questionKind(q: Question): QuestionKind {
   if (q.kind) return q.kind;
-  if (q.options === AGR5) {
-    if (q.dim === 'L') return 'mood';
-    if (q.dim === 'R') return 'frequency';
-    return 'agree';
-  }
+  if (q.options === AGR5) return 'agree';
   if (q.options[0]?.label === FREQ5_OPTIONS[0]?.label) return 'frequency';
   return 'choice';
 }
@@ -77,20 +71,6 @@ export const QUESTIONS: Question[] = [
   { id: 'X4', dim: 'X', text: 'Avez-vous une expérience internationale (travail à l\'étranger ou projets multiculturels) ?', options: [{ value:1,label:'Aucune'},{value:2,label:'Quelques missions'},{value:3,label:'1-2 ans à l\'étranger'},{value:4,label:'3-5 ans à l\'étranger'},{value:5,label:'> 5 ans / mobilité multiple'}] },
   { id: 'X5', dim: 'X', text: 'Avez-vous créé ou cofondé une organisation (entreprise, projet, association) ?', options: [{ value:1,label:'Non'},{value:2,label:'Projet associatif'},{value:3,label:'Startup/freelance'},{value:4,label:'PME créée'},{value:5,label:'Plusieurs entreprises créées'}] },
   { id: 'X6', dim: 'X', text: 'Votre évolution de carrière a-t-elle été rapide par rapport à votre secteur ?', options: AGR5 },
-
-  // ── LIFE SCORE (L) — 6 questions ─────────────────────────────────────────
-  { id: 'L1', dim: 'L', text: 'Je suis épanoui(e) dans mon travail actuel (ou ma dernière expérience).', options: AGR5 },
-  { id: 'L2', dim: 'L', text: 'Mes valeurs personnelles sont alignées avec les valeurs de mon employeur.', options: AGR5 },
-  { id: 'L3', dim: 'L', text: 'J\'arrive à maintenir un équilibre sain entre vie pro et vie perso.', options: AGR5 },
-  { id: 'L4', dim: 'L', text: 'Je me sens en bonne santé physique et mentale.', options: AGR5 },
-  { id: 'L5', dim: 'L', text: 'J\'ai des activités enrichissantes en dehors du travail (sport, art, famille, engagement).', options: AGR5 },
-  { id: 'L6', dim: 'L', text: 'Je me sens optimiste concernant l\'évolution de ma carrière.', options: AGR5 },
-
-  // ── RISQUE (R) — 4 questions (inversées) ─────────────────────────────────
-  { id: 'R1', dim: 'R', inverse: true, text: 'Je me sens souvent débordé(e) et sous pression au travail.', options: AGR5 },
-  { id: 'R2', dim: 'R', inverse: true, text: 'J\'ai du mal à déconnecter du travail le soir ou le week-end.', options: AGR5 },
-  { id: 'R3', dim: 'R', inverse: true, text: 'Je ressens régulièrement un manque de sens ou de reconnaissance dans mon travail.', options: AGR5 },
-  { id: 'R4', dim: 'R', inverse: true, text: 'Des conflits récurrents avec ma hiérarchie ou mes collègues perturbent mon efficacité.', options: AGR5 },
 ];
 
 export const FAMILY_PROFILES: Record<EnergyFamily, string[]> = {
@@ -120,14 +100,9 @@ export function computeAssessment(
   const xQs = QUESTIONS.filter(q => q.dim === 'X');
   const X = Math.round((xQs.reduce((s, q) => s + (responses[q.id] ?? 3), 0) / xQs.length) * 20);
 
-  // Life Score
-  const lQs = QUESTIONS.filter(q => q.dim === 'L');
-  const L = Math.round((lQs.reduce((s, q) => s + (responses[q.id] ?? 3), 0) / lQs.length) * 20);
-
-  // Risque (inverse)
-  const rQs = QUESTIONS.filter(q => q.dim === 'R');
-  const rRaw = rQs.reduce((s, q) => s + (responses[q.id] ?? 3), 0) / rQs.length;
-  const R    = Math.round(rRaw * 20); // 100 = risque max
+  // Life Score et Risque — mesurés par les étapes adaptatives (100 = risque max)
+  const L = overrides.L ?? 0;
+  const R = overrides.R ?? 0;
 
   const E = scoreEnergy;
 
@@ -150,7 +125,7 @@ export const QUESTION_STEPS = [
   { key: 'H',   label: 'Compétences techniques',  questions: QUESTIONS.filter(q => q.dim === 'H') },
   { key: 'S',   label: 'Soft Skills',              questions: [] as Question[] },
   { key: 'X',   label: 'Expérience',               questions: QUESTIONS.filter(q => q.dim === 'X') },
-  { key: 'L',   label: 'Life Score',               questions: QUESTIONS.filter(q => q.dim === 'L') },
+  { key: 'L',   label: 'Life Score',               questions: [] as Question[] },
   { key: 'E',   label: 'Profil énergétique',       questions: [] as Question[] },
-  { key: 'R',   label: 'Risques & bien-être',      questions: QUESTIONS.filter(q => q.dim === 'R') },
+  { key: 'R',   label: 'Risques & bien-être',      questions: [] as Question[] },
 ];

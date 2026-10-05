@@ -17,8 +17,8 @@ const DIM_COLORS: Record<string, string> = {
 const DIM_ICONS: Record<string, string> = {
   H: '⚙', S: '🧩', X: '📈', L: '🌿', E: '⚡', R: '🛡',
 };
-// Onglets du wizard pilotés par le moteur adaptatif (tranches suivantes : L, R, H, X).
-const ADAPTIVE_STEPS: Partial<Record<string, StepId>> = { S: 'soft' };
+// Onglets du wizard pilotés par le moteur adaptatif (tranches suivantes : H, X).
+const ADAPTIVE_STEPS: Partial<Record<string, StepId>> = { S: 'soft', L: 'life', R: 'risk' };
 
 export default function AssessmentForm({ steps, profileId, completedAdaptiveSteps }: Props) {
   const router = useRouter();
@@ -214,33 +214,7 @@ function QuestionInput(props: InputProps) {
     case 'frequency': return <FrequencySlider {...props} />;
     case 'range':     return <RangeSegments {...props} />;
     case 'choice':    return <ChoiceCards {...props} />;
-    case 'mood':      return <MoodFaces {...props} />;
   }
-}
-
-// Bien-être : 5 visages
-function MoodFaces({ question, selected, color, onAnswer }: InputProps) {
-  const faces = ['😞', '🙁', '😐', '🙂', '😄'];
-  return (
-    <div className="grid grid-cols-5 gap-2">
-      {question.options.map((opt, i) => {
-        const active = selected === opt.value;
-        return (
-          <button key={opt.value} type="button" onClick={() => onAnswer(opt.value)} aria-pressed={active}
-            className={`flex flex-col items-center gap-1 py-3 rounded-xl border transition-all ${
-              active ? 'shadow-sm' : 'border-slate-200 hover:bg-slate-50'
-            } ${selected != null && !active ? 'opacity-50' : ''}`}
-            style={active ? { borderColor: color, backgroundColor: `${color}10` } : {}}>
-            <span className={`text-2xl sm:text-3xl transition-transform ${active ? 'scale-125' : ''}`}>{faces[i]}</span>
-            <span className="text-[10px] sm:text-xs text-center leading-tight px-1"
-              style={active ? { color, fontWeight: 600 } : { color: '#64748B' }}>
-              {opt.label}
-            </span>
-          </button>
-        );
-      })}
-    </div>
-  );
 }
 
 // Likert : 5 pastilles, plus grandes aux extrêmes

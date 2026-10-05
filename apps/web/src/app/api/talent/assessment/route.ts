@@ -43,21 +43,35 @@ export async function POST(req: Request) {
   const dominantFamily = (existingPassport?.dominant_family as EnergyFamily | undefined) ?? 'pilotes';
   const scoreEnergy    = existingPassport?.score_energy ?? 20;
 
-  // Soft Skills : résultat de la passation adaptative, plus de réponses S1–S10.
-  const { data: softSession, error: softErr } = await admin
+  // Étapes adaptatives : on retient la passation terminée la plus récente par étape.
+  const { data: sessions, error: sessionsErr } = await admin
     .from('talent_assessment_sessions')
-    .select('result')
+    .select('step, result')
     .eq('profile_id', ctx.profileId)
-    .eq('step', 'soft')
     .eq('status', 'completed')
-    .order('updated_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (softErr) return NextResponse.json({ error: softErr.message }, { status: 500 });
-  const soft = softSession?.result as { facetScores: Record<string, number>; stepScore: number } | null | undefined;
-  if (!soft) return NextResponse.json({ error: 'Terminez l\'étape Soft Skills avant de générer votre Passport.' }, { status: 400 });
+    .order('updated_at', { ascending: false });
+  if (sessionsErr) return NextResponse.json({ error: sessionsErr.message }, { status: 500 });
 
-  const result = computeAssessment(parsed.data.responses, scoreEnergy, { S: soft.stepScore });
+  type StepResult = { facetScores: Record<string, number>; stepScore: number };
+  const latest = new Map<string, StepResult>();
+  for (const s of sessions ?? []) if (!latest.has(s.step) && s.result) latest.set(s.step, s.result as StepResult);
+
+  const STEP_LABELS: Record<string, string> = { soft: 'Soft Skills', life: 'Life Score', risk: 'Risques & bien-être' };
+  const missing = Object.keys(STEP_LABELS).filter(step => !latest.has(step));
+  if (missing.length > 0) {
+    const names = missing.map(step => STEP_LABELS[step]).join(', ');
+    return NextResponse.json({ error: `Terminez ces étapes avant de générer votre Passport : ${names}.` }, { status: 400 });
+  }
+  const soft = latest.get('soft')!;
+  const life = latest.get('life')!;
+  const risk = latest.get('risk')!;
+
+  const result = computeAssessment(parsed.data.responses, scoreEnergy, {
+    S: soft.stepScore,
+    L: life.stepScore,
+    // Étape Risques : 100 = aucun signal ; score_risk : 100 = risque max.
+    R: 100 - risk.stepScore,
+  });
   const passportRef = `TP-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 99999)).padStart(5, '0')}-SN`;
 
   const profileIdx = Math.min(Math.floor(result.score_global / 34), 2);

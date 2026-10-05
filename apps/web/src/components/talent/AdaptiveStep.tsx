@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { CheckCircle, Loader2 } from 'lucide-react';
-import type { StepId } from '@teranga/talent-assessment';
+import { STEP_CONFIGS, type StepId } from '@teranga/talent-assessment';
 
 interface Option { key: string; text: string; }
 interface Question { id: string; text: string; options: Option[]; }
@@ -19,6 +19,11 @@ interface Props {
 // retry de /answer est idempotent pour une même réponse).
 type PendingAction = { kind: 'start' } | { kind: 'answer'; key: string; responseMs: number };
 
+const INTROS: Record<'situational' | 'behavioral', string> = {
+  situational: 'Vous allez découvrir des situations professionnelles. Pour chacune, choisissez la réaction la plus proche de ce que vous feriez réellement.',
+  behavioral:  'Ces questions portent sur des faits concrets de vos dernières semaines (ou de votre dernière expérience). Il n’y a pas de bonne réponse : répondez au plus près de la réalité.',
+};
+
 function errorText(json: ApiResponse, fallback: string): string {
   return typeof json.error === 'string' && json.error ? json.error : fallback;
 }
@@ -32,6 +37,7 @@ export default function AdaptiveStep({ step, color, initiallyDone, onComplete }:
   const [count, setCount]           = useState(0);
   const [lastAction, setLastAction] = useState<PendingAction | null>(null);
   const shownAt = useRef<number>(0);
+  const config  = STEP_CONFIGS[step];
 
   async function call(action: PendingAction) {
     setLoading(true);
@@ -77,10 +83,11 @@ export default function AdaptiveStep({ step, color, initiallyDone, onComplete }:
   if (!question && !error) return (
     <div className="text-center py-8 space-y-4">
       <p className="text-slate-700 text-sm max-w-md mx-auto leading-relaxed">
-        Vous allez découvrir des situations professionnelles. Pour chacune, choisissez la réaction
-        la plus proche de ce que vous feriez réellement. Les questions s&apos;adaptent à vos réponses.
+        {INTROS[config.questionStyle]} Les questions s&apos;adaptent à vos réponses.
       </p>
-      <p className="text-slate-500 text-xs">Une question à la fois · pas de retour en arrière · environ 10 à 16 questions</p>
+      <p className="text-slate-500 text-xs">
+        Une question à la fois · pas de retour en arrière · {config.minQuestions} à {config.maxQuestions} questions
+      </p>
       <button type="button" onClick={() => void call({ kind: 'start' })} disabled={loading}
         className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-60"
         style={{ backgroundColor: color }}>

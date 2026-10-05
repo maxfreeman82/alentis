@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 // Prérequis : migration 008 appliquée, et serveur lancé avec
 // TALENT_ASSESSMENT_FORCE_FALLBACK=1 (questions de secours, sans IA).
-test.describe('Questionnaire 6D — Soft Skills adaptatif', () => {
+test.describe('Questionnaire 6D — étapes adaptatives', () => {
   test.beforeEach(async ({ page }) => {
     const email    = process.env['TEST_TALENT_EMAIL']    ?? 'talent@teranga-demo.net';
     const password = process.env['TEST_TALENT_PASSWORD'] ?? 'TerAngA@2026!';
@@ -25,23 +25,29 @@ test.describe('Questionnaire 6D — Soft Skills adaptatif', () => {
     expect(res.status()).toBe(400);
   });
 
-  test('passation complète jusqu\'à « Étape terminée »', async ({ page }) => {
-    test.setTimeout(180_000);
-    await page.goto('/assessment', { waitUntil: 'networkidle' });
-    await page.getByRole('button', { name: /Soft Skills/ }).first().click();
+  for (const { tab, max } of [
+    { tab: /Soft Skills/, max: 16 },
+    { tab: /Life Score/, max: 9 },
+    { tab: /Risques/, max: 8 },
+  ]) {
+    test(`passation complète jusqu'à « Étape terminée » — ${tab.source}`, async ({ page }) => {
+      test.setTimeout(180_000);
+      await page.goto('/assessment', { waitUntil: 'networkidle' });
+      await page.getByRole('button', { name: tab }).first().click();
 
-    const start = page.getByRole('button', { name: 'Commencer' });
-    if (await start.isVisible()) await start.click();
+      const start = page.getByRole('button', { name: 'Commencer' });
+      if (await start.isVisible()) await start.click();
 
-    const finished = page.getByText('Étape terminée');
-    for (let i = 0; i < 16; i++) {
-      if (await finished.isVisible()) break;
-      const option = page.getByTestId('adaptive-option').first();
-      await option.waitFor({ state: 'visible', timeout: 30_000 });
-      await expect(option).toBeEnabled({ timeout: 30_000 });
-      await option.click();
-      await page.waitForLoadState('networkidle');
-    }
-    await expect(finished).toBeVisible({ timeout: 30_000 });
-  });
+      const finished = page.getByText('Étape terminée');
+      for (let i = 0; i < max; i++) {
+        if (await finished.isVisible()) break;
+        const option = page.getByTestId('adaptive-option').first();
+        await option.waitFor({ state: 'visible', timeout: 30_000 });
+        await expect(option).toBeEnabled({ timeout: 30_000 });
+        await option.click();
+        await page.waitForLoadState('networkidle');
+      }
+      await expect(finished).toBeVisible({ timeout: 30_000 });
+    });
+  }
 });
