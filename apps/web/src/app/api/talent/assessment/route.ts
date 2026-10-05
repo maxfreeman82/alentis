@@ -43,7 +43,21 @@ export async function POST(req: Request) {
   const dominantFamily = (existingPassport?.dominant_family as EnergyFamily | undefined) ?? 'pilotes';
   const scoreEnergy    = existingPassport?.score_energy ?? 20;
 
-  const result = computeAssessment(parsed.data.responses, scoreEnergy);
+  // Soft Skills : résultat de la passation adaptative, plus de réponses S1–S10.
+  const { data: softSession, error: softErr } = await admin
+    .from('talent_assessment_sessions')
+    .select('result')
+    .eq('profile_id', ctx.profileId)
+    .eq('step', 'soft')
+    .eq('status', 'completed')
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (softErr) return NextResponse.json({ error: softErr.message }, { status: 500 });
+  const soft = softSession?.result as { facetScores: Record<string, number>; stepScore: number } | null | undefined;
+  if (!soft) return NextResponse.json({ error: 'Terminez l\'étape Soft Skills avant de générer votre Passport.' }, { status: 400 });
+
+  const result = computeAssessment(parsed.data.responses, scoreEnergy, { S: soft.stepScore });
   const passportRef = `TP-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 99999)).padStart(5, '0')}-SN`;
 
   const profileIdx = Math.min(Math.floor(result.score_global / 34), 2);
@@ -66,16 +80,16 @@ export async function POST(req: Request) {
       passport_version:      1,
       passport_id:           passportRef,
       verified:              false,
-      soft_communication:    Math.round((parsed.data.responses['S1'] ?? 3) * 20),
-      soft_leadership:       Math.round((parsed.data.responses['S2'] ?? 3) * 20),
-      soft_adaptability:     Math.round((parsed.data.responses['S3'] ?? 3) * 20),
-      soft_problem_solving:  Math.round((parsed.data.responses['S4'] ?? 3) * 20),
-      soft_critical_thinking: Math.round((parsed.data.responses['S5'] ?? 3) * 20),
-      soft_collaboration:    Math.round((parsed.data.responses['S6'] ?? 3) * 20),
-      soft_stress_mgmt:      Math.round((parsed.data.responses['S7'] ?? 3) * 20),
-      soft_organization:     Math.round((parsed.data.responses['S8'] ?? 3) * 20),
-      soft_learning_speed:   Math.round((parsed.data.responses['S9'] ?? 3) * 20),
-      soft_emotional_intel:  Math.round((parsed.data.responses['S10'] ?? 3) * 20),
+      soft_communication:     soft.facetScores.communication ?? null,
+      soft_leadership:        soft.facetScores.leadership ?? null,
+      soft_adaptability:      soft.facetScores.adaptability ?? null,
+      soft_problem_solving:   soft.facetScores.problem_solving ?? null,
+      soft_critical_thinking: soft.facetScores.critical_thinking ?? null,
+      soft_collaboration:     soft.facetScores.collaboration ?? null,
+      soft_stress_mgmt:       soft.facetScores.stress_mgmt ?? null,
+      soft_organization:      soft.facetScores.organization ?? null,
+      soft_learning_speed:    soft.facetScores.learning_speed ?? null,
+      soft_emotional_intel:   soft.facetScores.emotional_intel ?? null,
     },
     { onConflict: 'profile_id' }
   );

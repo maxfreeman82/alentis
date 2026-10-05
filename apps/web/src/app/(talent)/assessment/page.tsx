@@ -1,6 +1,7 @@
 ﻿import { requireAuth } from '@/lib/supabase/user';
 import { getTalentProfile } from '@/lib/supabase/auth';
 import { redirect } from 'next/navigation';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { QUESTION_STEPS } from '@/lib/talent/assessment';
 import AssessmentForm from '@/components/talent/AssessmentForm';
 
@@ -20,6 +21,15 @@ export default async function AssessmentPage() {
     .eq('profile_id', profileId)
     .maybeSingle();
 
+  // Étapes adaptatives déjà terminées. Client admin (non typé) : la table n'est
+  // pas encore dans les types générés ; filtrée sur le profil authentifié.
+  const { data: adaptiveDone } = await createAdminClient()
+    .from('talent_assessment_sessions')
+    .select('step')
+    .eq('profile_id', profileId)
+    .eq('status', 'completed');
+  const completedAdaptiveSteps = (adaptiveDone ?? []).map(r => r.step as string);
+
   return (
     <div className="space-y-6">
       <div>
@@ -37,7 +47,7 @@ export default async function AssessmentPage() {
         </div>
       )}
 
-      <AssessmentForm steps={QUESTION_STEPS} profileId={profileId} />
+      <AssessmentForm steps={QUESTION_STEPS} profileId={profileId} completedAdaptiveSteps={completedAdaptiveSteps} />
     </div>
   );
 }

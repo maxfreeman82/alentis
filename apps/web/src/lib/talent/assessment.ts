@@ -11,6 +11,27 @@ export interface Question {
   text:      string;
   options:   { value: 1 | 2 | 3 | 4 | 5; label: string }[];
   inverse?:  boolean; // si true, 5 = mauvais (risque, stress)
+  kind?:     QuestionKind; // rendu UI — déduit des options si absent
+}
+
+// Type de widget affiché. Toutes les réponses restent codées 1→5.
+//  agree     : échelle Likert horizontale (pas d'accord ↔ d'accord)
+//  frequency : curseur gradué (faible ↔ élevé)
+//  range     : plage numérique en segments (années, nombre…)
+//  choice    : cartes de choix qualitatives
+//  mood      : visages émotionnels (bien-être)
+// Chaque étape a son propre rendu pour que le parcours H → R ne soit pas monotone.
+export type QuestionKind = 'agree' | 'frequency' | 'range' | 'choice' | 'mood';
+
+export function questionKind(q: Question): QuestionKind {
+  if (q.kind) return q.kind;
+  if (q.options === AGR5) {
+    if (q.dim === 'L') return 'mood';
+    if (q.dim === 'R') return 'frequency';
+    return 'agree';
+  }
+  if (q.options[0]?.label === FREQ5_OPTIONS[0]?.label) return 'frequency';
+  return 'choice';
 }
 
 export interface AssessmentResult {
@@ -22,13 +43,14 @@ export interface AssessmentResult {
 }
 
 // ─── Options communes ─────────────────────────────────────────────────────────
-const FREQ5 = (q: string): Question['options'] => [
+const FREQ5_OPTIONS: Question['options'] = [
   { value: 1, label: 'Jamais / Très faible' },
   { value: 2, label: 'Rarement / Faible' },
   { value: 3, label: 'Parfois / Moyen' },
   { value: 4, label: 'Souvent / Élevé' },
   { value: 5, label: 'Toujours / Très élevé' },
 ];
+const FREQ5 = (_q: string): Question['options'] => FREQ5_OPTIONS;
 const AGR5: Question['options'] = [
   { value: 1, label: 'Pas du tout d\'accord' },
   { value: 2, label: 'Plutôt pas d\'accord' },
@@ -40,29 +62,17 @@ const AGR5: Question['options'] = [
 export const QUESTIONS: Question[] = [
   // ── HARD SKILLS (H) — 8 questions ────────────────────────────────────────
   { id: 'H1', dim: 'H', text: 'Quel est votre niveau de maîtrise dans votre domaine d\'expertise principal ?', options: [{ value:1,label:'Débutant'},{value:2,label:'Intermédiaire'},{value:3,label:'Avancé'},{value:4,label:'Expert'},{value:5,label:'Maître reconnu'}] },
-  { id: 'H2', dim: 'H', text: 'Combien d\'années d\'expérience pratique avez-vous dans vos compétences clés ?', options: [{ value:1,label:'< 1 an'},{value:2,label:'1-3 ans'},{value:3,label:'3-5 ans'},{value:4,label:'5-10 ans'},{value:5,label:'> 10 ans'}] },
+  { id: 'H2', dim: 'H', kind: 'range', text: 'Combien d\'années d\'expérience pratique avez-vous dans vos compétences clés ?', options: [{ value:1,label:'< 1 an'},{value:2,label:'1-3 ans'},{value:3,label:'3-5 ans'},{value:4,label:'5-10 ans'},{value:5,label:'> 10 ans'}] },
   { id: 'H3', dim: 'H', text: 'Êtes-vous capable de former d\'autres personnes sur vos compétences techniques ?', options: AGR5 },
-  { id: 'H4', dim: 'H', text: 'Combien de langues professionnelles maîtrisez-vous (niveau B2+) ?', options: [{ value:1,label:'1'},{value:2,label:'2'},{value:3,label:'3'},{value:4,label:'4'},{value:5,label:'5+'}] },
+  { id: 'H4', dim: 'H', kind: 'range', text: 'Combien de langues professionnelles maîtrisez-vous (niveau B2+) ?', options: [{ value:1,label:'1'},{value:2,label:'2'},{value:3,label:'3'},{value:4,label:'4'},{value:5,label:'5+'}] },
   { id: 'H5', dim: 'H', text: 'À quelle vitesse intégrez-vous de nouveaux outils technologiques ?', options: FREQ5('') },
-  { id: 'H6', dim: 'H', text: 'Vos compétences sont-elles validées par des certifications reconnues ?', options: [{ value:1,label:'Aucune'},{value:2,label:'1 certification'},{value:3,label:'2-3 certifications'},{value:4,label:'4-5 certifications'},{value:5,label:'6+ certifications'}] },
+  { id: 'H6', dim: 'H', kind: 'range', text: 'Vos compétences sont-elles validées par des certifications reconnues ?', options: [{ value:1,label:'Aucune'},{value:2,label:'1 certification'},{value:3,label:'2-3 certifications'},{value:4,label:'4-5 certifications'},{value:5,label:'6+ certifications'}] },
   { id: 'H7', dim: 'H', text: 'Avez-vous des compétences dans des domaines complémentaires (polyvalence) ?', options: AGR5 },
   { id: 'H8', dim: 'H', text: 'Vos compétences techniques sont-elles à jour avec les évolutions récentes du marché ?', options: AGR5 },
 
-  // ── SOFT SKILLS (S) — 10 questions ───────────────────────────────────────
-  { id: 'S1', dim: 'S', text: 'Je communique clairement mes idées, même sur des sujets complexes.', options: AGR5 },
-  { id: 'S2', dim: 'S', text: 'Je prends des initiatives et entraîne les autres dans mes projets.', options: AGR5 },
-  { id: 'S3', dim: 'S', text: 'Je m\'adapte rapidement quand les priorités changent ou en situation d\'incertitude.', options: AGR5 },
-  { id: 'S4', dim: 'S', text: 'Je résous des problèmes complexes de façon structurée et créative.', options: AGR5 },
-  { id: 'S5', dim: 'S', text: 'Je remets en question mes propres hypothèses et celles de mon environnement.', options: AGR5 },
-  { id: 'S6', dim: 'S', text: 'Je crée facilement un esprit d\'équipe et facilite la collaboration.', options: AGR5 },
-  { id: 'S7', dim: 'S', text: 'Je gère bien la pression et reste efficace sous stress.', options: AGR5 },
-  { id: 'S8', dim: 'S', text: 'J\'organise mon travail et mes priorités de façon autonome.', options: AGR5 },
-  { id: 'S9', dim: 'S', text: 'J\'apprends vite de mes erreurs et de mes interactions avec les autres.', options: AGR5 },
-  { id: 'S10', dim: 'S', text: 'Je perçois facilement les émotions des autres et adapte ma communication.', options: AGR5 },
-
   // ── EXPÉRIENCE (X) — 6 questions ─────────────────────────────────────────
-  { id: 'X1', dim: 'X', text: 'Combien d\'années d\'expérience professionnelle totale avez-vous ?', options: [{ value:1,label:'< 2 ans'},{value:2,label:'2-5 ans'},{value:3,label:'5-10 ans'},{value:4,label:'10-15 ans'},{value:5,label:'> 15 ans'}] },
-  { id: 'X2', dim: 'X', text: 'Avez-vous managé des équipes de façon régulière ?', options: [{ value:1,label:'Jamais'},{value:2,label:'Équipes < 3 pers.'},{value:3,label:'Équipes 3-10 pers.'},{value:4,label:'Équipes 10-30 pers.'},{value:5,label:'Équipes > 30 pers.'}] },
+  { id: 'X1', dim: 'X', kind: 'range', text: 'Combien d\'années d\'expérience professionnelle totale avez-vous ?', options: [{ value:1,label:'< 2 ans'},{value:2,label:'2-5 ans'},{value:3,label:'5-10 ans'},{value:4,label:'10-15 ans'},{value:5,label:'> 15 ans'}] },
+  { id: 'X2', dim: 'X', kind: 'range', text: 'Avez-vous managé des équipes de façon régulière ?', options: [{ value:1,label:'Jamais'},{value:2,label:'Équipes < 3 pers.'},{value:3,label:'Équipes 3-10 pers.'},{value:4,label:'Équipes 10-30 pers.'},{value:5,label:'Équipes > 30 pers.'}] },
   { id: 'X3', dim: 'X', text: 'Quelle est la complexité des projets que vous avez dirigés ?', options: [{ value:1,label:'Tâches simples'},{value:2,label:'Projets locaux'},{value:3,label:'Projets transverses'},{value:4,label:'Programmes multi-équipes'},{value:5,label:'Transformations stratégiques'}] },
   { id: 'X4', dim: 'X', text: 'Avez-vous une expérience internationale (travail à l\'étranger ou projets multiculturels) ?', options: [{ value:1,label:'Aucune'},{value:2,label:'Quelques missions'},{value:3,label:'1-2 ans à l\'étranger'},{value:4,label:'3-5 ans à l\'étranger'},{value:5,label:'> 5 ans / mobilité multiple'}] },
   { id: 'X5', dim: 'X', text: 'Avez-vous créé ou cofondé une organisation (entreprise, projet, association) ?', options: [{ value:1,label:'Non'},{value:2,label:'Projet associatif'},{value:3,label:'Startup/freelance'},{value:4,label:'PME créée'},{value:5,label:'Plusieurs entreprises créées'}] },
@@ -91,17 +101,20 @@ export const FAMILY_PROFILES: Record<EnergyFamily, string[]> = {
   regulateurs:    ['Le Gardien', 'L\'Harmoniseur', 'Le Stabilisateur'],
 };
 
+// Scores déjà mesurés par une étape adaptative (0–100), prioritaires sur les réponses Likert.
+export type ScoreOverrides = Partial<Record<'H' | 'S' | 'X' | 'L' | 'R', number>>;
+
 export function computeAssessment(
   responses: Record<string, number>,
-  scoreEnergy: number
+  scoreEnergy: number,
+  overrides: ScoreOverrides = {},
 ): AssessmentResult {
   // Hard Skills
   const hQs = QUESTIONS.filter(q => q.dim === 'H');
   const H = Math.round((hQs.reduce((s, q) => s + (responses[q.id] ?? 3), 0) / hQs.length) * 20);
 
-  // Soft Skills
-  const sQs = QUESTIONS.filter(q => q.dim === 'S');
-  const S = Math.round((sQs.reduce((s, q) => s + (responses[q.id] ?? 3), 0) / sQs.length) * 20);
+  // Soft Skills — mesurées par l'étape adaptative (talent_assessment_sessions)
+  const S = overrides.S ?? 0;
 
   // Expérience
   const xQs = QUESTIONS.filter(q => q.dim === 'X');
@@ -135,7 +148,7 @@ export function computeAssessment(
 // Grouper les questions par dimension pour l'affichage step-by-step
 export const QUESTION_STEPS = [
   { key: 'H',   label: 'Compétences techniques',  questions: QUESTIONS.filter(q => q.dim === 'H') },
-  { key: 'S',   label: 'Soft Skills',              questions: QUESTIONS.filter(q => q.dim === 'S') },
+  { key: 'S',   label: 'Soft Skills',              questions: [] as Question[] },
   { key: 'X',   label: 'Expérience',               questions: QUESTIONS.filter(q => q.dim === 'X') },
   { key: 'L',   label: 'Life Score',               questions: QUESTIONS.filter(q => q.dim === 'L') },
   { key: 'E',   label: 'Profil énergétique',       questions: [] as Question[] },
