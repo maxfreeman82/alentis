@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { buildFallbackQuestion, FALLBACK_BANKS } from './fallback';
-import { STEP_CONFIGS, STEP_IDS } from './configs';
+import { STEP_CONFIGS } from './configs';
+import { STEP_IDS } from './types';
 
 describe('buildFallbackQuestion', () => {
   it('chaque facette de chaque étape a un modèle de secours complet', () => {
