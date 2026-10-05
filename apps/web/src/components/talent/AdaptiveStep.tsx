@@ -19,7 +19,8 @@ interface Props {
 // retry de /answer est idempotent pour une même réponse).
 type PendingAction = { kind: 'start' } | { kind: 'answer'; key: string; responseMs: number };
 
-const INTROS: Record<'situational' | 'behavioral' | 'knowledge', string> = {
+const INTROS: Record<'situational' | 'behavioral' | 'knowledge' | 'proof', string> = {
+  proof:       'Ces questions portent sur le quotidien concret du poste, du secteur et de l’ancienneté indiqués dans votre CV. Choisissez ce que vous feriez réellement sur le terrain.',
   knowledge:   'Questions techniques sur les compétences de votre CV, avec une seule bonne réponse. Répondez sans aide extérieure : le temps de réponse est pris en compte.',
   situational: 'Vous allez découvrir des situations professionnelles. Pour chacune, choisissez la réaction la plus proche de ce que vous feriez réellement.',
   behavioral:  'Ces questions portent sur des faits concrets de vos dernières semaines (ou de votre dernière expérience). Il n’y a pas de bonne réponse : répondez au plus près de la réalité.',

@@ -1,22 +1,16 @@
 ﻿import { requireAuth } from '@/lib/supabase/user';
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
 import { getTalentProfile } from '@/lib/supabase/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { computeAssessment, FAMILY_PROFILES, type EnergyFamily } from '@/lib/talent/assessment';
+import { computeExperienceScore } from '@teranga/talent-assessment';
 
-const schema = z.object({
-  responses: z.record(z.string(), z.number().min(1).max(5)),
-});
-
-export async function POST(req: Request) {
+// Aucun score n'est accepté du client : tout est relu depuis les passations
+// adaptatives terminées (talent_assessment_sessions + energy-assessment).
+export async function POST() {
   const user = await requireAuth();
   const ctx = await getTalentProfile(user.id);
   if (!ctx) return NextResponse.json({ error: 'Profil introuvable — complétez l\'onboarding d\'abord.' }, { status: 401 });
-
-  const body = await req.json() as unknown;
-  const parsed = schema.safeParse(body);
-  if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
   const admin = createAdminClient();
 
@@ -29,8 +23,8 @@ export async function POST(req: Request) {
   // dans un autre onglet/session pile dans cette fenêtre, score_global et
   // dominant_profile calculés ici peuvent se baser sur une énergie pré-conclusion
   // périmée, même si dominant_family/score_energy en base finissent post-conclusion.
-  // L'UI actuelle (état `energyProfile` dans AssessmentForm.tsx, qui gate
-  // stepComplete/sDone pour l'onglet E) rend ce cas très difficile à atteindre
+  // L'UI actuelle (l'onglet E de AssessmentForm.tsx doit être terminé avant de
+  // pouvoir générer le Passport) rend ce cas très difficile à atteindre
   // en parcours mono-onglet — accepté tel quel, pas de transaction/RPC pour ce
   // cas limite.
   const { data: existingPassport, error: existingErr } = await admin
@@ -46,18 +40,22 @@ export async function POST(req: Request) {
   // Étapes adaptatives : on retient la passation terminée la plus récente par étape.
   const { data: sessions, error: sessionsErr } = await admin
     .from('talent_assessment_sessions')
-    .select('step, result')
+    .select('step, result, context_snapshot')
     .eq('profile_id', ctx.profileId)
     .eq('status', 'completed')
     .order('updated_at', { ascending: false });
   if (sessionsErr) return NextResponse.json({ error: sessionsErr.message }, { status: 500 });
 
-  type StepResult = { facetScores: Record<string, number>; stepScore: number };
+  type StepResult = { facetScores: Record<string, number>; stepScore: number; context: Record<string, unknown> };
   const latest = new Map<string, StepResult>();
-  for (const s of sessions ?? []) if (!latest.has(s.step) && s.result) latest.set(s.step, s.result as StepResult);
+  for (const s of sessions ?? []) {
+    if (latest.has(s.step) || !s.result) continue;
+    latest.set(s.step, { ...(s.result as Omit<StepResult, 'context'>), context: (s.context_snapshot ?? {}) as Record<string, unknown> });
+  }
 
   const STEP_LABELS: Record<string, string> = {
-    hard: 'Compétences techniques', soft: 'Soft Skills', life: 'Life Score', risk: 'Risques & bien-être',
+    hard: 'Compétences techniques', soft: 'Soft Skills', exp: 'Expérience',
+    life: 'Life Score', risk: 'Risques & bien-être',
   };
   const missing = Object.keys(STEP_LABELS).filter(step => !latest.has(step));
   if (missing.length > 0) {
@@ -66,16 +64,22 @@ export async function POST(req: Request) {
   }
   const hard = latest.get('hard')!;
   const soft = latest.get('soft')!;
+  const exp  = latest.get('exp')!;
   const life = latest.get('life')!;
   const risk = latest.get('risk')!;
 
-  const result = computeAssessment(parsed.data.responses, scoreEnergy, {
+  // Expérience : années du CV (figées au démarrage de la passation) × crédibilité.
+  const years = typeof exp.context.years_experience === 'number' ? exp.context.years_experience : null;
+  const experience = computeExperienceScore(years, exp.stepScore);
+
+  const result = computeAssessment({
     H: hard.stepScore,
     S: soft.stepScore,
+    X: experience.score,
     L: life.stepScore,
     // Étape Risques : 100 = aucun signal ; score_risk : 100 = risque max.
     R: 100 - risk.stepScore,
-  });
+  }, scoreEnergy);
   const passportRef = `TP-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 99999)).padStart(5, '0')}-SN`;
 
   const profileIdx = Math.min(Math.floor(result.score_global / 34), 2);
@@ -89,6 +93,7 @@ export async function POST(req: Request) {
       score_hard:            result.scores.H,
       score_soft:            result.scores.S,
       score_exp:             result.scores.X,
+      exp_verification:      experience.verification,
       score_life:            result.scores.L,
       score_risk:            result.score_risk,
       growth_potential:      result.growth_potential,

@@ -1,16 +1,19 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronRight, ChevronLeft, CheckCircle } from 'lucide-react';
-import { questionKind, type Question, type QUESTION_STEPS } from '@/lib/talent/assessment';
+import type { AssessmentStep } from '@/lib/talent/assessment';
 import EnergyStepAdaptive, { type FinalProfile } from './EnergyStepAdaptive';
 import AdaptiveStep from './AdaptiveStep';
 import CvGate from './CvGate';
-import type { StepId } from '@teranga/talent-assessment';
 
-type Step = typeof QUESTION_STEPS[number];
-interface Props { steps: Step[]; profileId: string; completedAdaptiveSteps: string[]; hasCvSkills: boolean; }
+interface Props {
+  steps:                  AssessmentStep[];
+  completedAdaptiveSteps: string[];
+  energyDone:             boolean;
+  cvReady:                boolean;
+}
 
 const DIM_COLORS: Record<string, string> = {
   H: '#0EA5E9', S: '#8B5CF6', X: '#F97316', L: '#10B981', E: '#F59E0B', R: '#F43F5E',
@@ -18,56 +21,42 @@ const DIM_COLORS: Record<string, string> = {
 const DIM_ICONS: Record<string, string> = {
   H: '⚙', S: '🧩', X: '📈', L: '🌿', E: '⚡', R: '🛡',
 };
-// Onglets du wizard pilotés par le moteur adaptatif (tranche suivante : X).
-const ADAPTIVE_STEPS: Partial<Record<string, StepId>> = { H: 'hard', S: 'soft', L: 'life', R: 'risk' };
 
-export default function AssessmentForm({ steps, profileId, completedAdaptiveSteps, hasCvSkills }: Props) {
+export default function AssessmentForm({ steps, completedAdaptiveSteps, energyDone, cvReady }: Props) {
   const router = useRouter();
-  const [step, setStep]           = useState(0);
-  const [responses, setResponses] = useState<Record<string, number>>({});
-  const [loading, setLoading]     = useState(false);
-  const [error, setError]         = useState('');
-  const [done, setDone]           = useState(false);
+  const [step, setStep]                   = useState(0);
+  const [loading, setLoading]             = useState(false);
+  const [error, setError]                 = useState('');
+  const [done, setDone]                   = useState(false);
   const [energyProfile, setEnergyProfile] = useState<FinalProfile | null>(null);
+  const [energyComplete, setEnergyComplete] = useState(energyDone);
   const [adaptiveDone, setAdaptiveDone]   = useState<Set<string>>(() => new Set(completedAdaptiveSteps));
 
-  const currentStep  = steps[step];
+  // Le CV est la base des questions techniques et de preuve : obligatoire avant tout.
+  if (!cvReady) return <CvGate />;
+
+  const currentStep = steps[step];
   if (!currentStep) return null;
-  // Le CV est la base des compétences testées : obligatoire avant tout le reste.
-  if (!hasCvSkills) return <CvGate />;
 
-  const totalQ       = steps.reduce((s, st) => s + st.questions.length, 0);
-  const answeredQ    = Object.keys(responses).length;
-  const globalPct    = Math.round((answeredQ / totalQ) * 100);
-
-  const stepQuestions  = currentStep.questions;
-  const stepAnswered   = stepQuestions.filter(q => responses[q.id] != null).length;
-  function isStepDone(key: string, questions: { id: string }[]): boolean {
-    if (key === 'E') return energyProfile !== null;
-    const adaptive = ADAPTIVE_STEPS[key];
-    if (adaptive) return adaptiveDone.has(adaptive);
-    return questions.length > 0 && questions.every(q => responses[q.id] != null);
+  function isStepDone(s: AssessmentStep): boolean {
+    if (s.key === 'E') return energyComplete;
+    return s.adaptive ? adaptiveDone.has(s.adaptive) : false;
   }
 
-  const currentAdaptive = ADAPTIVE_STEPS[currentStep.key];
-  const stepComplete   = isStepDone(currentStep.key, stepQuestions);
-  const allStepsDone   = steps.every(s => isStepDone(s.key, s.questions));
-  const isLastStep     = step === steps.length - 1;
-  const color          = DIM_COLORS[currentStep.key] ?? '#10B981';
-
-  function answer(qId: string, value: number) {
-    setResponses(prev => ({ ...prev, [qId]: value }));
-  }
+  const doneCount    = steps.filter(isStepDone).length;
+  const globalPct    = Math.round((doneCount / steps.length) * 100);
+  const stepComplete = isStepDone(currentStep);
+  const allStepsDone = doneCount === steps.length;
+  const isLastStep   = step === steps.length - 1;
+  const color        = DIM_COLORS[currentStep.key] ?? '#10B981';
+  const adaptive     = currentStep.adaptive;
 
   async function submit() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/talent/assessment', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ responses }),
-      });
+      // Aucun score envoyé : le serveur relit les passations terminées.
+      const res = await fetch('/api/talent/assessment', { method: 'POST' });
       if (res.ok) {
         setDone(true);
         setTimeout(() => router.push('/passport'), 2000);
@@ -92,10 +81,10 @@ export default function AssessmentForm({ steps, profileId, completedAdaptiveStep
 
   return (
     <div className="space-y-6">
-      {/* Progress global */}
+      {/* Progression : étapes terminées */}
       <div className="space-y-1">
         <div className="flex justify-between text-xs text-slate-500">
-          <span>{answeredQ}/{totalQ} questions répondues</span>
+          <span>{doneCount}/{steps.length} étapes terminées</span>
           <span>{globalPct}%</span>
         </div>
         <div className="h-1.5 bg-bg-card rounded-full overflow-hidden">
@@ -106,8 +95,8 @@ export default function AssessmentForm({ steps, profileId, completedAdaptiveStep
       {/* Étapes navettes */}
       <div className="flex gap-2 overflow-x-auto pb-1">
         {steps.map((s, i) => {
-          const sDone     = isStepDone(s.key, s.questions);
-          const sColor    = DIM_COLORS[s.key] ?? '#10B981';
+          const sDone  = isStepDone(s);
+          const sColor = DIM_COLORS[s.key] ?? '#10B981';
           return (
             <button key={s.key} onClick={() => setStep(i)}
               className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
@@ -121,51 +110,35 @@ export default function AssessmentForm({ steps, profileId, completedAdaptiveStep
         })}
       </div>
 
-      {/* Bloc questions de l'étape */}
+      {/* Bloc de l'étape */}
       <div className="card space-y-6">
         <div className="flex items-center gap-3 pb-3 border-b border-slate-200">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
             style={{ backgroundColor: `${color}15` }}>
             {DIM_ICONS[currentStep.key]}
           </div>
-          <div>
-            <p className="text-slate-900 font-semibold">{currentStep.label}</p>
-            {currentStep.key !== 'E' && !currentAdaptive && (
-              <p className="text-slate-500 text-xs">{stepAnswered}/{stepQuestions.length} répondues</p>
-            )}
-          </div>
+          <p className="text-slate-900 font-semibold">{currentStep.label}</p>
         </div>
 
-        {currentStep.key === 'E' ? (
+        {adaptive ? (
+          <AdaptiveStep
+            key={adaptive}
+            step={adaptive}
+            color={color}
+            initiallyDone={adaptiveDone.has(adaptive)}
+            onComplete={() => setAdaptiveDone(prev => new Set(prev).add(adaptive))}
+          />
+        ) : energyComplete && !energyProfile ? (
+          <div className="text-center py-10 space-y-3">
+            <CheckCircle className="w-12 h-12 mx-auto" style={{ color }} />
+            <p className="text-slate-900 font-semibold">Étape terminée</p>
+          </div>
+        ) : (
           <EnergyStepAdaptive
             key="energy-step"
-            onComplete={(profile) => setEnergyProfile(profile)}
+            onComplete={(profile) => { setEnergyProfile(profile); setEnergyComplete(true); }}
             initialProfile={energyProfile}
           />
-        ) : currentAdaptive ? (
-          <AdaptiveStep
-            key={currentAdaptive}
-            step={currentAdaptive}
-            color={color}
-            initiallyDone={adaptiveDone.has(currentAdaptive)}
-            onComplete={() => setAdaptiveDone(prev => new Set(prev).add(currentAdaptive))}
-          />
-        ) : (
-          <div className="space-y-8">
-            {stepQuestions.map((q, qi) => {
-              const selected = responses[q.id];
-              return (
-                <div key={q.id} className="space-y-3">
-                  <p className="text-slate-700 text-sm leading-relaxed">
-                    <span className="text-slate-600 text-xs font-mono mr-2">{qi + 1}.</span>
-                    {q.text}
-                    {q.inverse && <span className="ml-2 text-[10px] text-rose-400/70">[score inversé]</span>}
-                  </p>
-                  <QuestionInput question={q} selected={selected} color={color} onAnswer={v => answer(q.id, v)} />
-                </div>
-              );
-            })}
-          </div>
         )}
       </div>
 
@@ -198,99 +171,6 @@ export default function AssessmentForm({ steps, profileId, completedAdaptiveStep
           </button>
         )}
       </div>
-    </div>
-  );
-}
-
-// ─── Widgets de réponse (valeurs 1→5 dans tous les cas) ──────────────────────
-
-interface InputProps {
-  question: Question;
-  selected: number | undefined;
-  color:    string;
-  onAnswer: (value: number) => void;
-}
-
-function QuestionInput(props: InputProps) {
-  switch (questionKind(props.question)) {
-    case 'agree':     return <AgreeScale {...props} />;
-    case 'range':     return <RangeSegments {...props} />;
-    case 'choice':    return <ChoiceCards {...props} />;
-  }
-}
-
-// Likert : 5 pastilles, plus grandes aux extrêmes
-function AgreeScale({ question, selected, color, onAnswer }: InputProps) {
-  const sizes = ['w-10 h-10', 'w-8 h-8', 'w-6 h-6', 'w-8 h-8', 'w-10 h-10'];
-  const current = question.options.find(o => o.value === selected);
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between gap-2 px-1">
-        <span className="hidden sm:block text-xs text-slate-500 w-24">Pas d&apos;accord</span>
-        <div className="flex flex-1 items-center justify-between sm:justify-center sm:gap-8">
-          {question.options.map((opt, i) => {
-            const active = selected === opt.value;
-            return (
-              <button key={opt.value} type="button" onClick={() => onAnswer(opt.value)}
-                aria-label={opt.label} aria-pressed={active} title={opt.label}
-                className={`${sizes[i]} rounded-full border-2 transition-all hover:scale-110`}
-                style={active
-                  ? { borderColor: color, backgroundColor: color }
-                  : { borderColor: i < 2 ? '#FDA4AF' : i > 2 ? '#6EE7B7' : '#CBD5E1' }} />
-            );
-          })}
-        </div>
-        <span className="hidden sm:block text-xs text-slate-500 w-24 text-right">D&apos;accord</span>
-      </div>
-      <p className="text-center text-xs h-4 font-medium" style={{ color }}>{current?.label ?? ''}</p>
-    </div>
-  );
-}
-
-// Plage numérique : barre segmentée qui se remplit jusqu'à la valeur choisie
-function RangeSegments({ question, selected, color, onAnswer }: InputProps) {
-  return (
-    <div className="flex rounded-xl border border-slate-200 overflow-hidden">
-      {question.options.map(opt => {
-        const filled = selected != null && opt.value <= selected;
-        const active = selected === opt.value;
-        return (
-          <button key={opt.value} type="button" onClick={() => onAnswer(opt.value)} aria-pressed={active}
-            className={`flex-1 px-1 py-3 text-xs sm:text-sm transition-all border-r last:border-r-0 border-slate-200 ${
-              active ? 'font-semibold text-white' : filled ? 'font-medium' : 'text-slate-500 hover:bg-slate-50'
-            }`}
-            style={active ? { backgroundColor: color } : filled ? { backgroundColor: `${color}20`, color } : {}}>
-            {opt.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-// Choix qualitatif : grille de cartes avec indicateur de niveau
-function ChoiceCards({ question, selected, color, onAnswer }: InputProps) {
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
-      {question.options.map(opt => {
-        const active = selected === opt.value;
-        return (
-          <button key={opt.value} type="button" onClick={() => onAnswer(opt.value)} aria-pressed={active}
-            className={`relative flex flex-col items-start gap-2 p-3 rounded-xl border text-left text-sm transition-all ${
-              active ? 'font-medium shadow-sm' : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
-            }`}
-            style={active ? { borderColor: color, color, backgroundColor: `${color}10` } : {}}>
-            <span className="flex gap-0.5">
-              {[1, 2, 3, 4, 5].map(n => (
-                <span key={n} className="w-1.5 h-1.5 rounded-full"
-                  style={{ backgroundColor: n <= opt.value ? (active ? color : '#94A3B8') : '#E2E8F0' }} />
-              ))}
-            </span>
-            {opt.label}
-            {active && <CheckCircle className="absolute top-2 right-2 w-4 h-4" />}
-          </button>
-        );
-      })}
     </div>
   );
 }

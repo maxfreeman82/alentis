@@ -122,6 +122,12 @@ export default async function PassportPage() {
                 <p className="font-mono text-xl font-bold" style={{ color }}>{d.value}</p>
                 <p className="text-slate-400 text-xs">{d.label}</p>
                 {label && <p className="text-[10px] mt-0.5" style={{ color }}>{label}</p>}
+                {d.key === 'X' && (
+                  // Corroborée = parcours du CV confirmé par les questions de preuve
+                  <p className={`text-[10px] mt-0.5 font-medium ${(p as { exp_verification?: string }).exp_verification === 'corroborated' ? 'text-emerald-500' : 'text-slate-400'}`}>
+                    {(p as { exp_verification?: string }).exp_verification === 'corroborated' ? '✓ Corroborée' : 'Déclarée'}
+                  </p>
+                )}
               </div>
             );
           })}

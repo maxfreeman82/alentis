@@ -72,3 +72,10 @@ CREATE POLICY "taq_superadmin" ON public.talent_assessment_questions FOR ALL
   USING (EXISTS (
     SELECT 1 FROM public.profiles p WHERE p.user_id = auth.uid() AND p.role = 'super_admin'
   ));
+
+-- ─── Badge Expérience ───────────────────────────────────────────────────────
+-- 'corroborated' : crédibilité mesurée ≥ 66 par les questions de preuve sur le
+-- parcours du CV ; sinon 'declared'.
+ALTER TABLE public.talent_passports
+  ADD COLUMN IF NOT EXISTS exp_verification TEXT NOT NULL DEFAULT 'declared'
+  CHECK (exp_verification IN ('declared','corroborated'));

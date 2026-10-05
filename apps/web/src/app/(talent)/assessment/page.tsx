@@ -2,7 +2,7 @@
 import { getTalentProfile } from '@/lib/supabase/auth';
 import { redirect } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { QUESTION_STEPS } from '@/lib/talent/assessment';
+import { ASSESSMENT_STEPS } from '@/lib/talent/assessment';
 import { sanitizeSkills } from '@teranga/talent-assessment';
 import AssessmentForm from '@/components/talent/AssessmentForm';
 
@@ -31,13 +31,22 @@ export default async function AssessmentPage() {
     .eq('status', 'completed');
   const completedAdaptiveSteps = (adaptiveDone ?? []).map(r => r.step as string);
 
-  // CV obligatoire : sans compétences extraites, l'étape technique n'a rien à tester.
+  // CV obligatoire : compétences (étape technique) et poste déclaré (questions de preuve).
   const { data: cvProfile } = await createAdminClient()
     .from('profiles')
-    .select('cv_extracted_skills')
+    .select('cv_extracted_skills, job_title')
     .eq('id', profileId)
     .maybeSingle();
-  const hasCvSkills = sanitizeSkills(cvProfile?.cv_extracted_skills).length > 0;
+  const cvReady = sanitizeSkills(cvProfile?.cv_extracted_skills).length > 0 && !!cvProfile?.job_title;
+
+  // Profil énergétique déjà conclu (sinon l'onglet repartirait de zéro au rechargement)
+  const { data: energyRow } = await createAdminClient()
+    .from('energy_assessments')
+    .select('id')
+    .eq('profile_id', profileId)
+    .eq('status', 'completed')
+    .limit(1)
+    .maybeSingle();
 
   return (
     <div className="space-y-6">
@@ -56,7 +65,12 @@ export default async function AssessmentPage() {
         </div>
       )}
 
-      <AssessmentForm steps={QUESTION_STEPS} profileId={profileId} completedAdaptiveSteps={completedAdaptiveSteps} hasCvSkills={hasCvSkills} />
+      <AssessmentForm
+        steps={ASSESSMENT_STEPS}
+        completedAdaptiveSteps={completedAdaptiveSteps}
+        energyDone={!!energyRow}
+        cvReady={cvReady}
+      />
     </div>
   );
 }

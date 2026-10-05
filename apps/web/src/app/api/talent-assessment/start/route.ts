@@ -50,6 +50,10 @@ export async function POST(req: Request) {
   if (config.facets.length === 0) {
     return NextResponse.json({ error: 'Déposez votre CV pour que nous puissions évaluer vos compétences techniques.' }, { status: 400 });
   }
+  // Les questions de preuve vérifient le parcours déclaré : il faut au moins le poste.
+  if (step === 'exp' && !context.job_title) {
+    return NextResponse.json({ error: 'Indiquez votre poste (dans votre CV) pour évaluer votre expérience.' }, { status: 400 });
+  }
 
   const { data: session, error: sessionErr } = await admin
     .from('talent_assessment_sessions')
