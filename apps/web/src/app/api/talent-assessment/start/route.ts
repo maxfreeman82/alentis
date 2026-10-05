@@ -3,8 +3,10 @@ import { after, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getTalentProfile } from '@/lib/supabase/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { decideNextStep, resolveStepConfig, STEP_IDS } from '@teranga/talent-assessment';
-import { buildContextSnapshot, createQuestion, prepareNextQuestions, readPendingQuestion } from '@/lib/talent-assessment/server';
+import { decideNextStep, resolveStepConfig, STEP_IDS, type StepId } from '@teranga/talent-assessment';
+import {
+  buildContextSnapshot, createQuestion, prepareNextQuestions, preparePendingIfMissing, readPendingQuestion,
+} from '@/lib/talent-assessment/server';
 
 const schema = z.object({ step: z.enum(STEP_IDS) });
 
@@ -12,10 +14,10 @@ type AdminClient = ReturnType<typeof createAdminClient>;
 
 // Reprise : une passation in_progress existe pour (profil, étape) → on renvoie
 // sa question en attente au lieu de rappeler l'IA. null si aucune passation.
-async function resume(admin: AdminClient, profileId: string, step: string): Promise<NextResponse | null> {
+async function resume(admin: AdminClient, profileId: string, step: StepId): Promise<NextResponse | null> {
   const { data: session, error } = await admin
     .from('talent_assessment_sessions')
-    .select('id')
+    .select('id, context_snapshot')
     .eq('profile_id', profileId)
     .eq('step', step)
     .eq('status', 'in_progress')
@@ -25,7 +27,12 @@ async function resume(admin: AdminClient, profileId: string, step: string): Prom
 
   const pending = await readPendingQuestion(admin, session.id);
   if (!pending.ok) return NextResponse.json({ error: pending.error }, { status: pending.status });
-  if (pending.value) return NextResponse.json({ sessionId: session.id, question: pending.value });
+  if (pending.value) {
+    // Reprise : la suite n'a peut-être jamais été préparée (ex. onglet fermé).
+    const context = session.context_snapshot as Record<string, unknown>;
+    after(() => preparePendingIfMissing(admin, session.id, resolveStepConfig(step, context), context));
+    return NextResponse.json({ sessionId: session.id, question: pending.value });
+  }
   // Session sans question active = échec IA sur /answer : le client doit rejouer
   // sa dernière réponse (chemin retry de /answer).
   return NextResponse.json({ error: 'Passation en cours sans question active. Réessayez votre dernière réponse.' }, { status: 409 });

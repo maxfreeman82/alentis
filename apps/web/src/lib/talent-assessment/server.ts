@@ -219,3 +219,35 @@ export async function prepareNextQuestions(
     console.error('[prepareNextQuestions] failed:', err);
   }
 }
+
+// Reprise d'une passation : prépare la suite de la question en attente si rien
+// n'a encore été préparé pour elle (évite les doublons sur reprises répétées).
+export async function preparePendingIfMissing(
+  admin: AdminClient,
+  sessionId: string,
+  config: StepConfig,
+  context: Record<string, unknown>,
+): Promise<void> {
+  try {
+    const { data: pending } = await admin
+      .from('talent_assessment_questions')
+      .select('id, facet, option_values, difficulty')
+      .eq('session_id', sessionId)
+      .is('candidate_answer', null)
+      .maybeSingle();
+    if (!pending) return;
+    const { count } = await admin
+      .from('talent_assessment_prepared')
+      .select('id', { count: 'exact', head: true })
+      .eq('after_question_id', pending.id);
+    if ((count ?? 0) > 0) return;
+    await prepareNextQuestions(admin, sessionId, config, context, {
+      id:           pending.id,
+      facet:        pending.facet,
+      optionValues: pending.option_values as Record<string, number>,
+      difficulty:   pending.difficulty,
+    });
+  } catch (err) {
+    console.error('[preparePendingIfMissing] failed:', err);
+  }
+}
