@@ -44,13 +44,14 @@ test.describe('Questionnaire 6D — étapes adaptatives', () => {
       if (await start.isVisible()) await start.click();
 
       const finished = page.getByText('Étape terminée');
+      const options = page.getByTestId('adaptive-option');
       for (let i = 0; i < max; i++) {
+        // Attendre la fin de la requête précédente : soit l'écran de fin, soit
+        // une question dont les options sont de nouveau cliquables.
+        await expect(finished.or(options.first())).toBeVisible({ timeout: 30_000 });
+        await expect(page.locator('[data-testid="adaptive-option"][disabled]')).toHaveCount(0, { timeout: 30_000 });
         if (await finished.isVisible()) break;
-        const option = page.getByTestId('adaptive-option').first();
-        await option.waitFor({ state: 'visible', timeout: 30_000 });
-        await expect(option).toBeEnabled({ timeout: 30_000 });
-        await option.click();
-        await page.waitForLoadState('networkidle');
+        await options.first().click();
       }
       await expect(finished).toBeVisible({ timeout: 30_000 });
     });
