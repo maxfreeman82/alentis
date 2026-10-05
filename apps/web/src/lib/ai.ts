@@ -1,6 +1,6 @@
 import { validateGeneratedQuestion, type ValidatedQuestion } from '@teranga/energy-assessment';
 import type { EnergyCode } from '@teranga/energy-assessment';
-import { validateAdaptiveQuestion, type ClientQuestion, type StepConfig } from '@teranga/talent-assessment';
+import { bestOptionStandsOut, validateAdaptiveQuestion, type ClientQuestion, type StepConfig } from '@teranga/talent-assessment';
 
 // RÈGLE : toutes les fonctions IA sont server-side uniquement
 //
@@ -238,8 +238,9 @@ function adaptivePrompt(config: StepConfig, facet: string): { system: string; le
        la période indiquée), jamais une opinion ni une auto-évaluation (« êtes-vous… »).
      - Les options forment UNE échelle cohérente (ex. « Jamais / 1 ou 2 fois / … »),
        dans l'ordre des clés, et le niveau de chaque clé t'est imposé : respecte-le.
-     - Ton neutre et non culpabilisant ; si le candidat est sans emploi, la question
-       doit rester valable pour sa dernière expérience.
+     - Ton neutre et non culpabilisant. La question doit rester valable pour un
+       candidat sans emploi (dernière expérience), mais NE LE PRÉCISE PAS dans le
+       texte : l'introduction de l'étape le dit déjà.
      - Ne nomme jamais la dimension évaluée.
      ${SHARED_RULES}`,
     };
@@ -254,7 +255,8 @@ function adaptivePrompt(config: StepConfig, facet: string): { system: string; le
      - Le niveau d'efficacité de chaque option t'est imposé par sa clé : respecte-le.
      - Toutes les options doivent être plausibles, de longueur et de ton similaires.
        La meilleure ne doit pas être reconnaissable à son vocabulaire (« écoute »,
-       « bienveillance »…) : elle se distingue par sa pertinence sur le fond.
+       « bienveillance »…) ni à sa longueur : elle se distingue par sa pertinence
+       sur le fond. Au moins une option moins efficace doit être aussi longue qu'elle, ou plus.
      - Ne nomme jamais la compétence évaluée dans la question.
      - Situation réaliste, adaptée au métier et au secteur du candidat.
      ${SHARED_RULES}`,
@@ -286,6 +288,7 @@ function knowledgeSystemPrompt(skill: string, difficulty: number): string {
      - Teste la pratique (cas concret, résultat d'une manipulation, diagnostic) plutôt
        que la récitation d'une définition.
      - Options de longueur similaire ; la bonne ne doit pas se repérer à sa forme.
+       Au moins une option fausse doit être aussi longue que la bonne, ou plus.
      ${SHARED_RULES}`;
 }
 
@@ -305,6 +308,7 @@ function proofSystemPrompt(facetLabel: string): string {
      - La réponse « manuel » doit sembler correcte à quelqu'un qui n'a que lu sur le sujet.
      - Pas de culture générale ni de définition : un cas concret du quotidien du poste.
      - Options de longueur similaire ; la bonne ne doit pas se repérer à sa forme.
+       Au moins une option fausse doit être aussi longue que la bonne, ou plus.
      ${SHARED_RULES}`;
 }
 
@@ -379,12 +383,18 @@ ${levelLines}
 JSON attendu (exactement ces clés, une option par clé) :
 {"question_text":"string","options":[${keys.map(k => `{"key":"${k}","text":"string"}`).join(',')}]}`;
 
-  // Une tentative de plus quand la vérification peut rejeter.
-  const attempts = verified ? 3 : 2;
+  // Échelles factuelles : la longueur des options ne trahit rien. Ailleurs, la
+  // meilleure option ne doit pas se repérer à sa longueur (cf. bestOptionStandsOut).
+  const checkLength = style !== 'behavioral';
+  const attempts = verified || checkLength ? 3 : 2;
   for (let attempt = 0; attempt < attempts; attempt++) {
     try {
       const validated = validateAdaptiveQuestion(extractJson(await callAI(system, user)), keys);
       if (!validated) continue;
+      if (checkLength && bestOptionStandsOut(validated, optionValues)) {
+        console.warn('[generateAdaptiveQuestion] best option stands out by length:', { facet });
+        continue;
+      }
       if (!verified) return validated;
       const solved = await solveKnowledgeQuestion(solverDomain, validated);
       if (solved === correctKey) return validated;

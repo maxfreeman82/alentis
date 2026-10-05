@@ -14,7 +14,7 @@ export const FALLBACK_BANKS: Record<StepId, Record<string, FallbackEntry>> = {
       text: 'Vous devez expliquer à un client non technicien pourquoi sa livraison aura deux semaines de retard.',
       optionsByRank: [
         'Vous l\'appelez : la cause en une phrase, l\'impact concret pour lui, la nouvelle date et ce que vous faites pour la tenir.',
-        'Vous lui envoyez un email détaillé avec le planning révisé et proposez un appel s\'il a des questions.',
+        'Vous lui envoyez un email détaillé avec le planning révisé, les raisons du retard, et proposez un appel s\'il a des questions.',
         'Vous attendez d\'avoir une date certaine avant de le prévenir, pour ne pas l\'inquiéter inutilement.',
         'Vous lui transmettez l\'explication technique complète de l\'équipe pour qu\'il ait toute l\'information.',
       ],
@@ -22,8 +22,8 @@ export const FALLBACK_BANKS: Record<StepId, Record<string, FallbackEntry>> = {
     leadership: {
       text: 'Votre équipe doit livrer un projet important, mais deux membres ne s\'entendent pas sur la méthode et le travail stagne.',
       optionsByRank: [
-        'Vous les réunissez, faites expliciter l\'objectif commun et les critères de choix, tranchez avec eux et fixez un point de bilan.',
-        'Vous choisissez la méthode qui vous semble la meilleure et l\'annoncez clairement à l\'équipe.',
+        'Vous les réunissez, faites expliciter l\'objectif et les critères de choix, tranchez avec eux et fixez un point de bilan.',
+        'Vous choisissez vous-même la méthode qui vous semble la plus solide et l\'annoncez clairement à toute l\'équipe dès demain.',
         'Vous laissez chacun avancer avec sa méthode sur sa partie pour éviter le conflit.',
         'Vous signalez la situation à votre hiérarchie pour qu\'elle décide.',
       ],
@@ -31,17 +31,17 @@ export const FALLBACK_BANKS: Record<StepId, Record<string, FallbackEntry>> = {
     adaptability: {
       text: 'Le matin d\'une présentation importante, on vous annonce que le public a changé : ce seront des décideurs, pas des techniciens.',
       optionsByRank: [
-        'Vous recentrez la présentation sur les enjeux et les décisions attendues, et gardez le détail technique en annexe.',
+        'Vous recentrez la présentation sur les enjeux et les décisions attendues, le détail technique passe en annexe.',
         'Vous gardez votre support mais adaptez votre discours oral au fil de la présentation.',
-        'Vous demandez à reporter la présentation pour la retravailler correctement.',
+        'Vous demandez à reporter la présentation de quelques jours pour la retravailler correctement pour ce nouveau public.',
         'Vous présentez comme prévu : le contenu reste valable quel que soit le public.',
       ],
     },
     problem_solving: {
       text: 'Les ventes d\'un produit ont chuté de 30 % depuis un mois, sans cause évidente.',
       optionsByRank: [
-        'Vous découpez les données par zone, canal et période pour isoler où la baisse se concentre avant de proposer une action.',
-        'Vous interrogez quelques clients et commerciaux pour recueillir leurs explications.',
+        'Vous découpez les données par zone, canal et période pour isoler où se concentre la baisse avant d\'agir.',
+        'Vous interrogez plusieurs clients et commerciaux de terrain pour recueillir leurs explications avant d\'agir.',
         'Vous lancez une promotion pour relancer rapidement les ventes.',
         'Vous attendez le mois suivant pour voir si la tendance se confirme.',
       ],
@@ -49,10 +49,10 @@ export const FALLBACK_BANKS: Record<StepId, Record<string, FallbackEntry>> = {
     critical_thinking: {
       text: 'Un collègue présente une étude selon laquelle un nouvel outil a doublé la productivité d\'une entreprise similaire, et propose de l\'adopter.',
       optionsByRank: [
-        'Vous demandez comment la productivité a été mesurée, sur quelle durée, et si d\'autres changements ont eu lieu en même temps.',
+        'Vous demandez comment la productivité a été mesurée, sur quelle durée, et ce qui a changé en même temps.',
         'Vous proposez de le tester d\'abord sur une petite équipe.',
         'Vous cherchez d\'autres avis d\'utilisateurs en ligne.',
-        'Vous soutenez l\'adoption : l\'entreprise est comparable et le gain est net.',
+        'Vous soutenez l\'adoption : l\'entreprise est comparable, l\'étude est récente et le gain annoncé est très net.',
       ],
     },
     collaboration: {
@@ -60,15 +60,15 @@ export const FALLBACK_BANKS: Record<StepId, Record<string, FallbackEntry>> = {
       optionsByRank: [
         'Vous clarifiez son besoin et son échéance, puis proposez un créneau réaliste ou une personne mieux placée.',
         'Vous l\'aidez tout de suite, quitte à finir votre propre travail tard le soir.',
-        'Vous lui envoyez quelques documents utiles et lui dites de revenir vers vous si besoin.',
+        'Vous lui envoyez quelques documents utiles sur le sujet et lui dites de revenir vers vous s\'il reste bloqué.',
         'Vous lui expliquez que ce n\'est pas votre périmètre.',
       ],
     },
     stress_mgmt: {
       text: 'Trois urgences arrivent en même temps, une heure avant la fin de la journée.',
       optionsByRank: [
-        'Vous évaluez l\'impact et l\'échéance réelle de chacune, traitez la plus critique et prévenez les autres demandeurs avec un délai.',
-        'Vous commencez par la plus rapide pour en libérer une, puis enchaînez.',
+        'Vous évaluez l\'impact réel de chacune, traitez la plus critique et prévenez les autres demandeurs d\'un délai.',
+        'Vous commencez par la plus rapide à traiter pour en libérer une tout de suite, puis vous enchaînez sur les deux autres.',
         'Vous avancez sur les trois en parallèle pour ne délaisser personne.',
         'Vous restez tard pour tout terminer, sans prévenir personne.',
       ],
@@ -76,8 +76,8 @@ export const FALLBACK_BANKS: Record<StepId, Record<string, FallbackEntry>> = {
     organization: {
       text: 'En début de semaine, vous avez douze tâches de tailles et d\'échéances différentes.',
       optionsByRank: [
-        'Vous les classez par échéance et impact, bloquez des créneaux pour les plus importantes et regroupez les petites.',
-        'Vous faites une liste et avancez dans l\'ordre d\'arrivée des demandes.',
+        'Vous les classez par échéance et impact, bloquez des créneaux pour les plus lourdes et regroupez les petites.',
+        'Vous faites une liste complète de toutes les tâches et avancez dans l\'ordre d\'arrivée des différentes demandes.',
         'Vous commencez par les plus faciles pour prendre de l\'élan.',
         'Vous traitez chaque tâche au moment où l\'on vous relance.',
       ],
@@ -85,8 +85,8 @@ export const FALLBACK_BANKS: Record<StepId, Record<string, FallbackEntry>> = {
     learning_speed: {
       text: 'Vous devez utiliser dans dix jours un logiciel que vous ne connaissez pas.',
       optionsByRank: [
-        'Vous identifiez les quelques fonctions dont vous aurez besoin, les pratiquez sur un cas réel et demandez un retour à un utilisateur expérimenté.',
-        'Vous suivez une formation en ligne complète sur le logiciel.',
+        'Vous ciblez les fonctions dont vous aurez besoin, les pratiquez sur un cas réel et faites relire par un utilisateur aguerri.',
+        'Vous suivez une formation en ligne complète sur le logiciel, du premier module jusqu\'à l\'évaluation finale proposée.',
         'Vous lisez la documentation officielle de bout en bout.',
         'Vous comptez apprendre sur le tas le jour venu.',
       ],
