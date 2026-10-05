@@ -152,6 +152,9 @@ export const FALLBACK_BANKS: Record<StepId, Record<string, FallbackEntry>> = {
       optionsByRank: ['Aucun', 'Un', 'Deux ou trois', 'Plus de trois'],
     },
   },
+  // Compétences techniques : impossible d'écrire à l'avance des questions justes
+  // pour n'importe quelle compétence. En cas d'échec IA, le candidat réessaie.
+  hard: {},
 };
 
 export function buildFallbackQuestion(

@@ -3,6 +3,7 @@ export * from './configs';
 export * from './steps/soft';
 export * from './steps/life';
 export * from './steps/risk';
+export * from './steps/hard';
 export * from './engine';
 export * from './validation';
 export * from './fallback';

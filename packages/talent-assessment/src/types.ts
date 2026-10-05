@@ -1,5 +1,5 @@
-// Étapes livrées. Les tranches suivantes ajoutent 'hard' et 'exp'.
-export const STEP_IDS = ['soft', 'life', 'risk'] as const;
+// Étapes livrées. La tranche suivante ajoute 'exp'.
+export const STEP_IDS = ['soft', 'life', 'risk', 'hard'] as const;
 export type StepId = typeof STEP_IDS[number];
 
 export interface StepConfig {
@@ -16,7 +16,8 @@ export interface StepConfig {
   // situational : mise en situation (SJT), options plausibles graduées par efficacité.
   // behavioral  : fait concret récent (fréquence…), options = échelle de la plus
   //               favorable à la plus préoccupante.
-  questionStyle:  'situational' | 'behavioral';
+  // knowledge   : QCM / mini-cas, une seule bonne réponse, difficulté adaptative 1→5.
+  questionStyle:  'situational' | 'behavioral' | 'knowledge';
   // true : options affichées dans l'ordre de l'échelle (sens tiré au hasard) —
   // nécessaire pour une échelle de fréquences lisible. false : ordre mélangé.
   orderedOptions: boolean;
@@ -28,6 +29,7 @@ export interface AnsweredItem {
   optionValues:    Record<string, number>;
   candidateAnswer: string | null;
   responseMs:      number | null;
+  difficulty:      number | null; // mode knowledge uniquement
 }
 
 export interface ClientQuestion {

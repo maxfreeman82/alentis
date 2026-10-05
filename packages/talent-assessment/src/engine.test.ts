@@ -48,7 +48,7 @@ describe('assignOptionValues', () => {
 function answerWith(d: AskDecision, value: number, responseMs = 8000): AnsweredItem {
   const key = Object.keys(d.optionValues).find(k => d.optionValues[k] === value);
   if (!key) throw new Error(`valeur ${value} absente`);
-  return { facet: d.facet, optionValues: d.optionValues, candidateAnswer: key, responseMs };
+  return { facet: d.facet, optionValues: d.optionValues, candidateAnswer: key, responseMs, difficulty: d.difficulty };
 }
 
 // Simule une passation complète ; pick(facette, nbDéjàRépondusSurCetteFacette) → valeur choisie
@@ -120,7 +120,7 @@ describe('decideNextStep', () => {
 
   it('ignore une réponse dont la clé est inconnue', () => {
     const first = decideNextStep(SOFT_CONFIG, [], seeded()) as AskDecision;
-    const bogus: AnsweredItem = { facet: first.facet, optionValues: first.optionValues, candidateAnswer: 'k99', responseMs: 5000 };
+    const bogus: AnsweredItem = { facet: first.facet, optionValues: first.optionValues, candidateAnswer: 'k99', responseMs: 5000, difficulty: null };
     const d = decideNextStep(SOFT_CONFIG, [bogus], seeded());
     expect(d).toMatchObject({ action: 'ask', phase: 'exploration', facet: 'communication' });
   });

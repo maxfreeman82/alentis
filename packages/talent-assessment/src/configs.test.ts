@@ -21,8 +21,8 @@ describe('STEP_CONFIGS', () => {
     }
   });
 
-  it('livre Soft Skills, Life Score et Risques', () => {
-    expect([...STEP_IDS].sort()).toEqual(['life', 'risk', 'soft']);
+  it('livre Soft Skills, Life Score, Risques et Compétences techniques', () => {
+    expect([...STEP_IDS].sort()).toEqual(['hard', 'life', 'risk', 'soft']);
   });
 
   it('Life Score et Risques posent des questions factuelles à options ordonnées', () => {
