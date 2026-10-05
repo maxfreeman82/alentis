@@ -1,5 +1,4 @@
-// Étapes livrées. La tranche suivante ajoute 'exp'.
-export const STEP_IDS = ['soft', 'life', 'risk', 'hard'] as const;
+export const STEP_IDS = ['soft', 'life', 'risk', 'hard', 'exp'] as const;
 export type StepId = typeof STEP_IDS[number];
 
 export interface StepConfig {
@@ -17,7 +16,8 @@ export interface StepConfig {
   // behavioral  : fait concret récent (fréquence…), options = échelle de la plus
   //               favorable à la plus préoccupante.
   // knowledge   : QCM / mini-cas, une seule bonne réponse, difficulté adaptative 1→5.
-  questionStyle:  'situational' | 'behavioral' | 'knowledge';
+  // proof       : question de terrain qui vérifie une affirmation du CV.
+  questionStyle:  'situational' | 'behavioral' | 'knowledge' | 'proof';
   // true : options affichées dans l'ordre de l'échelle (sens tiré au hasard) —
   // nécessaire pour une échelle de fréquences lisible. false : ordre mélangé.
   orderedOptions: boolean;

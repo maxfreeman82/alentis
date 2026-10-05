@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { buildFallbackQuestion, FALLBACK_BANKS } from './fallback';
+import { AI_ONLY_STEPS, buildFallbackQuestion, FALLBACK_BANKS } from './fallback';
 import { STEP_CONFIGS } from './configs';
 import { STEP_IDS } from './types';
 
 describe('buildFallbackQuestion', () => {
   it('chaque facette de chaque étape a un modèle de secours complet', () => {
-    for (const step of STEP_IDS) {
+    for (const step of STEP_IDS.filter(s => !AI_ONLY_STEPS.includes(s))) {
       const c = STEP_CONFIGS[step];
       for (const f of c.facets) {
         expect(FALLBACK_BANKS[step][f]).toBeDefined();
@@ -23,6 +23,10 @@ describe('buildFallbackQuestion', () => {
       { key: 'k1', text: ranks[3] }, { key: 'k2', text: ranks[0] },
       { key: 'k3', text: ranks[2] }, { key: 'k4', text: ranks[1] },
     ]);
+  });
+
+  it('les étapes servies uniquement par IA n’ont aucune banque', () => {
+    for (const step of AI_ONLY_STEPS) expect(FALLBACK_BANKS[step]).toEqual({});
   });
 
   it('renvoie null pour une facette inconnue', () => {

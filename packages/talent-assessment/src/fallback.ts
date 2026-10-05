@@ -155,7 +155,13 @@ export const FALLBACK_BANKS: Record<StepId, Record<string, FallbackEntry>> = {
   // Compétences techniques : impossible d'écrire à l'avance des questions justes
   // pour n'importe quelle compétence. En cas d'échec IA, le candidat réessaie.
   hard: {},
+  // Expérience : questions propres au métier déclaré, même logique.
+  exp: {},
 };
+
+// Étapes sans banque de secours : questions propres au CV du candidat, générées
+// puis vérifiées par IA. En cas d'échec, le candidat réessaie.
+export const AI_ONLY_STEPS: readonly StepId[] = ['hard', 'exp'];
 
 export function buildFallbackQuestion(
   config: StepConfig,

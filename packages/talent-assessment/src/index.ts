@@ -4,6 +4,7 @@ export * from './steps/soft';
 export * from './steps/life';
 export * from './steps/risk';
 export * from './steps/hard';
+export * from './steps/exp';
 export * from './engine';
 export * from './validation';
 export * from './fallback';
