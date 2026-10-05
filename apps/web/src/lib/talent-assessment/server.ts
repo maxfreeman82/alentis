@@ -72,8 +72,17 @@ export async function createQuestion(
   decision: AskDecision,
   context: Record<string, unknown>,
 ): Promise<Result<ClientQuestionPayload>> {
+  // Situations déjà posées : transmises à l'IA pour qu'elle ne les recycle pas.
+  const { data: previous } = await admin
+    .from('talent_assessment_questions')
+    .select('question_text')
+    .eq('session_id', sessionId)
+    .order('created_at', { ascending: true });
+  const previousQuestions = (previous ?? []).map(q => q.question_text as string);
+
   const generated = await generateAdaptiveQuestion(
     config, decision.facet, decision.contextTag, decision.optionValues, context, decision.difficulty,
+    previousQuestions,
   );
   const question = generated ?? buildFallbackQuestion(config, decision.facet, decision.optionValues);
   // Pas de banque de secours en technique : le candidat réessaie (chemin retry).

@@ -336,6 +336,7 @@ export async function generateAdaptiveQuestion(
   optionValues: Record<string, number>,
   candidateContext: Record<string, unknown>,
   difficulty: number | null = null,
+  previousQuestions: string[] = [],
 ): Promise<ClientQuestion | null> {
   // Permet aux tests E2E de forcer la banque de secours (déterministe, sans IA).
   if (process.env.TALENT_ASSESSMENT_FORCE_FALLBACK === '1') return null;
@@ -358,11 +359,20 @@ export async function generateAdaptiveQuestion(
     ? String(candidateContext.job_title ?? candidateContext.sector ?? 'ce métier')
     : facet;
 
+  // Sans cet historique, l'IA recycle le même scénario d'une question à l'autre
+  // (constaté : 8 questions de preuve sur 8 ouvertes par « En clôture mensuelle… »).
+  const history = previousQuestions.slice(-8).map(t => `- ${t.slice(0, 180)}`).join('\n');
+  const avoid = history
+    ? `\nQuestions déjà posées à ce candidat : n'en reprends ni la situation, ni l'élément
+déclencheur, ni la formulation d'ouverture. Change de moment, d'interlocuteur et de sujet.
+${history}\n`
+    : '';
+
   const user =
     `<candidate_context>
 ${JSON.stringify(candidateContext)}
 </candidate_context>
-${frame} : ${contextTag}
+${avoid}${frame} : ${contextTag}
 Niveau imposé par clé :
 ${levelLines}
 
