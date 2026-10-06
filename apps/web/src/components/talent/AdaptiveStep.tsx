@@ -13,6 +13,8 @@ interface Props {
   color:         string;
   initiallyDone: boolean;
   onComplete:    () => void;
+  // Refaire l'étape : le serveur crée une nouvelle passation au « Commencer »
+  onRestart:     () => void;
 }
 
 // Dernière action réseau, rejouée telle quelle par « Réessayer » (le chemin
@@ -30,7 +32,7 @@ function errorText(json: ApiResponse, fallback: string): string {
   return typeof json.error === 'string' && json.error ? json.error : fallback;
 }
 
-export default function AdaptiveStep({ step, color, initiallyDone, onComplete }: Props) {
+export default function AdaptiveStep({ step, color, initiallyDone, onComplete, onRestart }: Props) {
   const [sessionId, setSessionId]   = useState<string | null>(null);
   const [question, setQuestion]     = useState<Question | null>(null);
   const [done, setDone]             = useState(initiallyDone);
@@ -74,11 +76,25 @@ export default function AdaptiveStep({ step, color, initiallyDone, onComplete }:
     void call({ kind: 'answer', key, responseMs: Date.now() - shownAt.current });
   }
 
+  function restart() {
+    setDone(false);
+    setQuestion(null);
+    setSessionId(null);
+    setCount(0);
+    setError('');
+    setLastAction(null);
+    onRestart();
+  }
+
   if (done) return (
     <div className="text-center py-10 space-y-3">
       <CheckCircle className="w-12 h-12 mx-auto" style={{ color }} />
       <p className="text-slate-900 font-semibold">Étape terminée</p>
       <p className="text-slate-500 text-sm">Vos réponses sont enregistrées. Passez à l&apos;étape suivante.</p>
+      <button type="button" onClick={restart}
+        className="text-xs text-slate-500 underline hover:text-slate-800 transition-colors">
+        Refaire cette étape
+      </button>
     </div>
   );
 

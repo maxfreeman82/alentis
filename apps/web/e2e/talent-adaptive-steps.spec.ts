@@ -65,4 +65,30 @@ test.describe('Questionnaire 6D — étapes adaptatives', () => {
     if (res.ok()) test.skip();
     expect(res.status()).toBe(502);
   });
+
+  test('une étape terminée peut être refaite après rafraîchissement', async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.goto('/assessment', { waitUntil: 'networkidle' });
+    await page.getByRole('button', { name: /Soft Skills/ }).first().click();
+    const start = page.getByRole('button', { name: 'Commencer' });
+    const finished = page.getByText('Étape terminée');
+    // Si l'étape n'est pas encore terminée, la terminer d'abord
+    if (await start.isVisible()) {
+      await start.click();
+      const options = page.getByTestId('adaptive-option');
+      for (let i = 0; i < 16; i++) {
+        await expect(finished.or(options.first())).toBeVisible({ timeout: 30_000 });
+        await expect(page.locator('[data-testid="adaptive-option"][disabled]')).toHaveCount(0, { timeout: 30_000 });
+        if (await finished.isVisible()) break;
+        await options.first().click();
+      }
+    }
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.getByRole('button', { name: /Soft Skills/ }).first().click();
+    await expect(finished).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Tout refaire' })).toBeVisible();
+    await page.getByRole('button', { name: 'Refaire cette étape' }).click();
+    await expect(start).toBeVisible();
+  });
 });
+

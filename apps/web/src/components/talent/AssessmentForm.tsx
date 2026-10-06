@@ -31,6 +31,8 @@ export default function AssessmentForm({ steps, completedAdaptiveSteps, energyDo
   const [energyProfile, setEnergyProfile] = useState<FinalProfile | null>(null);
   const [energyComplete, setEnergyComplete] = useState(energyDone);
   const [adaptiveDone, setAdaptiveDone]   = useState<Set<string>>(() => new Set(completedAdaptiveSteps));
+  // Change à chaque « Tout refaire » pour remonter les étapes à neuf
+  const [resetKey, setResetKey]           = useState(0);
 
   // Le CV est la base des questions techniques et de preuve : obligatoire avant tout.
   if (!cvReady) return <CvGate />;
@@ -50,6 +52,26 @@ export default function AssessmentForm({ steps, completedAdaptiveSteps, energyDo
   const isLastStep   = step === steps.length - 1;
   const color        = DIM_COLORS[currentStep.key] ?? '#10B981';
   const adaptive     = currentStep.adaptive;
+
+  function markUndone(step: string) {
+    setAdaptiveDone(prev => { const next = new Set(prev); next.delete(step); return next; });
+  }
+
+  function restartEnergy() {
+    setEnergyProfile(null);
+    setEnergyComplete(false);
+  }
+
+  // Remet toutes les étapes à zéro côté interface ; chaque « Commencer » crée
+  // ensuite une nouvelle passation. Les résultats précédents restent en base et
+  // comptent tant qu'une nouvelle passation n'est pas terminée.
+  function restartAll() {
+    setAdaptiveDone(new Set());
+    restartEnergy();
+    setResetKey(k => k + 1);
+    setStep(0);
+    setError('');
+  }
 
   async function submit() {
     setLoading(true);
@@ -85,7 +107,15 @@ export default function AssessmentForm({ steps, completedAdaptiveSteps, energyDo
       <div className="space-y-1">
         <div className="flex justify-between text-xs text-slate-500">
           <span>{doneCount}/{steps.length} étapes terminées</span>
-          <span>{globalPct}%</span>
+          <span className="flex items-center gap-3">
+            {doneCount > 0 && (
+              <button type="button" onClick={restartAll}
+                className="underline hover:text-slate-800 transition-colors">
+                Tout refaire
+              </button>
+            )}
+            {globalPct}%
+          </span>
         </div>
         <div className="h-1.5 bg-bg-card rounded-full overflow-hidden">
           <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${globalPct}%` }} />
@@ -122,23 +152,38 @@ export default function AssessmentForm({ steps, completedAdaptiveSteps, energyDo
 
         {adaptive ? (
           <AdaptiveStep
-            key={adaptive}
+            key={`${adaptive}-${resetKey}`}
             step={adaptive}
             color={color}
             initiallyDone={adaptiveDone.has(adaptive)}
             onComplete={() => setAdaptiveDone(prev => new Set(prev).add(adaptive))}
+            onRestart={() => markUndone(adaptive)}
           />
         ) : energyComplete && !energyProfile ? (
           <div className="text-center py-10 space-y-3">
             <CheckCircle className="w-12 h-12 mx-auto" style={{ color }} />
             <p className="text-slate-900 font-semibold">Étape terminée</p>
+            <button type="button" onClick={restartEnergy}
+              className="text-xs text-slate-500 underline hover:text-slate-800 transition-colors">
+              Refaire cette étape
+            </button>
           </div>
         ) : (
-          <EnergyStepAdaptive
-            key="energy-step"
-            onComplete={(profile) => { setEnergyProfile(profile); setEnergyComplete(true); }}
-            initialProfile={energyProfile}
-          />
+          <div className="space-y-3">
+            <EnergyStepAdaptive
+              key={`energy-step-${resetKey}-${energyComplete ? 'done' : 'todo'}`}
+              onComplete={(profile) => { setEnergyProfile(profile); setEnergyComplete(true); }}
+              initialProfile={energyProfile}
+            />
+            {energyProfile && (
+              <div className="text-center">
+                <button type="button" onClick={restartEnergy}
+                  className="text-xs text-slate-500 underline hover:text-slate-800 transition-colors">
+                  Refaire cette étape
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
