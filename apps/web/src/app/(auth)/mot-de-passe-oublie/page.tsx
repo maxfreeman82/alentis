@@ -1,7 +1,8 @@
 ﻿'use client';
 
-import { useState, useTransition, useMemo } from 'react';
+import { useEffect, useState, useTransition, useMemo } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
+import { recoveryRedirectUrl } from '@/lib/auth/redirects';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { KeyRound, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
@@ -14,6 +15,13 @@ export default function MotDePasseOubliePage() {
 
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
 
+  // Retour d'un lien e-mail invalide (cf. /auth/callback)
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('erreur') === 'lien') {
+      setError('Ce lien a expiré ou a déjà servi. Demandez-en un nouveau ci-dessous.');
+    }
+  }, []);
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
@@ -21,7 +29,9 @@ export default function MotDePasseOubliePage() {
       // signInWithOtp envoie un code OTP à 6 chiffres à l'email (si l'utilisateur existe)
       const { error: err } = await supabase.auth.signInWithOtp({
         email,
-        options: { shouldCreateUser: false },
+        // Si l'e-mail contient un lien plutôt qu'un code, il ramène ici puis
+        // directement vers le choix du nouveau mot de passe.
+        options: { shouldCreateUser: false, emailRedirectTo: recoveryRedirectUrl() },
       });
       if (err) {
         // Supabase retourne une erreur vague pour ne pas révéler si l'email existe
@@ -58,7 +68,7 @@ export default function MotDePasseOubliePage() {
             </div>
             <h1 className="font-display text-slate-900 text-2xl mb-2">Mot de passe oublié</h1>
             <p className="text-slate-400 text-sm max-w-xs mx-auto">
-              Entrez votre adresse email. Nous vous enverrons un code à 6 chiffres pour réinitialiser votre mot de passe.
+              Entrez votre adresse email. Nous vous enverrons un code à 6 chiffres ou un lien pour réinitialiser votre mot de passe.
             </p>
           </div>
 

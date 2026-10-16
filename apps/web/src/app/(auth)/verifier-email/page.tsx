@@ -2,6 +2,7 @@
 
 import { Suspense, useState, useRef, useTransition, useMemo, useEffect } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
+import { recoveryRedirectUrl } from '@/lib/auth/redirects';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Mail, ArrowLeft, RefreshCw, CheckCircle2, Loader2 } from 'lucide-react';
@@ -121,7 +122,10 @@ function OtpInput() {
     setError('');
     const { error: resendErr } = await supabase.auth.signInWithOtp({
       email,
-      options: { shouldCreateUser: step !== 'recovery' },
+      options: {
+        shouldCreateUser: step !== 'recovery',
+        ...(step === 'recovery' ? { emailRedirectTo: recoveryRedirectUrl() } : {}),
+      },
     });
     if (resendErr) { setError("Impossible de renvoyer le code. Réessayez."); return; }
     setResendMsg('Nouveau code envoyé !');

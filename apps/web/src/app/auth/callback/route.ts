@@ -1,68 +1,43 @@
-import { createUserClient } from '@/lib/supabase/user';
-import { createAdminClient } from '@/lib/supabase/admin';
-import { NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
+import type { EmailOtpType } from '@supabase/supabase-js';
 
-const ROLE_MAP: Record<string, string> = {
-  talent:     'talent_free',
-  entreprise: 'org_admin',
-  fondateur:  'founder',
-};
+// Retour des liens envoyés par e-mail (« Mot de passe oublié », connexion par lien).
+// Supabase redirige ici avec soit `code` (flux PKCE, lien ouvert dans le même
+// navigateur), soit `token_hash` + `type` (modèle d'e-mail basé sur le hash).
+// On ouvre la session puis on envoie vers `next`, chemin interne uniquement.
+export async function GET(req: NextRequest) {
+  const url       = req.nextUrl;
+  const code      = url.searchParams.get('code');
+  const tokenHash = url.searchParams.get('token_hash');
+  const type      = url.searchParams.get('type') as EmailOtpType | null;
+  const nextParam = url.searchParams.get('next') ?? '/';
+  // Pas de redirection ouverte : uniquement un chemin du site (« //x » = autre domaine)
+  const next = nextParam.startsWith('/') && !nextParam.startsWith('//') ? nextParam : '/';
 
-export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/';
+  const response = NextResponse.redirect(new URL(next, url.origin));
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll()     { return req.cookies.getAll(); },
+        setAll(list) { list.forEach(({ name, value, options }) => response.cookies.set(name, value, options)); },
+      },
+    },
+  );
 
-  if (!code) {
-    return NextResponse.redirect(`${origin}/sign-in?error=no_code`);
-  }
-
-  const supabase = await createUserClient();
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  const { error } = code
+    ? await supabase.auth.exchangeCodeForSession(code)
+    : tokenHash && type
+      ? await supabase.auth.verifyOtp({ token_hash: tokenHash, type })
+      : { error: new Error('Lien incomplet') };
 
   if (error) {
-    return NextResponse.redirect(`${origin}/sign-in?error=auth`);
+    // Lien expiré, déjà utilisé, ou ouvert dans un autre navigateur (PKCE)
+    const failure = new URL('/mot-de-passe-oublie', url.origin);
+    failure.searchParams.set('erreur', 'lien');
+    return NextResponse.redirect(failure);
   }
-
-  // Récupérer l'utilisateur après échange
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (user) {
-    const admin       = createAdminClient();
-    const profileType = (user.user_metadata?.profile_type as string | undefined) ?? 'talent';
-    const role        = ROLE_MAP[profileType] ?? 'talent_free';
-
-    // Créer le profil si absent (ignoreDuplicates = ne pas écraser un profil existant)
-    const { error: profileErr } = await admin.from('profiles').upsert(
-      {
-        user_id:              user.id,
-        email:                user.email ?? '',
-        role,
-        onboarding_completed: false,
-      },
-      { onConflict: 'user_id', ignoreDuplicates: true }
-    );
-
-    if (profileErr) {
-      console.error('[callback] profile upsert error:', profileErr.message);
-    }
-
-    // Pour les fondateurs : créer une ligne dans founders si absente
-    if (role === 'founder') {
-      const { data: profileRow } = await admin
-        .from('profiles')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (profileRow) {
-        await admin.from('founders').upsert(
-          { profile_id: profileRow.id },
-          { onConflict: 'profile_id', ignoreDuplicates: true }
-        );
-      }
-    }
-  }
-
-  return NextResponse.redirect(`${origin}${next}`);
+  return response;
 }
